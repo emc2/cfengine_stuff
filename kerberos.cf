@@ -1,0 +1,65 @@
+# Set up the basic kerberos realm configuration.  This assumes we're
+# using the base heimdal installation.
+
+bundle agent kerberos_client
+{
+  vars:
+    freebsd::
+      "make_conf[KRB5_IMPL]" string => "hiemdal";
+      "make_conf[KRB5_HOME]" string => "/usr";
+
+  files:
+    freebsd::
+      # Ensure that make.conf sets KRB5_IMPL and KRB5_HOME correctly
+      # (ie. to hiemdal and /usr)
+      "/etc/make.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("kerberos_realm.make_conf"),
+      comment => "Set kerberos implementation to base system hiemdal in make.conf",
+      classes => if_repaired("edited_make_conf");
+
+      # Make sure WITHOUT_KERBEROS is NOT set in src.conf
+      "/etc/src.conf"
+      create => "false",
+      perms => mog("644", "root", "wheel"),
+      edit_line => delete_lines_matching("[ \t]*WITHOUT_KERBEROS[ \t]*=[ \t]*1.*"),
+      comment => "Removed line disabling kerberos from /etc/src.conf",
+      classes => if_repaired("enable_kerberos_src_conf");
+
+  reports:
+    edited_make_conf::
+      "Set kerberos implementation to base system hiemdal in make.conf";
+
+    enable_kerberos_src_conf::
+      "Removed line disabling kerberos from /etc/src.conf";
+}
+
+# Set up the basic kerberos server configuration.  Note: this will not
+# initialize the kerberos database, or create kstash.  That should be
+# done manually!
+bundle agent kerberos_server
+{
+  vars:
+    freebsd::
+      "rc_conf[kerberos5_server_enable]" string => "YES";
+      "rc_conf[kadmind5_server_enable]" string => "YES";
+
+      "startcommand[kerberos]" string => "/etc/rc.d/kerberos";
+      "startcommand[kadmind]" string => "/etc/rc.d/kadmind";
+
+  files:
+    freebsd::
+      # Make sure the kerberos server is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("kerberos_server.rc_conf"),
+      comment => "Enable kerberos and kadmind in rc.conf",
+      classes => if_repaired("enable_kerberos_rc_conf");
+
+
+  reports:
+    enable_kerberos_rc_conf::
+      "Enable kerberos and kadmind in /etc/rc.conf";
+}
