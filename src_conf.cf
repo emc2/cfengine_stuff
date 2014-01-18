@@ -1,0 +1,35 @@
+# This bundle sets WITHOUT_ variables in src.conf to disable a number
+# of components of the base system that most users will never need.
+
+bundle agent src_conf_disable_junk {
+
+  vars:
+    freebsd::
+      "src_conf[WITHOUT_ATM]" string => "1";
+      "src_conf[WITHOUT_FLOPPY]" string => "1";
+      "src_conf[WITHOUT_GAMES]" string => "1";
+      "src_conf[WITHOUT_GPIB]" string => "1";
+      "src_conf[WITHOUT_IPX]" string => "1";
+      "src_conf[WITHOUT_NCP]" string => "1";
+      "src_conf[WITHOUT_NIS]" string => "1";
+      "src_conf[WITHOUT_OFED]" string => "1";
+      "src_conf[WITHOUT_PMC]" string => "1";
+      "src_conf[WITHOUT_PPP]" string => "1";
+      "src_conf[WITHOUT_RCMDS]" string => "1";
+      "src_conf[WITHOUT_TELNET]" string => "1";
+
+  files:
+    freebsd::
+      # Set WITHOUT_ variables in src.conf
+      "/etc/src.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("src_conf_disable_junk.src_conf"),
+      comment => "Set WITHOUT_ variables in src.conf",
+      classes => if_repaired("done");
+
+
+  reports:
+    done::
+      "Set variables in /etc/src.conf to remove some useless components from base system builds";
+}
