@@ -1,0 +1,36 @@
+# Set up rsyslog, and replace the standard syslogd
+
+bundle agent rsyslog
+{
+  vars:
+    freebsd::
+      "disable_syslog[syslogd_enable]" string => "NO";
+      "enable_rsyslog[rsyslogd_enable]" string => "YES";
+      "enable_rsyslog[rsyslogd_pidfile]" string => "/var/run/syslog.pid";
+
+  files:
+    freebsd::
+      # Make sure rsyslog is enabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("rsyslog.enable_rsyslog"),
+      comment => "Enable rsyslog in rc.conf",
+      classes => if_repaired("enable_rsyslog_rc_conf");
+
+      # Make sure syslog is disabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("rsyslog.disable_syslog"),
+      comment => "Disable syslog in rc.conf",
+      classes => if_repaired("disable_syslog_rc_conf");
+
+
+  reports:
+    enable_rsyslog_rc_conf::
+      "Enabled kerberos and kadmind in /etc/rc.conf";
+
+    disable_syslog_rc_conf::
+      "Disable syslog in rc.conf";
+}
