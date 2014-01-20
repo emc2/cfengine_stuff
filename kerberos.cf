@@ -1,6 +1,15 @@
+# Kerberos configuration data
+bundle agent kerberos_config
+{
+  vars:
+      "realm" string => "METRICSPACE.NET";
+      "kdc_server" string => "kdc.metricspace.net:88";
+      "kadmin_server" string => "kdc.metricspace.net:749";
+      "realm_domain" string => "metricspace.net";
+}
+
 # Set up the basic kerberos realm configuration.  This assumes we're
 # using the base heimdal installation.
-
 bundle agent kerberos_client
 {
   vars:
@@ -8,7 +17,38 @@ bundle agent kerberos_client
       "make_conf[KRB5_IMPL]" string => "hiemdal";
       "make_conf[KRB5_HOME]" string => "/usr";
 
+      "krb5_conf[libdefaults][default_realm]" string => "$(kerberos_config.realm)";
+      "krb5_conf[libdefaults][allow_weak_crypto]" string => "false";
+      "krb5_conf[domain_realm][$(kerberos_config.realm_domain)]" string => "$(kerberos_config.realm)";
+      "krb5_conf[domain_realm][.$(kerberos_config.realm_domain)]" string => "$(kerberos_config.realm)";
+#      "krb5_conf[realms][$(kerberos_config.realm)][kdc]" string => "$(kerberos_config.kdc_server)";
+#      "krb5_conf[realms][$(kerberos_config.realm)][admin_server]" string => "$(kerberos_config.kadmin_server)";
+#      "krb5_conf[realms][$(kerberos_config.realm)][default_domain]" string => "$(kerberos_config.realm_domain)";
+
+      "krb5_conf_file" string => "/etc/krb5.conf";
+      "system_keytab" string => "/etc/krb5.keytab";
+
   files:
+      # Check if the keytab exists, and if it has the wrong
+      # permissions, set them and flag for a warning.
+      #
+      # CFEngine cannot directly fix this problem, as doing so
+      # requires someone to input the kerberos password for the
+      # admin/admin principal.
+      "$(system_keytab)"
+      create => "false",
+      perms => mog ("600", "root", "wheel"),
+      comment => "Assert that the system keytab is present and has the correct permissions",
+      classes => keytab;
+
+      # Ensure that there is a krb5.conf file
+      "$(krb5_conf_file)"
+      create => "true",
+      perms => mog ("644", "root", "wheel"),
+      comment => "Create krb5.conf",
+      classes => if_repaired("create_krb5_conf"),
+      handle => "create_krb5_conf";
+
     freebsd::
       # Ensure that make.conf sets KRB5_IMPL and KRB5_HOME correctly
       # (ie. to hiemdal and /usr)
@@ -27,12 +67,33 @@ bundle agent kerberos_client
       comment => "Removed line disabling kerberos from /etc/src.conf",
       classes => if_repaired("enable_kerberos_src_conf");
 
+  methods:
+      "$(krb5_conf_file)" usebundle => set_kerberos_config_file_vars("kerberos_client.krb5_conf", "$(krb5_conf_file)");
+
   reports:
     edited_make_conf::
       "Set kerberos implementation to base system hiemdal in make.conf";
 
     enable_kerberos_src_conf::
       "Removed line disabling kerberos from /etc/src.conf";
+
+    keytab_wrong_perms::
+      "WARNING: System keytab had wrong permissions!  Possible security breach!  Consider re-creating the system keytab to secure systems.";
+
+    create_keytab::
+      "The system keytab does not exist.  It needs to be created manually.";
+
+    create_krb5_conf::
+      "Ensure /etc/krb5.conf exists with permissions 644";
+
+    krb5_conf_sections::
+      "Added sections to /etc/krb5.conf";
+}
+
+body classes keytab
+{
+      promise_repaired => { "keytab_wrong_perms", "no_keytab" };
+      repair_failed => { "no_keytab" };
 }
 
 # Set up the basic kerberos server configuration.  Note: this will not
@@ -41,6 +102,11 @@ bundle agent kerberos_client
 bundle agent kerberos_server
 {
   vars:
+      "kdc_conf[kdcdefaults][allow_weak_crypto]" string => "false";
+      "kdc_conf[kdcdefaults][kdc_ports]" string => "88";
+#      "kdc_conf[realms][$(kerberos_config.realm)][master_key_type]" string => "aes256-cts-hmac-sha1-96";
+#      "kdc_conf[realms][$(kerberos_config.realm)][kadmind_port]" string => "749";
+
     freebsd::
       "rc_conf[kerberos5_server_enable]" string => "YES";
       "rc_conf[kadmind5_server_enable]" string => "YES";
@@ -48,7 +114,17 @@ bundle agent kerberos_server
       "startcommand[kerberos]" string => "/etc/rc.d/kerberos";
       "startcommand[kadmind]" string => "/etc/rc.d/kadmind";
 
+      "kadm_acl" string => "/usr/local/var/krb5kdc/kadm5.acl";
+
   files:
+      # Make sure the kerberos acl grants admins access to everything
+      "$(kadm_acl)"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => append_if_no_line("*/admin@$(kerberos_config.realm) *"),
+      comment => "Grant universal access to admins",
+      classes => if_repaired("grant_admin_access");
+
     freebsd::
       # Make sure the kerberos server is turned on
       "/etc/rc.conf"
@@ -58,8 +134,139 @@ bundle agent kerberos_server
       comment => "Enable kerberos and kadmind in rc.conf",
       classes => if_repaired("enable_kerberos_rc_conf");
 
+      # Make sure the principal database exists and is only
+      # accessible to root
+      "/usr/local/var/krb5kdc/principal"
+      create => "false",
+      perms => mog("600", "root", "wheel"),
+      comment => "Set permission of princial database to 600",
+      classes => if_repaired("set_principal_perms");
+
+      # Make sure the principal.kadm5 database exists and is only
+      # accessible to root
+      "/usr/local/var/krb5kdc/principal.kadm5"
+      create => "false",
+      perms => mog("600", "root", "wheel"),
+      comment => "Set permission of princial.kadm5 database to 600",
+      classes => if_repaired("set_principal_kadm5_perms");
 
   reports:
     enable_kerberos_rc_conf::
       "Enable kerberos and kadmind in /etc/rc.conf";
+
+    grant_admin_access::
+      "Granted all privileges to admin";
+
+    set_principal_perms::
+      "WARNING: principal database was tampered with, possible security breach!!";
+      "Set permission of princial database to 600.";
+
+    set_principal_kadm5_perms::
+      "WARNING: principal.kadm5 database was tampered with, possible security breach!!";
+      "Set permission of princial database to 600.";
+}
+
+# Set variables in a kerberos configuration file.  This will create
+# sections and domains and set the variables they contain accordingly.
+bundle agent set_kerberos_config_file_vars(info, file)
+{
+  vars:
+      "section" slist => getindices("$(info)");
+
+  # Some of these promises are workarounds for the fact that the
+  # select_region attribute doesn't quite work right.  If a section
+  # beginning is the last line in the file (ie. no newline), then
+  # insert_lines or field_edits with a select_region in them won't
+  # work right.
+  files:
+      # Workaround: create any sections that don't exist, and add
+      # their variables.
+      "$(file)"
+      edit_line => add_section("$(info)", "$(section)"),
+      comment => "Add $(section) to $(file)",
+      classes => "add_$(section)";
+
+      # Now do the actual work.
+      "$(file)"
+      edit_line => set_section_vars("$(info)", "$(section)"),
+      comment => "Edit $(section) in $(file)",
+      classes => "edit_$(section)";
+
+  reports:
+      "Added section $(section) to $(file)"
+      ifvarclass => "add_$(section)";
+
+      "Edited section $(section) to $(file)"
+      ifvarclass => "edit_$(section)";
+}
+
+# This is a workaround for the fact that the select_region command
+# breaks if the start of a region is also the end of the file.
+bundle edit_line add_section(info, section)
+{
+  vars:
+      "index" slist => getindices("$(info)[$(section)]");
+      "csection" string => canonify("$(section)");
+
+      "cindex[$(section)][$(index)]" string => canonify("$(index)");
+
+  insert_lines:
+      # Create the section tag
+      "[$(section)]"
+      classes => if_repaired("added_$(csection)");
+
+      # Add the variables to the section.  Since we just created it,
+      # add them all.
+      "  $(index)=$($(info)[$(section)][$(index)])",
+      location => bracket_section("$(section)"),
+      comment => "Insert a variable definition in $(section)",
+      classes => if_ok("$(section)_$($(info)[$(section)][$(index)])_added"),
+      ifvarclass => "added_$(csection)";
+
+  reports:
+      "Added $(section)"
+      ifvarclass => "added_$(csection)";
+}
+
+# Insert new lines right after the new section.
+body location bracket_section(name)
+{
+      select_line_matching => "\s*\[$(name)\]\s*";
+      before_after => "after";
+}
+
+# Edit sections in a kerberos config file
+bundle edit_line set_section_vars(info, section)
+{
+  vars:
+      "index" slist => getindices("$(info)[$(section)]");
+      "csection" string => canonify("$(section)");
+
+      "cindex[$(section)][$(index)]" string => canonify("$(index)");
+
+  field_edits:
+      # match a line starting like the key = something
+      "\s*$(index)\s*=.*"
+      edit_field => col("=","2","$($(info)[$(section)][$(index)])","set"),
+      select_region => INI_section("$(csection)"),
+      classes => if_ok("$(section)_$($(info)[$(section)][$(index)])_in_file"),
+      comment => "Match a line starting like key = something in $(section)";
+
+  insert_lines:
+      # Add the variables if they were not defined
+      "  $(index)=$($(info)[$(section)][$(index)])",
+      select_region => INI_section("$(csection)"),
+      comment => "Insert a variable definition in $(section)",
+      classes => if_ok("$(section)_$($(info)[$(section)][$(index)])_added"),
+      ifvarclass => "!$(cindex[$(section)][$(index)])_in_file";
+
+  reports:
+      "Created section $(section)"
+      ifvarclass => "create_$(section)";
+
+      "Set $(index) to $($(info)[$(section)][$(index)]) in section $(section)"
+      ifvarclass => "$(section)_$(cindex[$(section)][$(index)])_in_file";
+
+      "Add $(index)=$($(info)[$(section)][$(index)]) in section $(section)"
+      ifvarclass => "$(section)_$(cindex[$(section)][$(index)])_added";
 }
