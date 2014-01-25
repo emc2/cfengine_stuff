@@ -7,6 +7,4 @@ bundle agent base_config
 
     freebsd::
       "cert_files_path" string => "/etc/ssl/certs";
-      # CA certificate file
-      "ca_cert_file" string => "ca-cert.pem";
 }
