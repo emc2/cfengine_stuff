@@ -2,5 +2,11 @@
 bundle agent base_config
 {
   vars:
+      # Path to files on the policy host
       "file_store" string => "/var/cfengine/files";
+
+    freebsd::
+      "cert_files_path" string => "/etc/ssl/certs";
+      # CA certificate file
+      "ca_cert_file" string => "ca-cert.pem";
 }
