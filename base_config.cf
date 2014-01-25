@@ -7,4 +7,5 @@ bundle agent base_config
 
     freebsd::
       "cert_files_path" string => "/etc/ssl/certs";
+      "key_files_path" string => "/etc/ssl/private";
 }
