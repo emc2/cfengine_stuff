@@ -1,0 +1,29 @@
+# Manage CA certificate file
+bundle agent ca_cert
+{
+  vars:
+      # CA certificate file
+      "ca_cert_file" string => "ca-cert.pem";
+      "ca_cert_path" string => "$(base_config.cert_files_path)/$(ca_cert_file)";
+
+  files:
+      # Copy CA certificate into place
+      "$(ca_cert_path)"
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy CA certificate file into place",
+      classes => if_repaired("ca_cert_copy");
+
+      # Set permissions on CA certificate
+      "$(ca_cert_path)"
+      perms => m("644"),
+      comment => "Copy CA certificate file into place",
+      classes => if_repaired("ca_cert_set_perms");
+
+  reports:
+    ca_cert_copy::
+      "Copied CA certificate into place";
+
+    ca_cert_set_perms::
+      "Set permissions on CA certificate to 644";
+}
