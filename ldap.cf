@@ -16,7 +16,7 @@ bundle agent ldap_client
       "ldap_conf[BASE]" string => "$(ldap_config.ldap_base)";
       "ldap_conf[URI]" string => "$(ldap_config.ldap_server)";
       "ldap_conf[SSL]" string => "start_tls";
-      "ldap_conf[TLS_CACERT]" string => "$(base_config.ca_cert_file)";
+      "ldap_conf[TLS_CACERT]" string => "$(ca_cert.ca_cert_path)";
       "ldap_conf[TLS_CERT]" string => "$(base_config.cert_files_path)/$(sys.uqhost)-cert.pem";
       "ldap_conf[TLS_KEY]" string => "$(base_config.cert_files_path)/$(sys.uqhost)-key.pem";
       "ldap_conf[SASL_MECH]" string => "GSSAPI";
@@ -33,16 +33,11 @@ bundle agent ldap_client
   files:
       # Create the ldap.conf file
       "$(ldap_conf_file)"
+      edit_line => set_config_values("ldap_client.ldap_conf"),
       create => "true",
       perms => m("644"),
       comment => "Create ldap.conf file",
-      classes => if_repaired("create_ldap_conf");
-
-      # Set variables in ldap.conf
-      "$(ldap_conf_file)"
-      edit_line => set_config_values("ldap_client.ldap_conf"),
-      comment => "Create ldap.conf file",
-      classes => if_repaired("edit_ldap_conf");
+      classes => if_repaired("set_ldap_conf");
 
       # Copy this host's LDAP certificate file from the policy host
       "$(cert_files_path)/$(ldap_cert_file)"
@@ -63,10 +58,7 @@ bundle agent ldap_client
       classes => if_repaired("ldap_key");
 
   reports:
-    create_ldap_conf::
-      "Created LDAP client configuration variables";
-
-    edit_ldap_conf::
+    set_ldap_conf::
       "Set LDAP client configuration variables";
 
     ldap_cert::
