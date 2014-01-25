@@ -1,0 +1,6 @@
+# Base configuration bundle
+bundle agent base_config
+{
+  vars:
+      "file_store" string => "/var/cfengine/files";
+}
