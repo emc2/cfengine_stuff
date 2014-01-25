@@ -31,13 +31,14 @@ bundle agent ldap_client
       "ldap_key_file" string => "$(sys.uqhost)-key.pem";
 
   files:
-      # Create the ldap.conf file from config variables
+      # Create the ldap.conf file
       "$(ldap_conf_file)"
       create => "true",
       perms => m("644"),
       comment => "Create ldap.conf file",
       classes => if_repaired("create_ldap_conf");
 
+      # Set variables in ldap.conf
       "$(ldap_conf_file)"
       edit_line => set_config_values("ldap_client.ldap_conf"),
       comment => "Create ldap.conf file",
