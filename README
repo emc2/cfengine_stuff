@@ -1,4 +1,114 @@
 cfengine_stuff
 ==============
 
-CFEngine3 files for doing various system maintenance tasks
+CFEngine3 files for maintaining a network of machines with central
+authentication and authorization.  This repo holds CFengine3 promises
+representing an ongoing effort to convert management of an existing
+network over to CFengine3.
+
+
+Network Overview
+================
+
+The network has the following basic services:
+
+* Kerberos authentication server
+* LDAP directory server
+* DNS server
+* Email (imap/smtp) server
+* Database server (postgresql)
+* WWW server, running basic httpd as well as wiki software
+* NFS server
+* XMPP server
+* Proxies (Tor/Privoxy for anonymized communications, Squid for open)
+* User machines
+
+The network is presently based on FreeBSD machines, with some Mac OS
+and Linux client machines.  However, it is usually easier to adapt a
+FreeBSD configuration to Linux than the other way around, so it should
+be possible to adapt these files to manage linux hosts without too
+much trouble.
+
+
+The network is designed to be highly secure, and is built along the
+following guidelines:
+
+* All communications between services are encrypted, both the server
+  and clients have their own certificates, which are signed by a
+  central CA.
+
+* All user information is stored in the LDAP database, and all user
+  authentication is done against the kerberos service.
+
+* All authentication between services is done using GSSAPI/Kerberos.
+  This means no configuration file ever contains a password (hence,
+  they can be freely published).
+
+* Databases (LDAP and PostgreSQL) should restrict access so that any
+  service can only see relevant data (this is not presently done for
+  LDAP).
+
+* Logging messages should be written to the PostgreSQL database (not
+  presently done).
+
+* NFS is kerberized, with full encryption.
+
+
+This setup should be well-hardened against intrusion.  Because of the
+level of security and access control, it is even theoretically
+possible to have all machines completely accessible to the outside
+world (though I still wouldn't recommend it).
+
+
+Machine Configuration Overview
+==============================
+
+The following is a list of machine configurations, and what they need
+done:
+
+Kerberos Server         kerberos server/client, rsyslog, postgresql client,
+                        CA cert, FreeRADIUS server
+
+LDAP Server:            ldap server/client, kerberos client, rsyslog,
+                        postgresql client, CA cert
+
+DNS Server:             ldap client, postgresql client, rsyslog, CA cert
+
+RDBMS Server:           kerberos client, ldap client, PAM Kerberos, nslcd,
+                        rsyslog, postgresql client/server, CA cert
+
+Email Server:           kerberos client, ldap client, postgresql client,
+                        rsyslog, CA cert, dovecot, postfix
+
+WWW Server:             kerberos client, ldap client, postgresql client,
+                        rsyslog, CA cert, apache, tomcat, xwiki
+
+XMPP Server:            kerberos client, ldap client, postgresql client,
+                        rsyslog, CA cert, openfire
+
+Proxy Server:           postgresql client, rsyslog, tor, privoxy, squid,
+                        CA cert
+
+Client Machines:        kerberos client, ldap client, postgresql client,
+                        nslcd, PAM Kerberos, NFS client
+
+
+
+Things that can't be managed by CFengine:
+
+* Creating kerberos keytabs requires inputting the password for
+  admin/admin, interactively, so CFengine can't automate that.
+  However, it can warn about missing keytabs.
+
+* CFengine ought not be in the business of signing certificates,
+  though it can distribute them.
+
+* User information in LDAP can't be managed by CFengine community,
+  neither can system configuration information.
+
+* Most of the NFS information ought to be managed using LDAP automount
+  maps.
+
+* CFengine probably shouldn't deal with installing and configuring
+  packages, especially on a FreeBSD-based network where packages are
+  primarily installed via source builds.
