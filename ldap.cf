@@ -6,40 +6,42 @@ bundle agent ldap_config
       "ldap_base" string => "dc=metricspace,dc=net";
       # FQDN of the ldap server
       "ldap_server" string => "ldap.metricspace.net";
+      # URI for LDAP server
+      "ldap_server_uri" string => "ldaps://$(ldap_config.ldap_server)";
+
+    freebsd::
+      "ldap_conf_dir" string => "/usr/local/etc/openldap";
 }
 
 # Set up an LDAP client with GSSAPI authentication
 bundle agent ldap_client
 {
   vars:
-    freebsd::
-      # location of ldap.conf
-      "ldap_conf_file" string => "/usr/local/etc/openldap/ldap.conf";
       # LDAP certificate file
       "ldap_cert_file" string => "$(sys.uqhost)-cert.pem";
       # LDAP key file
       "ldap_key_file" string => "$(sys.uqhost)-key.pem";
-
-    any::
-      # Path to ldap certificate file
-      "ldap_cert_path" string => "$(base_config.cert_files_path)/$(sys.uqhost)-cert.pem";
-      # Path to ldap key file
-      "ldap_key_path" string => "$(base_config.key_files_path)/$(sys.uqhost)-key.pem";
-      # ldap.conf variables
-      "ldap_conf[BASE]" string => "$(ldap_config.ldap_base)";
-      "ldap_conf[URI]" string => "ldaps://$(ldap_config.ldap_server)";
-      "ldap_conf[TLS_CACERT]" string => "$(ca_cert.ca_cert_path)";
-      "ldap_conf[TLS_CERT]" string => "$(ldap_cert_path)";
-      "ldap_conf[TLS_KEY]" string => "$(ldap_key_path)";
-      "ldap_conf[SASL_MECH]" string => "GSSAPI";
-      "ldap_conf[SASL_SECPROPS]" string => "noplain,noanonymous";
+      # Path to LDAP certificate file
+      "ldap_cert_path" string => "$(base_config.cert_files_path)/$(ldap_cert_file)";
+      # Path to LDAP key file
+      "ldap_key_path" string => "$(base_config.key_files_path)/$(ldap_key_file)";
+      # name of ldap.conf
+      "ldap_conf_file" string => "ldap.conf";
+      # location of ldap.conf
+      "ldap_conf_path" string => "$(ldap_config.ldap_conf_dir)/$(ldap_conf_file)";
 
   files:
-      # Create and/or edit the ldap.conf file
-      "$(ldap_conf_file)"
-      edit_line => set_config_values("ldap_client.ldap_conf"),
+      "$(ldap_config.ldap_conf_dir)/."
       create => "true",
       perms => m("644"),
+      comment => "Create ldap configuration directory",
+      classes => if_repaired("create_ldap_conf_dir");
+
+      # Create and/or edit the ldap.conf file
+      "$(ldap_conf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/ldap.conf.template",
       comment => "Create ldap.conf file",
       classes => if_repaired("set_ldap_conf");
 
@@ -55,13 +57,16 @@ bundle agent ldap_client
       # Copy this host's LDAP key file from the policy host
       "$(ldap_key_path)"
       create => "true",
-      perms => m("600"),
+      perms => mog("640", "root", "nslcd"),
       copy_from => secure_cp("$(base_config.file_store)/$(ldap_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP key file",
       classes => if_repaired("ldap_key");
 
   reports:
+    create_ldap_conf_dir::
+      "Created LDAP configuration directory";
+
     set_ldap_conf::
       "Set LDAP client configuration variables";
 

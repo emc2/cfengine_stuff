@@ -1,0 +1,7 @@
+BASE            $(ldap_config.ldap_base)
+URI             $(ldap_config.ldap_server_uri)
+TLS_CACERT      $(ca_cert.ca_cert_path)
+TLS_CERT        $(ldap_client.ldap_cert_path)
+TLS_KEY         $(ldap_client.ldap_key_path)
+SASL_MECH       GSSAPI
+SASL_SECPROPS   noplain,noanonymous
