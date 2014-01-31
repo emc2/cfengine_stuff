@@ -1,0 +1,22 @@
+[%CFEngine BEGIN %]
+[libdefaults]
+  default_realm = $(kerberos_config.realm)
+  allow_weak_crypto = false
+  forwardable = true
+  proxiable = true
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+[realms]
+  $(kerberos_config.realm) = {
+    kdc = $(kerberos_config.kdc_server)
+    admin_server = $(kerberos_config.kadmin_server)
+    default_domain = $(kerberos_config.realm_domain)
+  }
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+[domain_realm]
+  $(kerberos_config.realm_domain) = $(kerberos_config.realm)
+  .$(kerberos_config.realm_domain) = $(kerberos_config.realm)
+[%CFEngine END %]
