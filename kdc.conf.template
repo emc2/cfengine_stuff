@@ -1,0 +1,13 @@
+[%CFEngine BEGIN %]
+[kdcdefaults]
+  allow_weak_crypto = false
+  kdc_ports = 88
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+[realms]
+  $(kerberos_config.realm) = {
+    kadmind_port = 749
+    master_key_type = aes256-cts-hmac-sha1-96
+  }
+[%CFEngine END %]
