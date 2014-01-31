@@ -19,6 +19,7 @@ bundle agent kerberos_config
     freebsd::
       "keytabs_dir" string => "/etc/keytabs";
       "system_keytab" string => "/etc/krb5.keytab";
+      "kdc_config_dir" string => "/usr/local/var/krb5kdc";
 }
 
 # Set up the basic kerberos realm configuration.  This assumes we're
@@ -58,8 +59,7 @@ bundle agent kerberos_client
       perms => mog ("644", "root", "wheel"),
       edit_template => "$(sys.workdir)/inputs/promises/krb5.conf.template",
       comment => "Create krb5.conf",
-      classes => if_repaired("create_krb5_conf"),
-      handle => "create_krb5_conf";
+      classes => if_repaired("create_krb5_conf");
 
     freebsd::
       # Ensure that make.conf sets KRB5_IMPL and KRB5_HOME correctly
@@ -98,3 +98,84 @@ bundle agent kerberos_client
     create_keytabs_dir::
       "Created keytabs directory";
 }
+
+# Set up the basic kerberos server configuration. Note: this will not
+# initialize the kerberos database, or create kstash. That should be
+# done manually!
+bundle agent kerberos_server
+{
+  vars:
+      "kadm_acl_file" string => "kadm5.acl";
+      "kadm_acl_path" string => "$(kerberos_config.kdc_config_dir)/$(kadm_acl_file)";
+      "kdc_conf_file" string => "kdc.conf";
+      "kdc_conf_path" string => "$(kerberos_config.kdc_config_dir)/$(kdc_conf_file)";
+      "principal_file" string => "principal";
+      "principal_path" string => "$(kerberos_config.kdc_config_dir)/$(principal_file)";
+      "principal_kadm5_file" string => "principal.kadm5";
+      "principal_kadm5_path" string => "$(kerberos_config.kdc_config_dir)/$(principal_kadm5_file)";
+
+    freebsd::
+      "rc_conf[kerberos5_server_enable]" string => "YES";
+      "rc_conf[kadmind5_server_enable]" string => "YES";
+
+      "startcommand[kerberos]" string => "/etc/rc.d/kerberos";
+      "startcommand[kadmind]" string => "/etc/rc.d/kadmind";
+
+  files:
+      # Make sure the kerberos acl grants admins access to everything
+      "$(kadm_acl_path)"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => append_if_no_line("*/admin@$(kerberos_config.realm) *"),
+      comment => "Grant universal access to admins",
+      classes => if_repaired("grant_admin_access");
+
+      # Set config variables in the kdc.conf file
+      "$(kdc_conf_path)"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_template("$(sys.workdir)/masterfiles/promises/kdc.conf.template")
+      comment => "Grant universal access to admins",
+      classes => if_repaired("grant_admin_access");      
+
+      # Make sure the principal database exists and is only
+      # accessible to root
+      "$(principal_path)"
+      create => "false",
+      perms => mog("600", "root", "wheel"),
+      comment => "Set permission of princial database to 600",
+      classes => if_repaired("set_principal_perms");
+
+      # Make sure the principal.kadm5 database exists and is only
+      # accessible to root
+      "$(principal_kadm5_path)"
+      create => "false",
+      perms => mog("600", "root", "wheel"),
+      comment => "Set permission of princial.kadm5 database to 600",
+      classes => if_repaired("set_principal_kadm5_perms");
+
+    freebsd::
+      # Make sure the kerberos server is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("kerberos_server.rc_conf"),
+      comment => "Enable kerberos and kadmind in rc.conf",
+      classes => if_repaired("enable_kerberos_rc_conf");
+
+  reports:
+    enable_kerberos_rc_conf::
+      "Enable kerberos and kadmind in /etc/rc.conf";
+
+    grant_admin_access::
+      "Granted all privileges to admin";
+
+    set_principal_perms::
+      "WARNING: principal database was tampered with, possible security breach!!";
+      "Set permission of princial database to 600.";
+
+    set_principal_kadm5_perms::
+      "WARNING: principal.kadm5 database was tampered with, possible security breach!!";
+      "Set permission of princial database to 600.";
+}
+
