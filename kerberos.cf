@@ -134,7 +134,7 @@ bundle agent kerberos_server
       "$(kdc_conf_path)"
       create => "true",
       perms => mog("644", "root", "wheel"),
-      edit_template("$(sys.workdir)/masterfiles/promises/kdc.conf.template")
+      edit_template => "$(sys.workdir)/masterfiles/promises/kdc.conf.template",
       comment => "Grant universal access to admins",
       classes => if_repaired("grant_admin_access");      
 
@@ -178,4 +178,3 @@ bundle agent kerberos_server
       "WARNING: principal.kadm5 database was tampered with, possible security breach!!";
       "Set permission of princial database to 600.";
 }
-
