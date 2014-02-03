@@ -11,73 +11,30 @@ bundle agent nslcd
       # Path to NSS key file
       "nslcd_key_path" string => "$(base_config.key_files_path)/$(nslcd_key_file)";
       # NSS kerberos credential
+      # need to switch this over to nss/hostname
       "nslcd_cred" string => "nss/$(sys.fqhost)"
       # NSS keytab file
       "nslcd_keytab_file" string => "nss.keytab"
       # Path to NSS keytab
       "nslcd_keytab_file" string => "$(kerberos_config.keytabs_path)/$(nslcd_keytab_file)"
 
-      "nslcd_conf[uid]" string => "nslcd";
-      "nslcd_conf[gid]" string => "nslcd";
-      "nslcd_conf[uri]" string => "$(ldap_config.ldap_server_uri)";
-      "nslcd_conf[ldap_version]" string => "3";
-      "nslcd_conf[base]" string => "$(ldap_config.ldap_base)";
-      "nslcd_conf[scope]" string => "one";
-      "nslcd_conf[sasl_mech]" string => "GSSAPI";
-      "nslcd_conf[tls_reqcert]" string => "demand";
-      "nslcd_conf[tls_cacertfile]" string => "$(ca_cert.ca_cert_path)";
-      "nslcd_conf[tls_cert]" string => "$(nslcd_cert_path)";
-      "nslcd_conf[tls_key]" string => "$(nslcd_key_path)";
-
-      "nslcd_conf_base[passwd]" string => "ou=people,$(ldap_config.ldap_base)";
-      "nslcd_conf_base[group]" string => "ou=group,$(ldap_config.ldap_base)";
-      "nslcd_conf_base[hosts]" string => "ou=hosts,$(ldap_config.ldap_base)";
-      "nslcd_conf_base[ethers]" string => "ou=hosts,$(ldap_config.ldap_base)";
-
       "nslcd_cred" string => "nss/$(sys.fqhost)"
 
     freebsd::
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
       "nslcd_rc" string => "/usr/local/etc/rc.d/nslcd";
+#      "nslcd_run_dir" string => "/var/run/nslcd";
 
   files:
      # Set basic configuration variables
       "$(nslcd_conf_path)"
       create => "true",
       perms => m("600"),
-      edit_line => set_config_values("nslcd.nslcd_conf"),
-      comment => "Set nslcd configuration vars",
-      classes => if_repaired("edit_nslcd_conf");
-
-      # Set LDAP translation configuration variables
-      "$(nslcd_conf_path)"
-      edit_line => set_base_config_values("nslcd.nslcd_conf_base"),
+      edit_template => "$(sys.workdir)/inputs/promises/nslcd.conf.template",
       comment => "Set nslcd configuration vars",
       classes => if_repaired("edit_nslcd_conf");
 
   reports:
     edit_nslcd_conf::
       "Set configuration variables in $(nslcd_conf_path)";
-}
-
-# Adapted from set_config_values
-bundle edit_line set_base_config_values(base_vals)
-{
-  vars:
-      "index" slist => getindices("$(base_vals)");
-
-      # Be careful if the index string contains funny chars
-      "cindex[$(index)]" string => canonify("$(index)");
-
-  replace_patterns:
-      # If the line is there, maybe commented out, uncomment and replace with
-      # the correct value
-      "^\s*(base $(index)\s+(?!$($(base_vals)[$(index)])).*|# base ?$(index)\s+.*)$"
-      replace_with => value("base $(index) $($(base_vals)[$(index)])"),
-      classes => always("replace_attempted_$(cindex[$(index)])");
-
-  insert_lines:
-      "base $(index) $($(base_vals)[$(index)])"
-      ifvarclass => "replace_attempted_$(cindex[$(index)])";
-
 }
