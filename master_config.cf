@@ -1,0 +1,69 @@
+# Central point for managing configuration promises and selecting
+# which ones apply to a given server.
+bundle common host_config
+{
+  vars:
+      "global_auth_clients" slist => { "www",
+                                       "mail",
+                                       "xmpp",
+                                       "proton",
+                                       "higgs" };
+
+  classes:
+      "kerberos_server" expression => "kdc";
+      "ldap_server" expression => "ldap";
+
+      "kerberos_client" or => { "kdc",
+                                "ldap",
+                                @(global_auth_clients) };
+
+
+      "ldap_client" or => { "ldap",
+                            @(global_auth_clients) };
+
+      "nslcd" or => { @(global_auth_clients) };
+
+}
+
+bundle common master_config 
+{
+  vars:
+    kerberos_client::
+      "kerberos_client_bundles" slist => { "kerberos_client" };
+
+    !kerberos_client::
+      "kerberos_client_bundles" slist => {};
+
+    kerberos_server::
+      "kerberos_server_bundles" slist => { "kerberos_server" };
+
+    !kerberos_server::
+      "kerberos_server_bundles" slist => {};
+
+    ldap_client::
+      "ldap_client_bundles" slist => { "ldap_client" };
+
+    !ldap_client::
+      "ldap_client_bundles" slist => {};
+
+#    ldap_server::
+#      "ldap_server_bundles" slist => { "ldap_server" };
+
+#    !ldap_server::
+#      "ldap_server_bundles" slist => {};
+
+    freebsd::
+      "os_bundles" slist => { "src_conf" };
+
+    any::
+      "inputs" slist => { "promises/base_config.cf",
+                          "promises/src_conf.cf",
+                          "promises/kerberos.cf",
+                          "promises/ldap.cf" };
+
+      "bundles" slist => { "ca_cert",
+                           @(os_bundles),
+                           @(kerberos_client_bundles),
+                           @(kerberos_server_bundles),
+                           @(ldap_client_bundles) };
+}
