@@ -53,10 +53,11 @@ bundle common master_config
 #      "ldap_server_bundles" slist => {};
 
     freebsd::
-      "os_bundles" slist => { "src_conf" };
+      "os_bundles" slist => { "src_conf_disable_junk" };
 
     any::
       "inputs" slist => { "promises/base_config.cf",
+                          "promises/ca_cert.cf",
                           "promises/src_conf.cf",
                           "promises/kerberos.cf",
                           "promises/ldap.cf" };
