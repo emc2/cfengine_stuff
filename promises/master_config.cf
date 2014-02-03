@@ -23,6 +23,10 @@ bundle common host_config
 
       "nslcd" or => { @(global_auth_clients) };
 
+      "sasl" or => { @(global_auth_clients) };
+
+      "pam" or => { @(global_auth_clients) };
+
 }
 
 bundle common master_config 
@@ -52,6 +56,12 @@ bundle common master_config
 #    !ldap_server::
 #      "ldap_server_bundles" slist => {};
 
+    nslcd::
+      "nslcd_bundles" slist => { "nslcd" };
+
+    !nslcd::
+      "nslcd_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -59,11 +69,13 @@ bundle common master_config
       "inputs" slist => { "promises/base_config.cf",
                           "promises/ca_cert.cf",
                           "promises/src_conf.cf",
+                          "promises/nslcd.cf",
                           "promises/kerberos.cf",
                           "promises/ldap.cf" };
 
       "bundles" slist => { "ca_cert",
                            @(os_bundles),
+                           @(nslcd_bundles),
                            @(kerberos_client_bundles),
                            @(kerberos_server_bundles),
                            @(ldap_client_bundles) };
