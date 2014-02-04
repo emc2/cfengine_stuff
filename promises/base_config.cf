@@ -1,4 +1,6 @@
-# Base configuration bundle
+# Base configuration bundle.  This mostly contains variables defining
+# paths to things that are used by almost every bundle, or don't
+# clearly belong to a single system's config bundle.
 bundle agent base_config
 {
   vars:
