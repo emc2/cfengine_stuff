@@ -75,9 +75,9 @@ bundle common master_config
 
       "bundles" slist => { "ca_cert",
                            @(os_bundles),
-                           @(nslcd_bundles),
                            @(kerberos_client_bundles),
                            @(kerberos_server_bundles),
-                           @(nslcd_bundles),
-                           @(ldap_client_bundles) };
+                           @(ldap_client_bundles),
+                           @(nslcd_bundles)
+                         };
 }
