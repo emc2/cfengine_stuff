@@ -1,30 +1,42 @@
-# Central point for managing configuration promises and selecting
-# which ones apply to a given server.
+# This is the central point for managing configuration promises and
+# selecting which ones apply to a given server.
 bundle common host_config
 {
   vars:
+      # Clients for globally-controlled LDAP+Kerberos authentication.
+      # These clients get Kerberized/LDAPized NSS and PAM.  Note: a
+      # lot of the rest of this configuration assumes these bundles
+      # are run.
       "global_auth_clients" slist => { "www",
                                        "mail",
                                        "xmpp",
                                        "proton",
-                                       "higgs" };
+                                       "tachyon"
+                                     };
 
   classes:
+      # Set this machine up as a kerberos server machine.
       "kerberos_server" expression => "kdc";
+      # Set this machine up as an LDAP server machine.
       "ldap_server" expression => "ldap";
 
+      # Set these machines up as users of kerberos authentication.
       "kerberos_client" or => { "kdc",
                                 "ldap",
+                                "higgs",
                                 @(global_auth_clients) };
 
-
+      # Set these machines up as LDAP clients.
       "ldap_client" or => { "ldap",
                             @(global_auth_clients) };
 
+      # Set up LDAP-based NSS on these machines.
       "nslcd" or => { @(global_auth_clients) };
 
+      # Set up kerberos-based saslauthd.
       "sasl" or => { @(global_auth_clients) };
 
+      # Set up kerberos-based PAM authentication.
       "pam" or => { @(global_auth_clients) };
 
 }
@@ -32,6 +44,8 @@ bundle common host_config
 bundle common master_config 
 {
   vars:
+    # These are lists of bundles to be run for each option.  Most of
+    # the time an option isn't chosen, nothing is done.
     kerberos_client::
       "kerberos_client_bundles" slist => { "kerberos_client" };
 
@@ -66,6 +80,7 @@ bundle common master_config
       "os_bundles" slist => { "src_conf_disable_junk" };
 
     any::
+      # List of all input files for promise bundles we use.
       "inputs" slist => { "promises/base_config.cf",
                           "promises/ca_cert.cf",
                           "promises/src_conf.cf",
@@ -73,6 +88,10 @@ bundle common master_config
                           "promises/kerberos.cf",
                           "promises/ldap.cf" };
 
+      # This is the master list of bundles that will be run.  We
+      # always install the CA certificate.  Beyond that, we run any
+      # OS-specific bundles, then start running the service specific
+      # bundle lists.
       "bundles" slist => { "ca_cert",
                            @(os_bundles),
                            @(kerberos_client_bundles),
