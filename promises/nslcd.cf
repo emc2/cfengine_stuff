@@ -13,7 +13,7 @@
 # nss/<hostname>, and extract it to the keytab
 # /etc/keytabs/nss.keytab.
 #
-# This bundle expects the kerberos_client bundle to also be run.
+# This bundle expects the kerberos_client bundle.
 bundle agent nslcd
 {
   vars:
