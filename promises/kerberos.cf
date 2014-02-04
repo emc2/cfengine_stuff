@@ -28,6 +28,7 @@ bundle agent kerberos_client
 {
   vars:
     freebsd::
+      # Variables for make.conf
       "make_conf[KRB5_IMPL]" string => "heimdal";
       "make_conf[KRB5_HOME]" string => "/usr";
 
@@ -100,8 +101,9 @@ bundle agent kerberos_client
 }
 
 # Set up the basic kerberos server configuration. Note: this will not
-# initialize the kerberos database, or create kstash. That should be
-# done manually!
+# initialize the kerberos principals database, or create kstash.
+# Neither will it create any principals.  That should be done
+# manually!
 bundle agent kerberos_server
 {
   vars:
@@ -115,6 +117,8 @@ bundle agent kerberos_server
       "principal_kadm5_path" string => "$(kerberos_config.kdc_config_dir)/$(principal_kadm5_file)";
 
     freebsd::
+      # Variables for rc.conf, to enable the kerberos and kadmin
+      # server.
       "rc_conf[kerberos5_server_enable]" string => "YES";
       "rc_conf[kadmind5_server_enable]" string => "YES";
 
