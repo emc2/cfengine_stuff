@@ -1,10 +1,10 @@
-# Configuration variables
+# Configuration data for the LDAP system.
 bundle agent ldap_config
 {
   vars:
-      # Base for the ldap database
+      # Base for the LDAP database.
       "ldap_base" string => "dc=metricspace,dc=net";
-      # FQDN of the ldap server
+      # FQDN of the LDAP server.
       "ldap_server" string => "ldap.metricspace.net";
       # URI for LDAP server
       "ldap_server_uri" string => "ldaps://$(ldap_config.ldap_server)";
@@ -13,7 +13,15 @@ bundle agent ldap_config
       "ldap_conf_dir" string => "/usr/local/etc/openldap";
 }
 
-# Set up an LDAP client with GSSAPI authentication
+# Set up an LDAP client with GSSAPI authentication.  This only sets up
+# the ldap.conf file, which controls LDAP tools like ldapsearch,
+# ldapwhoami, ldapadd/modify, and friends.  Most applications using
+# LDAP will have their own configuration variables.
+#
+# This sets up client certificates and GSSAPI authentication by
+# default for the LDAP tools.
+#
+# Note: this bundle assumes kerberos_client, as well as ca_cert.
 bundle agent ldap_client
 {
   vars:
@@ -31,6 +39,7 @@ bundle agent ldap_client
       "ldap_conf_path" string => "$(ldap_config.ldap_conf_dir)/$(ldap_conf_file)";
 
   files:
+      # Ensure the LDAP configuration directory exists.
       "$(ldap_config.ldap_conf_dir)/."
       create => "true",
       perms => m("644"),
@@ -75,4 +84,23 @@ bundle agent ldap_client
 
     ldap_key::
       "Copied LDAP SSL key file into place";
+}
+
+
+bundle agent ldap_server
+{
+  vars:
+      "ldap_schema_dir" string => "$(ldap_config.ldap_conf_dir)/schema";
+
+      "slapd_conf_file" string => "slapd.conf";
+      "slapd_conf_path" string => "$(ldap_config.ldap_conf_dir)/$(slapd_conf_file)";
+
+      "slapd_access_file" string => "slapd.access";
+      "slapd_access_path" string => "$(ldap_config.ldap_conf_dir)/$(slapd_access_file)";
+
+    freebsd::
+      "ldap_module_dir" string => "/usr/local/libexec/openldap";
+      "ldap_run_dir" string => "/var/run/openldap";
+      "ldap_db_dir" string => "/var/db/openldap-data";
+
 }
