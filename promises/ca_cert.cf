@@ -6,6 +6,10 @@ bundle agent ca_cert
       "ca_cert_file" string => "ca-cert.pem";
       "ca_cert_path" string => "$(base_config.cert_files_path)/$(ca_cert_file)";
 
+      # CA revocation list file
+      "ca_crl_file" string => "ca-crl.pem";
+      "ca_crl_path" string => "$(base_config.cert_files_path)/$(ca_crl_file)";
+
   files:
       # Copy CA certificate into place
       "$(ca_cert_path)"
@@ -20,10 +24,29 @@ bundle agent ca_cert
       comment => "Copy CA certificate file into place",
       classes => if_repaired("ca_cert_set_perms");
 
+      # Copy CA revocation list into place
+      "$(ca_crl_path)"
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy CA crlificate file into place",
+      classes => if_repaired("ca_crl_copy");
+
+      # Set permissions on CA revocation list
+      "$(ca_crl_path)"
+      perms => m("644"),
+      comment => "Copy CA crlificate file into place",
+      classes => if_repaired("ca_crl_set_perms");
+
   reports:
     ca_cert_copy::
       "Copied CA certificate into place";
 
     ca_cert_set_perms::
       "Set permissions on CA certificate to 644";
+
+    ca_crl_copy::
+      "Copied CA revocation list into place";
+
+    ca_crl_set_perms::
+      "Set permissions on CA revocation list to 644";
 }
