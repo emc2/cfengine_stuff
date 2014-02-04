@@ -8,7 +8,7 @@ tls_reqcert     demand
 tls_cacertfile  $(ca_cert.ca_cert_path)
 tls_cert        $(nslcd_cert_path)
 tls_key         $(nslcd_key_path)
-
+sasl_mech       GSSAPI
 base passwd     ou=people,$(ldap_config.ldap_base)
 base group      ou=groups,$(ldap_config.ldap_base)
 base hosts      ou=hosts,$(ldap_config.ldap_base)
