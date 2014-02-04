@@ -8,6 +8,12 @@
 # What this bundle does NOT do is create the kerberos principals and
 # set up the keytabs.  That requires direct password input.  It also
 # does not create the SSL keys (though it does distribute them).
+#
+# You need to create a kerberos principal per-host of the form
+# nss/<hostname>, and extract it to the keytab
+# /etc/keytabs/nss.keytab.
+#
+# This bundle expects the kerberos_client bundle to also be run.
 bundle agent nslcd
 {
   vars:
@@ -64,6 +70,12 @@ bundle agent nslcd
       comment => "Copy host NSS certificate file",
       classes => if_repaired("nss_cert");
 
+      "$(nslcd_keytab_path)"
+      create => "false",
+      perms => mog("600", "nslcd", "nslcd"),
+      comment => "Set permission of NSS keytab",
+      classes => if_repaired("nss_keytab_wrong_perms");
+
       # Copy this host's NSS key file from the policy host
       "$(nslcd_key_path)"
       create => "true",
@@ -79,4 +91,7 @@ bundle agent nslcd
 
     set_nslcd_crontab::
       "Set crontab entry to refresh nslcd credentials periodically";
+
+    nss_keytab_wrong_perms::
+      "Set permissions on $(nss_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 }
