@@ -1,0 +1,4 @@
+ssl = on
+krb_server_keyfile = '/var/db/pgsql/postgres.keytab'
+krb_srvname = 'postgres'
+log_destination = 'syslog'
