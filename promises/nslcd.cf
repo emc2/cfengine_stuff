@@ -16,17 +16,17 @@ bundle agent nslcd
       # NSS keytab file
       "nslcd_keytab_file" string => "nss.keytab"
       # Path to NSS keytab
-      "nslcd_keytab_file" string => "$(kerberos_config.keytabs_path)/$(nslcd_keytab_file)"
-
+      "nslcd_keytab_path" string => "$(kerberos_config.keytabs_path)/$(nslcd_keytab_file)"
+      # The kerberos credential to use
       "nslcd_cred" string => "nss/$(sys.fqhost)"
+      # A crontab entry to refresh the kerberos credentials every 8 hours
+      "nslcd_crontab_entry" string => "0       */8     *       *       *       nslcd   /usr/bin/kinit -t $(nslcd_keytab_path) $(nslcd_cred)";
 
     freebsd::
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
-      "nslcd_rc" string => "/usr/local/etc/rc.d/nslcd";
-#      "nslcd_run_dir" string => "/var/run/nslcd";
 
   files:
-     # Set basic configuration variables
+      # Set basic configuration variables in nslcd.conf
       "$(nslcd_conf_path)"
       create => "true",
       perms => m("600"),
@@ -34,7 +34,19 @@ bundle agent nslcd
       comment => "Set nslcd configuration vars",
       classes => if_repaired("edit_nslcd_conf");
 
+      # Set up a crontab entry to refresh the kerberos credentials
+      # every 8 hours (by default, they expire in 10 hours, so this is
+      # ok).
+      "$(base_config.system_crontab)"
+      create => "false",
+      edit_line => append_if_no_line("$(nslcd_crontab_entry)"),
+      comment => "Set crontab entry to refresh nslcd credentials periodically",
+      classes => if_repaired("set_nslcd_crontab");
+
   reports:
     edit_nslcd_conf::
       "Set configuration variables in $(nslcd_conf_path)";
+
+    set_nslcd_crontab::
+      "Set crontab entry to refresh nslcd credentials periodically";
 }
