@@ -1,7 +1,19 @@
-# Manage an nslcd configuration
+# Manage an nslcd configuration, which talks to an LDAP server over
+# SSL with client certificates, using GSSAPI to authenticate.
+#
+# The nslcd daemon gets has a per-host service credential which it
+# uses to authenticate to the LDAP server, as well as a per-host SSL
+# certificate and key.
+#
+# What this bundle does NOT do is create the kerberos principals and
+# set up the keytabs.  That requires direct password input.  It also
+# does not create the SSL keys (though it does distribute them).
 bundle agent nslcd
 {
   vars:
+      # TODO: these keys currently are the same as the host keys.
+      # Change them to service-specific keys.
+
       # NSS certificate file
       "nslcd_cert_file" string "$(sys.uqhost)-cert.pem";
       # NSS key file
@@ -42,6 +54,24 @@ bundle agent nslcd
       edit_line => append_if_no_line("$(nslcd_crontab_entry)"),
       comment => "Set crontab entry to refresh nslcd credentials periodically",
       classes => if_repaired("set_nslcd_crontab");
+
+      # Copy this host's NSS certificate file from the policy host
+      "$(nslcd_cert_path)"
+      create => "true",
+      perms => mog("644", "nslcd", "nslcd"),
+      copy_from => secure_cp("$(base_config.file_store)/$(nslcd_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy host NSS certificate file",
+      classes => if_repaired("nss_cert");
+
+      # Copy this host's NSS key file from the policy host
+      "$(nslcd_key_path)"
+      create => "true",
+      perms => mog("640", "nslcd", "nslcd"),
+      copy_from => secure_cp("$(base_config.file_store)/$(nslcd_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy host NSS key file",
+      classes => if_repaired("nss_key");
 
   reports:
     edit_nslcd_conf::
