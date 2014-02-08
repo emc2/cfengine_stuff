@@ -6,4 +6,6 @@ Host *
   MACs $(ssh_config.macs)
   HostKeyAlgorithms $(ssh_config.hostkey)
   KexAlgorithms $(ssh_config.kex)
+  GSSAPIAuthentication yes
+  GSSAPIDelegateCredential yes
 [%CFEngine END %]
