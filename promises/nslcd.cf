@@ -34,7 +34,7 @@ bundle agent nslcd
       # NSS keytab file
       "nslcd_keytab_file" string => "nss.keytab";
       # Path to NSS keytab
-      "nslcd_keytab_path" string => "$(kerberos_config.keytabs_path)/$(nslcd_keytab_file)";
+      "nslcd_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(nslcd_keytab_file)";
       # The kerberos credential to use
       "nslcd_cred" string => "nss/$(sys.fqhost)";
       # A crontab entry to refresh the kerberos credentials every 8 hours
