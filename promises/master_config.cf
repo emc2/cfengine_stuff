@@ -40,13 +40,13 @@ bundle common host_config
       "pam" or => { @(global_auth_clients) };
 
       # Set up a PostgreSQL client installation.
-      "postgres_client" or => { "www",
+      "postgresql_client" or => { "www",
                                 "higgs",
                                 "xmpp"
                               };
 
       # Set up the PostgreSQL server.
-      "postgres_server" expression => "higgs";
+      "postgresql_server" expression => "higgs";
 }
 
 bundle common master_config 
@@ -85,17 +85,17 @@ bundle common master_config
       "nslcd_bundles" slist => {};
 
     # Nothing to do for postgresql clients for now...
-    postgres_client::
-      "postgres_client_bundles" slist => {};
+    postgresql_client::
+      "postgresql_client_bundles" slist => {};
 
-    !postgres_client::
-      "postgres_client_bundles" slist => {};
+    !postgresql_client::
+      "postgresql_client_bundles" slist => {};
 
-    postgres_server::
-      "postgres_server_bundles" slist => { "postgres_server" };
+    postgresql_server::
+      "postgresql_server_bundles" slist => { "postgresql_server" };
 
-    !postgres_server::
-      "postgres_server_bundles" slist => {};
+    !postgresql_server::
+      "postgresql_server_bundles" slist => {};
 
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
@@ -120,7 +120,7 @@ bundle common master_config
                            @(kerberos_server_bundles),
                            @(ldap_client_bundles),
                            @(nslcd_bundles),
-                           @(postgres_client_bundles),
-                           @(postgres_server_bundles)
+                           @(postgresql_client_bundles),
+                           @(postgresql_server_bundles)
                          };
 }
