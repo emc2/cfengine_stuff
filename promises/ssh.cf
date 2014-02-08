@@ -53,7 +53,7 @@ bundle agent ssh_client
       "Set variables in Host * section in $(usr_local_ssh_config_path)";
 }
 
-bundle agent sshd_server
+bundle agent ssh_server
 {
   vars:
       # Configuration file for sshd
