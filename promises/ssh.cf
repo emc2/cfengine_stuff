@@ -83,7 +83,7 @@ bundle agent ssh_server
       "$(usr_local_ssh_config_path)"
       create => "true",
       perms => m("644"),
-      edit_template => "$(sys.workdir)/inputs/promises/nslcd.conf.template",
+      edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
       comment => "Set variables in sshd_config",
       classes => if_repaired("usr_local_sshd_config_edit");
 
