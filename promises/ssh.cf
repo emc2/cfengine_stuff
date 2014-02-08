@@ -1,0 +1,94 @@
+# Basic configuration data for SSH
+bundle agent ssh_config
+{
+  vars:
+      "ciphers" string => "aes256-gcm@openssh.com,aes256-ctr,aes256-cbc,aes192-ctr,aes192-cbc,aes128-gcm@openssh.com,aes128-ctr,aes128-cbc,blowfish-cbc";
+      "macs" string => "hmac-sha2-512-etm@openssh.com,hmac-sha2-512,hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-ripemd160-etm@openssh.com,hmac-ripemd160";
+      "kex" string => "curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1";
+      "hostkey" string => "ssh-ed25519-cert-v01@openssh.com,ssh-ed25519,ssh-rsa-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-rsa";
+
+    freebsd::
+      "ssh_config_dir" string => "/etc/ssh";
+}
+
+# Bundle to manage the SSH configuration.  This sets configuration
+# parameters for ssh and sshd.
+bundle agent ssh_client
+{
+  vars:
+      # SSH configuration file
+      "ssh_config_file" string => "ssh_config";
+      # Path to SSH configuration file
+      "ssh_config_path" string => "$(ssh_config.ssh_config_dir)/$(ssh_config_file)";
+
+    freebsd::
+      # There is another SSH configuration file in /usr/local, if
+      # anyone's installed any ssh ports (most commonly,
+      # openssh-portable)
+      "usr_local_ssh_config_path" string => "/usr/local$(ssh_config_path)";
+
+  files:
+      # Set variables in the client SSH configuration file
+      "$(ssh_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/nslcd.conf.template",
+      comment => "Set variables in Host * section in ssh_config",
+      classes => if_repaired("ssh_config_edit");
+
+    freebsd::
+      # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
+      "$(usr_local_ssh_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/ssh_config.template",
+      comment => "Set variables in Host * section in ssh_config",
+      classes => if_repaired("usr_local_ssh_config_edit");
+
+  reports:
+    ssh_config_edit::
+      "Set variables in Host * section in $(ssh_config_path)";
+
+    usr_local_ssh_config_edit::
+      "Set variables in Host * section in $(usr_local_ssh_config_path)";
+}
+
+bundle agent sshd_server
+{
+  vars:
+      # Configuration file for sshd
+      "sshd_config_file" string => "sshd_config";
+      # Path to sshd configuration file
+      "sshd_config_path" string => "$(ssh_config.ssh_config_dir)/$(sshd_config_file)";
+
+    freebsd::
+      # There is another SSH configuration file in /usr/local, if
+      # anyone's installed any ssh ports (most commonly,
+      # openssh-portable)
+      "usr_local_sshd_config_path" string => "/usr/local$(sshd_config_path)";
+
+ files:
+      # Set variables in the client SSH configuration file
+      "$(sshd_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
+      comment => "Set variables in sshd_config",
+      classes => if_repaired("sshd_config_edit");
+
+    freebsd::
+      # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
+      "$(usr_local_ssh_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/nslcd.conf.template",
+      comment => "Set variables in sshd_config",
+      classes => if_repaired("usr_local_sshd_config_edit");
+
+  reports:
+    sshd_config_edit::
+      "Set variables in Host * section in $(sshd_config_path)";
+
+    usr_local_sshd_config_edit::
+      "Set variables in Host * section in $(usr_local_sshd_config_path)";
+}
