@@ -1,0 +1,10 @@
+sasl_bind = yes
+sasl_mech = GSSAPI
+tls_ca_cert_file = $(ca_cert.ca_cert_path)
+tls_cert_file = /etc/ssl/certs/mail-cert.pem
+tls_key_file = /etc/ssl/private/mail-key.pem
+tls_require_cert = demand
+ldap_version = 3
+base = ou=people,$(ldap_config.ldap_base)
+user_attrs = homeDirectory=home,uidNumber=uid,gidNumber=gid
+user_filter = (&(objectClass=mailUser)(cn=%u))
