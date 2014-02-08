@@ -70,6 +70,7 @@ bundle agent nslcd
       comment => "Copy host NSS certificate file",
       classes => if_repaired("nss_cert");
 
+      # Make sure the keytab has the right permissions
       "$(nslcd_keytab_path)"
       create => "false",
       perms => mog("600", "nslcd", "nslcd"),
