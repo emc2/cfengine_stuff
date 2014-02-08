@@ -67,6 +67,8 @@ bundle agent ssh_server
       # openssh-portable)
       "usr_local_sshd_config_path" string => "/usr/local$(sshd_config_path)";
 
+      "rc_conf[sshd_enable]" string => "YES";
+
  files:
       # Set variables in the client SSH configuration file
       "$(sshd_config_path)"
@@ -85,10 +87,44 @@ bundle agent ssh_server
       comment => "Set variables in sshd_config",
       classes => if_repaired("usr_local_sshd_config_edit");
 
+      # Make sure the sshd server is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("ssh_server.rc_conf"),
+      comment => "Enable nslcd in rc.conf",
+      classes => if_repaired("enable_sshd_rc_conf");
+
   reports:
     sshd_config_edit::
       "Set variables in Host * section in $(sshd_config_path)";
 
     usr_local_sshd_config_edit::
       "Set variables in Host * section in $(usr_local_sshd_config_path)";
+
+    enable_sshd_rc_conf::
+      "Enabled sshd in rc.conf";
+
+}
+
+# Bundle to ensure that the sshd server is NOT enabled
+bundle agent no_ssh_server
+{
+  vars:
+    freebsd::
+      "rc_conf[sshd_enable]" string => "NO";
+
+  files:
+    freebsd::
+      # Make sure the sshd server is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("ssh_server.rc_conf"),
+      comment => "Disable nslcd in rc.conf",
+      classes => if_repaired("disable_sshd_rc_conf");
+
+  reports:
+    disable_sshd_rc_conf::
+      "Disabled sshd in rc.conf";
 }
