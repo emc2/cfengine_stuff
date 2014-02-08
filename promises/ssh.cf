@@ -32,7 +32,7 @@ bundle agent ssh_client
       "$(ssh_config_path)"
       create => "true",
       perms => m("644"),
-      edit_template => "$(sys.workdir)/inputs/promises/ssh_config.conf.template",
+      edit_template => "$(sys.workdir)/inputs/promises/ssh_config.template",
       comment => "Set variables in Host * section in ssh_config",
       classes => if_repaired("ssh_config_edit");
 
