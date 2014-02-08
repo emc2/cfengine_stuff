@@ -43,6 +43,8 @@ bundle agent nslcd
     freebsd::
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
 
+      "rc_conf[nslcd_enable]" string => "YES";
+
   files:
       # Set basic configuration variables in nslcd.conf
       "$(nslcd_conf_path)"
@@ -86,6 +88,15 @@ bundle agent nslcd
       comment => "Copy host NSS key file",
       classes => if_repaired("nss_key");
 
+    freebsd::
+      # Make sure the kerberos server is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("nslcd.rc_conf"),
+      comment => "Enable nslcd in rc.conf",
+      classes => if_repaired("enable_nslcd_rc_conf");
+
   reports:
     edit_nslcd_conf::
       "Set configuration variables in $(nslcd_conf_path)";
@@ -95,4 +106,7 @@ bundle agent nslcd
 
     nss_keytab_wrong_perms::
       "Set permissions on $(nss_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
+    enable_nslcd_rc_conf::
+      "Enabled nslcd in rc.conf";
 }
