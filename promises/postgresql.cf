@@ -60,7 +60,7 @@ bundle agent postgresql_server
 
   files:
       # Copy the CA cert into place
-      "$(postgresql_ca_cert_file)"
+      "$(postgresql_ca_cert_path)"
       perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Copy CA cert into PostgreSQL database directory",
       copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
@@ -68,7 +68,7 @@ bundle agent postgresql_server
       classes => if_repaired("postgres_ca_cert_copy");
 
       # Copy the CA CRL into place
-      "$(postgresql_ca_crl_file)"
+      "$(postgresql_ca_crl_path)"
       perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Copy CA revocation list into PostgreSQL database directory",
       copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
@@ -99,15 +99,15 @@ bundle agent postgresql_server
 
   reports:
     postgres_ca_cert_copy::
-      "Copied CA cert into $(postgresql_db_dir)";
+      "Copied CA cert into $(postgresql_config.postgresql_db_dir)";
 
     postgres_ca_cert_copy::
-      "Copied CA revocation list into $(postgresql_db_dir)";
+      "Copied CA revocation list into $(postgresql_config.postgresql_db_dir)";
 
     postgres_hba_copy::
-      "Copied HBA file into $(postgresql_db_dir)";
+      "Copied HBA file into $(postgresql_config.postgresql_db_dir)";
 
     edit_postgresq_conf::
-      "Set configuration variables in $(postgresql_conf_path)";
+      "Set configuration variables in $(postgresql_config.postgresql_conf_path)";
 
 }
