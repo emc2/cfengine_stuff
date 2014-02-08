@@ -15,6 +15,13 @@ bundle common host_config
                                      };
 
   classes:
+      # Set this machine up as an ssh server (meaning it runs sshd).
+      #
+      # Note: on FreeBSD, the default key size needs to get turned up
+      "ssh_server" or => { "tachyon",
+                           "proton"
+                         };
+
       # Set this machine up as a kerberos server machine.
       "kerberos_server" expression => "kdc";
       # Set this machine up as an LDAP server machine.
@@ -52,8 +59,17 @@ bundle common host_config
 bundle common master_config 
 {
   vars:
+      # EVERYBODY gets their ssh client updated...
+      "ssh_client_bundles" slist => { "ssh_client" };
+
     # These are lists of bundles to be run for each option.  Most of
     # the time an option isn't chosen, nothing is done.
+    ssh_server::
+      "ssh_server_bundles" slist => { "ssh_server" };
+
+    !ssh_server::
+      "ssh_server_bundles" slist => { "no_ssh_server" };
+
     kerberos_client::
       "kerberos_client_bundles" slist => { "kerberos_client" };
 
@@ -116,6 +132,8 @@ bundle common master_config
       # bundle lists.
       "bundles" slist => { "ca_cert",
                            @(os_bundles),
+                           @(ssh_client_bundles),
+                           @(ssh_server_bundles),
                            @(kerberos_client_bundles),
                            @(kerberos_server_bundles),
                            @(ldap_client_bundles),
