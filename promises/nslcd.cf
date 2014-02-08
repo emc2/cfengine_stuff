@@ -89,7 +89,7 @@ bundle agent nslcd
       classes => if_repaired("nss_key");
 
     freebsd::
-      # Make sure the kerberos server is turned on
+      # Make sure the nslcd daemon is turned on
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
