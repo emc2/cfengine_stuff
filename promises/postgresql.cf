@@ -1,0 +1,113 @@
+# Configuration variables for postgresql.  This is particularly
+# important here; port/package systems can vary quite a bit in where
+# they put the database, and what they call the user.
+bundle agent postgresql_config
+{
+  vars:
+    freebsd::
+      # The master database directory
+      "postgresql_db_dir" string => "/var/db/pgsql";
+
+      # The user and group for the PostgreSQL database server.
+      "postgresql_user" string => "pgsql";
+      "postgresql_group" string => "pgsql";
+}
+
+bundle agent postgresql_server
+{
+  vars:
+      # Filename and path for the PostgreSQL configuration file.
+      "postgresql_conf_file" string => "postgresql.conf";
+      "postgresql_conf_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_conf_file)";
+
+      # Filename and path for the host based access file.
+      "postgresql_hba_file" string => "pg_hba.conf";
+      "postgresql_hba_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_conf_file)";
+
+      # PostgreSQL chroots into its database directory, so the keytab,
+      # the certs, and the CA cert all have to be there.  It also
+      # expects exact file names.
+      "postgresql_keytab_file" string => "postgres.keytab";
+      "postgresql_keytab_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_keytab_file)";
+
+      # Filename and path for the CA certificate in the PostgreSQL
+      # database directory
+      "postgresql_ca_cert_file" string => "root.crt";
+      "postgresql_ca_cert_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_ca_cert_file)";
+
+      # Filename and path for the CA revocation list in the PostgreSQL
+      # database directory
+      "postgresql_ca_crl_file" string => "root.crl";
+      "postgresql_ca_crl_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_ca_crl_file)";
+
+      # The filename for the PostgreSQL server's certificate on the
+      # policy host.
+      "postgresql_cert_name" string => "$(sys.uqhost)/postgresql-cert.pem";
+
+      # The filename and path for the PostgreSQL server's certificate
+      # in the database directory.
+      "postgresql_cert_file" string => "server.crt";
+      "postgresql_cert_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_cert_file)";
+
+      # The filename for the PostgreSQL server's certificate on the
+      # policy host.
+      "postgresql_key_name" string => "$(sys.uqhost)/postgresql-key.pem";
+
+      # The filename and path for the PostgreSQL server's key in the
+      # database directory.
+      "postgresql_key_file" string => "server.key";
+      "postgresql_key_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_key_file)";
+
+  files:
+      # Copy the CA cert into place
+      "$(postgresql_ca_cert_file)" string =>
+      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy CA cert into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_ca_cert_copy");
+
+      # Copy the CA CRL into place
+      "$(postgresql_ca_crl_file)" string =>
+      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy CA revocation list into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_ca_crl_copy");
+
+      # Set configuration variables in postgresql.conf
+      "$(postgresql_conf_path)"
+      create => "true",
+      perms => m("600"),
+      edit_template => "$(sys.workdir)/inputs/promises/postgresql.conf.template",
+      comment => "Set postgresql configuration vars",
+      classes => if_repaired("edit_postgreql_conf");
+
+      # Make sure the keytab has the right permissions
+      "$(postgresql_keytab_path)"
+      create => "false",
+      perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Set permission of postgresql keytab",
+      classes => if_repaired("postgres_keytab_wrong_perms");
+
+      # Copy the HBA file into place
+      "$(postgresql_hba_path)" string =>
+      perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy HBA file into PostgreSQL database directory",
+      copy_from => local_cp("$(sys.workdir)/inputs/promises/$(postgresql_hba_file)"),
+      classes => if_repaired("postgres_hba_copy");
+
+  reports:
+    postgres_ca_cert_copy::
+      "Copied CA cert into $(postgresql_db_dir)";
+
+    postgres_ca_cert_copy::
+      "Copied CA revocation list into $(postgresql_db_dir)";
+
+    postgres_hba_copy::
+      "Copied HBA file into $(postgresql_db_dir)";
+
+    edit_postgresq_conf::
+      "Set configuration variables in $(postgresql_conf_path)";
+
+}
