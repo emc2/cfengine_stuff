@@ -1,8 +1,8 @@
 Protocol 2
 Compression yes
-Ciphers $(ciphers)
-MACs $(macs)
-KexAlgorithms $(kex)
+Ciphers $(ssh_config.ciphers)
+MACs $(ssh_config.macs)
+KexAlgorithms $(ssh_config.kex)
 ServerKeyBits 8192
 
 PasswordAuthentication no
