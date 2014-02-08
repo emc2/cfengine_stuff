@@ -10,5 +10,4 @@ PermitEmptyPasswords no
 KerberosAuthentication yes
 KerberosTicketCleanup yes
 GSSAPIAuthentication yes
-GSSAPIDelegateCredentials yes
 GSSAPICleanupCredentials yes
