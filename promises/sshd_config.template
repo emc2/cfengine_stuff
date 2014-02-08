@@ -1,0 +1,14 @@
+Protocol 2
+Compression yes
+Ciphers $(ciphers)
+MACs $(macs)
+KexAlgorithms $(kex)
+ServerKeyBits 8192
+
+PasswordAuthentication no
+PermitEmptyPasswords no
+KerberosAuthentication yes
+KerberosTicketCleanup yes
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials yes
+GSSAPICleanupCredentials yes
