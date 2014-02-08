@@ -121,6 +121,7 @@ bundle common master_config
       "inputs" slist => { "promises/base_config.cf",
                           "promises/ca_cert.cf",
                           "promises/src_conf.cf",
+                          "promises/ssh.cf",
                           "promises/nslcd.cf",
                           "promises/kerberos.cf",
                           "promises/ldap.cf",
