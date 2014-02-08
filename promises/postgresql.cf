@@ -79,7 +79,6 @@ bundle agent postgresql_server
 
       # Set configuration variables in postgresql.conf
       "$(postgresql_conf_path)"
-      create => "true",
       perms => m("600"),
       edit_template => "$(sys.workdir)/inputs/promises/postgresql.conf.template",
       comment => "Set postgresql configuration vars",
@@ -87,7 +86,6 @@ bundle agent postgresql_server
 
       # Copy the HBA file into place
       "$(postgresql_hba_path)"
-      create => "true",
       perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Copy HBA file into PostgreSQL database directory",
       copy_from => local_cp("$(sys.workdir)/inputs/promises/$(postgresql_hba_file)"),
