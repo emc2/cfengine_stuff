@@ -2,8 +2,8 @@
 Host *
   Protocol 2
   Compression yes
-  Ciphers $(ciphers)
-  MACs $(macs)
-  HostKeyAlgorithms $(hostkey)
-  KexAlgorithms $(kex)
+  Ciphers $(ssh_config.ciphers)
+  MACs $(ssh_config.macs)
+  HostKeyAlgorithms $(ssh_config.hostkey)
+  KexAlgorithms $(ssh_config.kex)
 [%CFEngine END %]
