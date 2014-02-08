@@ -5,7 +5,7 @@ bundle agent ssh_config
       "ciphers" string => "aes256-gcm@openssh.com,aes256-ctr,aes256-cbc,aes192-ctr,aes192-cbc,aes128-gcm@openssh.com,aes128-ctr,aes128-cbc,blowfish-cbc";
       "macs" string => "hmac-sha2-512-etm@openssh.com,hmac-sha2-512,hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-ripemd160-etm@openssh.com,hmac-ripemd160";
       "kex" string => "diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1";
-      "hostkey" string => "ssh-rsa-cert-v01@openssh.com,ssh-rsa-cert-v01@openssh.com,ssh-rsa";
+      "hostkey" string => "ssh-rsa-cert-v01@openssh.com,ssh-rsa";
 
     freebsd::
       "ssh_config_dir" string => "/etc/ssh";
