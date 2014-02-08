@@ -21,9 +21,9 @@ bundle agent nslcd
       # Change them to service-specific keys.
 
       # NSS certificate file
-      "nslcd_cert_file" string "$(sys.uqhost)-cert.pem";
+      "nslcd_cert_file" string => "$(sys.uqhost)-cert.pem";
       # NSS key file
-      "nslcd_key_file" string "$(sys.uqhost)-cert.pem";
+      "nslcd_key_file" string => "$(sys.uqhost)-cert.pem";
       # Path to NSS certificate file
       "nslcd_cert_path" string => "$(base_config.cert_files_path)/$(nslcd_cert_file)";
       # Path to NSS key file
