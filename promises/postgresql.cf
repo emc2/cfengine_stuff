@@ -22,7 +22,7 @@ bundle agent postgresql_server
 
       # Filename and path for the host based access file.
       "postgresql_hba_file" string => "pg_hba.conf";
-      "postgresql_hba_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_conf_file)";
+      "postgresql_hba_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_hba_file)";
 
       # PostgreSQL chroots into its database directory, so the keytab,
       # the certs, and the CA cert all have to be there.  It also
@@ -85,13 +85,6 @@ bundle agent postgresql_server
       comment => "Set postgresql configuration vars",
       classes => if_repaired("edit_postgreql_conf");
 
-      # Make sure the keytab has the right permissions
-      "$(postgresql_keytab_path)"
-      create => "false",
-      perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
-      comment => "Set permission of postgresql keytab",
-      classes => if_repaired("postgres_keytab_wrong_perms");
-
       # Copy the HBA file into place
       "$(postgresql_hba_path)"
       create => "true",
@@ -99,6 +92,13 @@ bundle agent postgresql_server
       comment => "Copy HBA file into PostgreSQL database directory",
       copy_from => local_cp("$(sys.workdir)/inputs/promises/$(postgresql_hba_file)"),
       classes => if_repaired("postgres_hba_copy");
+
+      # Make sure the keytab has the right permissions
+      "$(postgresql_keytab_path)"
+      create => "false",
+      perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Set permission of postgresql keytab",
+      classes => if_repaired("postgres_keytab_wrong_perms");
 
   reports:
     postgres_ca_cert_copy::
