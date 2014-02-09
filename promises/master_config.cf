@@ -48,12 +48,15 @@ bundle common host_config
 
       # Set up a PostgreSQL client installation.
       "postgresql_client" or => { "www",
-                                "higgs",
-                                "xmpp"
-                              };
+                                  "higgs",
+                                  "xmpp"
+                                };
 
       # Set up the PostgreSQL server.
       "postgresql_server" expression => "higgs";
+
+      # Set up a mail server running dovecot and postfix.
+      "mail_server" expression => "mail";
 }
 
 bundle common master_config 
@@ -113,6 +116,12 @@ bundle common master_config
     !postgresql_server::
       "postgresql_server_bundles" slist => {};
 
+    mail_server::
+      "mail_server_bundles" slist => { "dovecot" };
+
+    !mail_server::
+      "mail_server_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -125,7 +134,10 @@ bundle common master_config
                           "promises/nslcd.cf",
                           "promises/kerberos.cf",
                           "promises/ldap.cf",
-                          "promises/postgresql.cf" };
+                          "promises/postgresql.cf",
+                          "promises/mail.cf",
+                          "promises/dovecot.cf"
+                        };
 
       # This is the master list of bundles that will be run.  We
       # always install the CA certificate.  Beyond that, we run any
@@ -140,6 +152,7 @@ bundle common master_config
                            @(ldap_client_bundles),
                            @(nslcd_bundles),
                            @(postgresql_client_bundles),
-                           @(postgresql_server_bundles)
+                           @(postgresql_server_bundles),
+                           @(mail_server_bundles)
                          };
 }
