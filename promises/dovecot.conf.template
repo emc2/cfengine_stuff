@@ -1,0 +1,96 @@
+auth_default_realm = $(kerberos_config.realm)
+auth_gssapi_hostname = $(sys.fqhost)
+auth_krb5_keytab = $(dovecot_keytab_path)
+auth_mechanisms = plain gssapi external
+auth_realms = $(kerberos_config.realm)
+auth_username_format = %n
+base_dir = /var/run/dovecot/
+disable_plaintext_auth = no
+first_valid_gid = 10000
+first_valid_uid = 10000
+login_greeting = $(mail_config.mail_domain) mail server ready.
+mail_location = maildir:~/Maildir
+mail_privileged_group = mail
+protocols = imap pop3 sieve
+ssl = required
+ssl_ca = <$(ca_cert.ca_cert_path)
+ssl_cert = <$(dovecot_external_cert_path)
+ssl_key = <$(dovecot_external_key_path)
+verbose_proctitle = yes
+
+[%CFEngine BEGIN %]
+passdb {
+  driver = pam
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+plugin {
+  sieve = ~/.sieve
+  sieve_storage = ~/sieve
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+service auth {
+  unix_listener /var/spool/postfix/private/auth {
+    group = postfix
+    mode = 0660
+    user = postfix
+  }
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+service imap-login {
+  chroot = login
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+service pop3-login {
+  chroot = login
+
+  inet_listener pop3 {
+    port = 0
+  }
+
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+service sieve {
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+userdb {
+  args = /usr/local/etc/dovecot/dovecot-ldap.conf
+  driver = ldap
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+protocol imap {
+  imap_client_workarounds = delay-newmail  tb-extra-mailbox-sep
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+protocol pop3 {
+  pop3_client_workarounds = outlook-no-nuls oe-ns-eoh
+  pop3_uidl_format = %08Xu%08Xv
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+protocol lda {
+  mail_plugins = sieve
+  postmaster_address = postmaster@metricspace.net
+  sendmail_path = /usr/local/bin/sendmail
+}
+[%CFEngine END %]
