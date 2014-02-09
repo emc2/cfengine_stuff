@@ -39,7 +39,7 @@ bundle agent dovecot
       "dovecot_internal_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_internal_cert_file)";
 
       # The client key used by dovecot to talk to LDAP
-      "dovecot_internal_key_file" string => "mail-cert.pem";
+      "dovecot_internal_key_file" string => "mail-key.pem";
       "dovecot_internal_key_path" string => "$(base_config.key_files_path)/$(dovecot_internal_key_file)";
 
       # The client certificate used by dovecot to talk to LDAP
@@ -47,7 +47,7 @@ bundle agent dovecot
       "dovecot_external_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_external_cert_file)";
 
       # The client key used by dovecot to talk to LDAP
-      "dovecot_external_key_file" string => "imap-cert.pem";
+      "dovecot_external_key_file" string => "imap-key.pem";
       "dovecot_external_key_path" string => "$(base_config.key_files_path)/$(dovecot_external_key_file)";
 
   files:
