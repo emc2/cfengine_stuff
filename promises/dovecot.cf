@@ -83,6 +83,49 @@ bundle agent dovecot
       comment => "Set LDAP configuration variables in dovecot LDAP configuration file",
       classes => if_repaired("set_dovecot_vars");
 
+      # Make sure the keytab has the right permissions
+      "$(dovecot_keytab_path)"
+      create => "false",
+      perms => mog("600", "dovecot", "dovecot"),
+      comment => "Set permission of dovecot keytab",
+      classes => if_repaired("dovecot_keytab_wrong_perms");
+
+      # Copy the dovecot-to-LDAP certificate file from the policy host
+      "$(dovecot_internal_cert_path)"
+      create => "true",
+      perms => mog("644", "dovecot", "dovecot"),
+      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_internal_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy dovecot-to-LDAP certificate file",
+      classes => if_repaired("dovecot_internal_cert");
+
+      # Copy this host's NSS key file from the policy host
+      "$(dovecot_internal_key_path)"
+      create => "true",
+      perms => mog("600", "dovecot", "dovecot"),
+      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_internal_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy dovecot-to-LDAP key file",
+      classes => if_repaired("dovecot_internal_key");
+
+      # Copy the dovecot-to-LDAP certificate file from the policy host
+      "$(dovecot_external_cert_path)"
+      create => "true",
+      perms => mog("644", "dovecot", "dovecot"),
+      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_external_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy dovecot-to-LDAP certificate file",
+      classes => if_repaired("dovecot_external_cert");
+
+      # Copy this host's NSS key file from the policy host
+      "$(dovecot_external_key_path)"
+      create => "true",
+      perms => mog("600", "dovecot", "dovecot"),
+      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_external_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy dovecot-to-LDAP key file",
+      classes => if_repaired("dovecot_external_key");
+
     freebsd::
       # Make sure the nslcd daemon is turned on
       "/etc/rc.conf"
@@ -93,7 +136,19 @@ bundle agent dovecot
       classes => if_repaired("enable_dovecot_rc_conf");
 
   reports:
-    set_nslcd_crontab::
+    dovecot_internal_key::
+      "Copied dovecot-to-LDAP SSL key";
+
+    dovecot_internal_cert::
+      "Copied dovecot-to-LDAP SSL certificate";
+
+    dovecot_external_key::
+      "Copied dovecot-to-LDAP SSL key";
+
+    dovecot_external_cert::
+      "Copied dovecot-to-LDAP SSL certificate";
+
+    set_dovecot_crontab::
       "Set crontab entry to refresh dovecot credentials periodically";
 
     set_dovecot_ldap_vars::
@@ -102,9 +157,9 @@ bundle agent dovecot
     create_dovecot_conf_dir::
       "Created dovecot configuration directory";
 
-    set_dovecot_ldap_vars::
-      "Set configuration variables in $(dovecot_ldap_conf_path)";
-
     set_dovecot_vars::
       "Set configuration variables in $(dovecot_conf_path)";
+
+    dovecot_keytab_wrong_perms::
+      "Set permissions on $(dovecot_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 }
