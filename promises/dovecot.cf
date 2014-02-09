@@ -1,0 +1,108 @@
+# Bundle to manage a dovecot mail server configuration, which gets
+# users from LDAP and authenticates them with kerberos.
+#
+# The server uses GSSAPI to authenticate to the LDAP server and client
+# certificates for SSL.
+bundle agent dovecot
+{
+  vars:
+    freebsd::
+      "dovecot_conf_dir" string => "/usr/local/etc/dovecot";
+
+      "rc_conf[dovecot_enable]" string => "YES";
+
+    any::
+      # Filename for dovecot configuration file
+      "dovecot_conf_file" string => "dovecot.conf";
+      # Path to dovecot configuration file
+      "dovecot_conf_path" string => "$(dovecot_conf_dir)/$(dovecot_conf_file)";
+
+      # Filename for ldap configuration file
+      "dovecot_ldap_conf_file" string => "dovecot-ldap.conf";
+      # Path to ldap configuration file
+      "dovecot_ldap_conf_path" string => "$(dovecot_conf_dir)/$(dovecot_ldap_conf_file)";
+
+      # dovecot kerberos credential.  This is used both for
+      # authentication with clients, as well as for authentication
+      # with the LDAP database.
+      "dovecot_cred" string => "dovecot/$(sys.fqhost)";
+      # NSS keytab file
+      "dovecot_keytab_file" string => "dovecot.keytab";
+      # Path to NSS keytab
+      "dovecot_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(dovecot_keytab_file)";
+
+      # A crontab entry to refresh the kerberos credentials every 8 hours
+      "nslcd_crontab_entry" string => "0       */8     *       *       *       dovecot   /usr/bin/kinit -t $(dovecot_keytab_path) $(dovecot_cred)";
+
+      # The client certificate used by dovecot to talk to LDAP
+      "dovecot_internal_cert_file" string => "mail-cert.pem";
+      "dovecot_internal_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_internal_cert_file)";
+
+      # The client key used by dovecot to talk to LDAP
+      "dovecot_internal_key_file" string => "mail-cert.pem";
+      "dovecot_internal_key_path" string => "$(base_config.key_files_path)/$(dovecot_internal_key_file)";
+
+      # The client certificate used by dovecot to talk to LDAP
+      "dovecot_external_cert_file" string => "imap-cert.pem";
+      "dovecot_external_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_external_cert_file)";
+
+      # The client key used by dovecot to talk to LDAP
+      "dovecot_external_key_file" string => "imap-cert.pem";
+      "dovecot_external_key_path" string => "$(base_config.key_files_path)/$(dovecot_external_key_file)";
+
+  files:
+      # Set up a crontab entry to refresh the kerberos credentials
+      # every 8 hours (by default, they expire in 10 hours, so this is
+      # ok).
+      "$(base_config.system_crontab)"
+      create => "false",
+      edit_line => append_if_no_line("$(dovecot_crontab_entry)"),
+      comment => "Set crontab entry to refresh dovecot credentials periodically",
+      classes => if_repaired("set_dovecot_crontab");
+
+      # Create dovecot configuration directory
+      "$(dovecot_conf_dir)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create dovecot configuration directory",
+      classes => if_repaired("create_dovecot_conf_dir");
+
+      # Set LDAP configuation variables
+      "$(dovecot_ldap_conf_path)"
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/dovecot-ldap.conf.template",
+      comment => "Set LDAP configuration variables in dovecot LDAP configuration file",
+      classes => if_repaired("set_dovecot_ldap_vars");
+
+      # Set dovecot configuation variables
+      "$(dovecot_conf_path)"
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/dovecot.conf.template",
+      comment => "Set LDAP configuration variables in dovecot LDAP configuration file",
+      classes => if_repaired("set_dovecot_vars");
+
+    freebsd::
+      # Make sure the nslcd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("dovecot.rc_conf"),
+      comment => "Enable dovecot in rc.conf",
+      classes => if_repaired("enable_dovecot_rc_conf");
+
+  reports:
+    set_nslcd_crontab::
+      "Set crontab entry to refresh dovecot credentials periodically";
+
+    set_dovecot_ldap_vars::
+      "Set LDAP configuration variables in $(dovecot_ldap_conf_path)";
+
+    create_dovecot_conf_dir::
+      "Created dovecot configuration directory";
+
+    set_dovecot_ldap_vars::
+      "Set configuration variables in $(dovecot_ldap_conf_path)";
+
+    set_dovecot_vars::
+      "Set configuration variables in $(dovecot_conf_path)";
+}
