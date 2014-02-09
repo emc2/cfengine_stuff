@@ -1,6 +1,6 @@
 auth_default_realm = $(kerberos_config.realm)
 auth_gssapi_hostname = $(sys.fqhost)
-auth_krb5_keytab = $(dovecot_keytab_path)
+auth_krb5_keytab = $(dovecot.dovecot_keytab_path)
 auth_mechanisms = plain gssapi external
 auth_realms = $(kerberos_config.realm)
 auth_username_format = %n
@@ -14,8 +14,8 @@ mail_privileged_group = mail
 protocols = imap pop3 sieve
 ssl = required
 ssl_ca = <$(ca_cert.ca_cert_path)
-ssl_cert = <$(dovecot_external_cert_path)
-ssl_key = <$(dovecot_external_key_path)
+ssl_cert = <$(dovecot.dovecot_external_cert_path)
+ssl_key = <$(dovecot.dovecot_external_key_path)
 verbose_proctitle = yes
 
 [%CFEngine BEGIN %]
@@ -69,7 +69,7 @@ service sieve {
 
 [%CFEngine BEGIN %]
 userdb {
-  args = /usr/local/etc/dovecot/dovecot-ldap.conf
+  args = $(dovecot.dovecot_ldap_conf_path)
   driver = ldap
 }
 [%CFEngine END %]
