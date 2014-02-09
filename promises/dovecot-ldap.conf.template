@@ -1,8 +1,8 @@
 sasl_bind = yes
 sasl_mech = GSSAPI
 tls_ca_cert_file = $(ca_cert.ca_cert_path)
-tls_cert_file = $(dovecot_internal_cert_path)
-tls_key_file = $(dovecot_internal_key_path)
+tls_cert_file = $(dovecot.dovecot_internal_cert_path)
+tls_key_file = $(dovecot.dovecot_internal_key_path)
 tls_require_cert = demand
 ldap_version = 3
 base = ou=people,$(ldap_config.ldap_base)
