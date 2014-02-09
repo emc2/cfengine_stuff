@@ -32,7 +32,7 @@ bundle agent dovecot
       "dovecot_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(dovecot_keytab_file)";
 
       # A crontab entry to refresh the kerberos credentials every 8 hours
-      "nslcd_crontab_entry" string => "0       */8     *       *       *       dovecot   /usr/bin/kinit -t $(dovecot_keytab_path) $(dovecot_cred)";
+      "dovecot_crontab_entry" string => "0       */8     *       *       *       dovecot   /usr/bin/kinit -t $(dovecot_keytab_path) $(dovecot_cred)";
 
       # The client certificate used by dovecot to talk to LDAP
       "dovecot_internal_cert_file" string => "mail-cert.pem";
