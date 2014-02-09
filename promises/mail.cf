@@ -4,5 +4,5 @@ bundle agent mail_config
 {
   vars:
       # The domain for which we are serving mail
-      "mail_domain" => "metricspace.net";
+      "mail_domain" string => "metricspace.net";
 }
