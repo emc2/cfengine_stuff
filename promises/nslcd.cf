@@ -29,14 +29,12 @@ bundle agent nslcd
       # Path to NSS key file
       "nslcd_key_path" string => "$(base_config.key_files_path)/$(nslcd_key_file)";
       # NSS kerberos credential
-      # need to switch this over to nss/hostname
       "nslcd_cred" string => "nss/$(sys.fqhost)";
       # NSS keytab file
       "nslcd_keytab_file" string => "nss.keytab";
       # Path to NSS keytab
       "nslcd_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(nslcd_keytab_file)";
-      # The kerberos credential to use
-      "nslcd_cred" string => "nss/$(sys.fqhost)";
+
       # A crontab entry to refresh the kerberos credentials every 8 hours
       "nslcd_crontab_entry" string => "0       */8     *       *       *       nslcd   /usr/bin/kinit -t $(nslcd_keytab_path) $(nslcd_cred)";
 
