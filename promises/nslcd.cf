@@ -80,7 +80,7 @@ bundle agent nslcd
       # Copy this host's NSS key file from the policy host
       "$(nslcd_key_path)"
       create => "true",
-      perms => mog("640", "nslcd", "nslcd"),
+      perms => mog("600", "nslcd", "nslcd"),
       copy_from => secure_cp("$(base_config.file_store)/$(nslcd_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS key file",
@@ -96,6 +96,12 @@ bundle agent nslcd
       classes => if_repaired("enable_nslcd_rc_conf");
 
   reports:
+    nss_key::
+      "Copied NSS host SSL key";
+
+    nss_cert::
+      "Copied NSS host SSL certificate";
+
     edit_nslcd_conf::
       "Set configuration variables in $(nslcd_conf_path)";
 
