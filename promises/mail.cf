@@ -1,0 +1,8 @@
+# Basic configuration variables for a mail server that serves mail for
+# a single domain.
+bundle agent mail_config
+{
+  vars:
+      # The domain for which we are serving mail
+      "mail_domain" => "metricspace.net";
+}
