@@ -2,13 +2,13 @@ uid             nslcd
 gid             nslcd
 uri             $(ldap_config.ldap_server_uri)
 ldap_version    3
-ldap_base       $(ldap_config.ldap_base)
 scope           one
 tls_reqcert     demand
 tls_cacertfile  $(ca_cert.ca_cert_path)
 tls_cert        $(nslcd.nslcd_cert_path)
 tls_key         $(nslcd.nslcd_key_path)
 sasl_mech       GSSAPI
+base            $(ldap_config.ldap_base)
 base passwd     ou=people,$(ldap_config.ldap_base)
 base group      ou=groups,$(ldap_config.ldap_base)
 base hosts      ou=hosts,$(ldap_config.ldap_base)
