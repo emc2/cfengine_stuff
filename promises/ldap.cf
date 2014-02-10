@@ -26,9 +26,9 @@ bundle agent ldap_client
 {
   vars:
       # LDAP certificate file
-      "ldap_cert_file" string => "$(sys.uqhost)-cert.pem";
+      "ldap_cert_file" string => "$(sys.uqhost)-ldap-cert.pem";
       # LDAP key file
-      "ldap_key_file" string => "$(sys.uqhost)-key.pem";
+      "ldap_key_file" string => "$(sys.uqhost)-ldap-key.pem";
       # Path to LDAP certificate file
       "ldap_cert_path" string => "$(base_config.cert_files_path)/$(ldap_cert_file)";
       # Path to LDAP key file
@@ -58,7 +58,7 @@ bundle agent ldap_client
       "$(ldap_cert_path)"
       create => "true",
       perms => m("644"),
-      copy_from => secure_cp("$(base_config.file_store)/$(ldap_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP certificate file",
       classes => if_repaired("ldap_cert");
@@ -67,7 +67,7 @@ bundle agent ldap_client
       "$(ldap_key_path)"
       create => "true",
       perms => mog("640", "root", "nslcd"),
-      copy_from => secure_cp("$(base_config.file_store)/$(ldap_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP key file",
       classes => if_repaired("ldap_key");
