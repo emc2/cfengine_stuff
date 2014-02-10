@@ -8,7 +8,7 @@ bundle agent ca_cert
 
       # CA revocation list file
       "ca_crl_file" string => "ca-crl.pem";
-      "ca_crl_path" string => "$(base_config.cert_files_path)/$(ca_crl_file)";
+      "ca_crl_path" string => "$(base_config.crl_files_path)/$(ca_crl_file)";
 
   files:
       # Copy CA certificate into place
