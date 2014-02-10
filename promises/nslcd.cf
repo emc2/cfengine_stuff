@@ -21,9 +21,9 @@ bundle agent nslcd
       # Change them to service-specific keys.
 
       # NSS certificate file
-      "nslcd_cert_file" string => "$(sys.uqhost)-cert.pem";
+      "nslcd_cert_file" string => "$(sys.uqhost)-nss-cert.pem";
       # NSS key file
-      "nslcd_key_file" string => "$(sys.uqhost)-key.pem";
+      "nslcd_key_file" string => "$(sys.uqhost)-nss-key.pem";
       # Path to NSS certificate file
       "nslcd_cert_path" string => "$(base_config.cert_files_path)/$(nslcd_cert_file)";
       # Path to NSS key file
@@ -65,7 +65,7 @@ bundle agent nslcd
       "$(nslcd_cert_path)"
       create => "true",
       perms => mog("644", "nslcd", "nslcd"),
-      copy_from => secure_cp("$(base_config.file_store)/$(nslcd_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS certificate file",
       classes => if_repaired("nss_cert");
@@ -81,7 +81,7 @@ bundle agent nslcd
       "$(nslcd_key_path)"
       create => "true",
       perms => mog("600", "nslcd", "nslcd"),
-      copy_from => secure_cp("$(base_config.file_store)/$(nslcd_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS key file",
       classes => if_repaired("nss_key");
