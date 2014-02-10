@@ -1,3 +1,4 @@
+uris = $(ldap_config.ldap_server_uri)
 sasl_bind = yes
 sasl_mech = GSSAPI
 tls_ca_cert_file = $(ca_cert.ca_cert_path)
