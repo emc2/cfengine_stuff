@@ -10,6 +10,8 @@ bundle agent base_config
     freebsd::
       # Where to keep public key certificates
       "cert_files_path" string => "/etc/ssl/certs";
+      # Where to keep the CRL
+      "crl_files_path" string => "/etc/ssl/crl";
       # Where to keep private keys on the system
       "key_files_path" string => "/etc/ssl/private";
       # System-wide crontab file
