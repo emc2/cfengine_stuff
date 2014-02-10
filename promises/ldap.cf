@@ -66,7 +66,7 @@ bundle agent ldap_client
       # Copy this host's LDAP key file from the policy host
       "$(ldap_key_path)"
       create => "true",
-      perms => mog("640", "root", "nslcd"),
+      perms => mog("600"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP key file",
