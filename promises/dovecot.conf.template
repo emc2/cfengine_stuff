@@ -39,7 +39,6 @@ service auth {
     user = postfix
   }
   user = dovecot
-  uris = $(ldap_config.ldap_server_uri)
 }
 [%CFEngine END %]
 
@@ -72,6 +71,7 @@ service sieve {
 userdb {
   args = $(dovecot.dovecot_ldap_conf_path)
   driver = ldap
+  uris = $(ldap_config.ldap_server_uri)
 }
 [%CFEngine END %]
 
