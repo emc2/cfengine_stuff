@@ -13,7 +13,7 @@ bundle agent ca_cert
   files:
       # Copy CA certificate into place
       "$(ca_cert_path)"
-      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy CA certificate file into place",
       classes => if_repaired("ca_cert_copy");
@@ -26,7 +26,7 @@ bundle agent ca_cert
 
       # Copy CA revocation list into place
       "$(ca_crl_path)"
-      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_crl_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy CA crlificate file into place",
       classes => if_repaired("ca_crl_copy");
