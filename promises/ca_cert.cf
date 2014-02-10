@@ -11,6 +11,27 @@ bundle agent ca_cert
       "ca_crl_path" string => "$(base_config.crl_files_path)/$(ca_crl_file)";
 
   files:
+      # Ensure cert files directory exists
+      "$(base_config.cert_files_path)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create certificate files directory",
+      classes => if_repaired("create_cert_dir");
+
+      # Ensure cert files directory exists
+      "$(base_config.key_files_path)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create key files directory",
+      classes => if_repaired("create_key_dir");
+
+      # Ensure cert files directory exists
+      "$(base_config.crl_files_path)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create CRL files directory",
+      classes => if_repaired("create_crl_dir");
+
       # Copy CA certificate into place
       "$(ca_cert_path)"
       copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_cert_file)",
@@ -49,4 +70,13 @@ bundle agent ca_cert
 
     ca_crl_set_perms::
       "Set permissions on CA revocation list to 644";
+
+    create_cert_dir::
+      "Create SSL certificate files directory";
+
+    create_crl_dir::
+      "Create SSL CRL files directory";
+
+    create_key_dir::
+      "Create SSL key files directory";
 }
