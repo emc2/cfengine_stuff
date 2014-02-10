@@ -39,6 +39,7 @@ service auth {
     user = postfix
   }
   user = dovecot
+  uris = $(ldap_config.ldap_server_uri)
 }
 [%CFEngine END %]
 
