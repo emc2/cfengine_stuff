@@ -37,6 +37,9 @@ bundle common host_config
       "ldap_client" or => { "ldap",
                             @(global_auth_clients) };
 
+      # Set up an LDAP server
+      "ldap_server" expression => "ldap";
+
       # Set up LDAP-based NSS on these machines.
       "nslcd" or => { @(global_auth_clients) };
 
@@ -91,11 +94,11 @@ bundle common master_config
     !ldap_client::
       "ldap_client_bundles" slist => {};
 
-#    ldap_server::
-#      "ldap_server_bundles" slist => { "ldap_server" };
+    ldap_server::
+      "ldap_server_bundles" slist => { "ldap_server" };
 
-#    !ldap_server::
-#      "ldap_server_bundles" slist => {};
+    !ldap_server::
+      "ldap_server_bundles" slist => {};
 
     nslcd::
       "nslcd_bundles" slist => { "nslcd" };
@@ -150,6 +153,7 @@ bundle common master_config
                            @(kerberos_client_bundles),
                            @(kerberos_server_bundles),
                            @(ldap_client_bundles),
+                           @(ldap_server_bundles),
                            @(nslcd_bundles),
                            @(postgresql_client_bundles),
                            @(postgresql_server_bundles),
