@@ -90,17 +90,75 @@ bundle agent ldap_client
 bundle agent ldap_server
 {
   vars:
-      "ldap_schema_dir" string => "$(ldap_config.ldap_conf_dir)/schema";
+      # Directory for ldap schemas
+      "slapd_schema_dir" string => "$(ldap_config.ldap_conf_dir)/schema";
 
+      # Name of slapd.conf file
       "slapd_conf_file" string => "slapd.conf";
+      # Path to slapd.conf file
       "slapd_conf_path" string => "$(ldap_config.ldap_conf_dir)/$(slapd_conf_file)";
 
+      # Name of slapd access control file
       "slapd_access_file" string => "slapd.access";
+      # Path to slapd access control file
       "slapd_access_path" string => "$(ldap_config.ldap_conf_dir)/$(slapd_access_file)";
+
+      # slapd certificate file
+      "slapd_cert_file" string => "$(sys.uqhost)-slapd-cert.pem";
+      # slapd key file
+      "slapd_key_file" string => "$(sys.uqhost)-slapd-key.pem";
+      # Path to slapd certificate file
+      "slapd_cert_path" string => "$(base_config.cert_files_path)/$(slapd_cert_file)";
+      # Path to slapd file
+      "slapd_key_path" string => "$(base_config.key_files_path)/$(slapd_key_file)"
+      # NSS kerberos credential
+      "slapd_cred" string => "ldap/$(sys.fqhost)";
+      # slapd keytab file
+      "slapd_keytab_file" string => "ldap.keytab";
+      # Path to slapd keytab
+      "slapd_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(slapd_keytab_file)";
 
     freebsd::
       "ldap_module_dir" string => "/usr/local/libexec/openldap";
       "ldap_run_dir" string => "/var/run/openldap";
       "ldap_db_dir" string => "/var/db/openldap-data";
+      "slapd_user" string => "ldap";
+      "slapd_group" string => "ldap";
+
+  files:
+      # Copy slapd certificate file from the policy host
+      "$(slapd_cert_path)"
+      create => "true",
+      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(slapd_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy slapd certificate file",
+      classes => if_repaired("slapd_cert");
+
+      # Copy slapd key file from the policy host
+      "$(slapd_key_path)"
+      create => "true",
+      perms => mog("600", "$(slapd_user)", "$(slapd_group)"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(slapd_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy slapd key file",
+      classes => if_repaired("slapd_key");
+
+      # Make sure the keytab has the right permissions
+      "$(slapd_keytab_path)"
+      create => "false",
+      perms => mog("600", "$(slapd_user)", "$(slapd_group)"),
+      comment => "Set permission of slapd keytab",
+      classes => if_repaired("slapd_keytab_wrong_perms");
+
+  reports:
+    slapd_key::
+      "Copied slapd SSL key";
+
+    slapd_cert::
+      "Copied slapd SSL certificate";
+
+    slapd_keytab_wrong_perms::
+      "Set permissions on $(slapd_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 
 }
