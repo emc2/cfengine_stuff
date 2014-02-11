@@ -90,6 +90,26 @@ bundle agent ldap_client
 bundle agent ldap_server
 {
   vars:
+    freebsd::
+      "ldap_module_dir" string => "/usr/local/libexec/openldap";
+      "ldap_run_dir" string => "/var/run/openldap";
+      "ldap_db_dir" string => "/var/db/openldap-data";
+      "slapd_user" string => "ldap";
+      "slapd_group" string => "ldap";
+      "sasl_config_path" string => "/usr/local/lib/sasl2/slapd.conf";
+      "sasl_auth_mux_dir" string => "/var/run/saslauthd";
+      "sasl_auth_mux_path" string => "$(sasl_auth_mux_dir)/mux";
+      "sasl_config_vars" slist => { "pwcheck_method: saslauthd",
+                                    "saslauthd_path: $(sasl_auth_mux_path)" };
+
+      "rc_conf[saslauthd_enable]" string => "YES";
+      "rc_conf[saslauthd_flags]" string => "-a kerberos5";
+      "rc_conf[slapd_enable]" string => "YES";
+      "rc_conf[slapd_flags]" string => "-h 'ldapi:/// ldap:/// ldaps:///'";
+      "rc_conf[slapd_sockets]" string => "/var/run/openldap/ldapi";
+      "rc_conf[slapd_krb5_ktname]" string => "/etc/keytabs/ldap.keytab";
+
+    any::
       # Directory for ldap schemas
       "slapd_schema_dir" string => "$(ldap_config.ldap_conf_dir)/schema";
 
@@ -118,12 +138,8 @@ bundle agent ldap_server
       # Path to slapd keytab
       "slapd_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(slapd_keytab_file)";
 
-    freebsd::
-      "ldap_module_dir" string => "/usr/local/libexec/openldap";
-      "ldap_run_dir" string => "/var/run/openldap";
-      "ldap_db_dir" string => "/var/db/openldap-data";
-      "slapd_user" string => "ldap";
-      "slapd_group" string => "ldap";
+      "db_config_file" string => "DB_CONFIG";
+      "db_config_path" string => "$(ldap_db_dir)/$(db_config_file)";
 
   files:
       # Ensure the LDAP configuration directory exists.
@@ -174,7 +190,38 @@ bundle agent ldap_server
       comment => "Create slapd.access file",
       classes => if_repaired("set_slapd_access");
 
+      # Create DB_CONFIG file
+      "$(db_config_path)"
+      create => "true",
+      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
+      edit_line => append_if_no_line("set_cachesize 0 67108864 0"),
+      comment => "Create DB_CONFIG file in database directory",
+      classes => if_repaired("create_db_config");
+
+      # Setup sasl configuration file
+      "$(sasl_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_line => append_if_no_lines(@(sasl_config_vars)),
+      comment => "Create sasl configuration file",
+      classes => if_repaired("create_sasl_conf");
+
+    freebsd::
+      # Make sure the nslcd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("ldap_server.rc_conf"),
+      comment => "Enable saslauthd and slapd in rc.conf",
+      classes => if_repaired("enable_slapd_rc_conf");
+
   reports:
+    create_sasl_conf::
+      "Edit sasl configuration in $(sasl_config_path)";
+
+    create_db_config::
+      "Edited $(db_config_path) file";
+
     create_ldap_conf_dir::
       "Created LDAP configuration directory";
 
@@ -196,4 +243,6 @@ bundle agent ldap_server
     set_slapd_access::
       "Set LDAP server access policy";
 
+    enable_slapd_rc_conf::
+      "Enabled slapd and saslauthd in rc.conf";
 }
