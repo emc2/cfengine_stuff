@@ -126,6 +126,13 @@ bundle agent ldap_server
       "slapd_group" string => "ldap";
 
   files:
+      # Ensure the LDAP configuration directory exists.
+      "$(ldap_config.ldap_conf_dir)/."
+      create => "true",
+      perms => m("644"),
+      comment => "Create ldap configuration directory",
+      classes => if_repaired("create_ldap_conf_dir");
+
       # Copy slapd certificate file from the policy host
       "$(slapd_cert_path)"
       create => "true",
@@ -151,7 +158,29 @@ bundle agent ldap_server
       comment => "Set permission of slapd keytab",
       classes => if_repaired("slapd_keytab_wrong_perms");
 
+      # Create and/or edit the ldap.conf file
+      "$(slapd_conf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/slapd.conf.template",
+      comment => "Create slapd.conf file",
+      classes => if_repaired("set_slapd_conf");
+
+      # Create and/or edit the ldap.conf file
+      "$(slapd_access_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/slapd.access.template",
+      comment => "Create slapd.access file",
+      classes => if_repaired("set_slapd_access");
+
   reports:
+    create_ldap_conf_dir::
+      "Created LDAP configuration directory";
+
+    create_ldap_schema_dir::
+      "Created LDAP schema directory";
+
     slapd_key::
       "Copied slapd SSL key";
 
@@ -160,5 +189,11 @@ bundle agent ldap_server
 
     slapd_keytab_wrong_perms::
       "Set permissions on $(slapd_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
+    set_slapd_conf::
+      "Set LDAP server configuration variables";
+
+    set_slapd_access::
+      "Set LDAP server access policy";
 
 }
