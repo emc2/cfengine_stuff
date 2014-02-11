@@ -1,21 +1,21 @@
-include         /usr/local/etc/openldap/schema/core.schema
-include         /usr/local/etc/openldap/schema/cosine.schema
-include         /usr/local/etc/openldap/schema/inetorgperson.schema
-include         /usr/local/etc/openldap/schema/jabberd.schema
-include         /usr/local/etc/openldap/schema/nis.schema
-include         /usr/local/etc/openldap/schema/postfix.schema
-include         /usr/local/etc/openldap/schema/dnszone.schema
-include         /usr/local/etc/openldap/schema/automount.schema
+include         $(ldap_server.ldap_schema_dir)/core.schema
+include         $(ldap_server.ldap_schema_dir)/cosine.schema
+include         $(ldap_server.ldap_schema_dir)/inetorgperson.schema
+include         $(ldap_server.ldap_schema_dir)/jabberd.schema
+include         $(ldap_server.ldap_schema_dir)/nis.schema
+include         $(ldap_server.ldap_schema_dir)/postfix.schema
+include         $(ldap_server.ldap_schema_dir)/dnszone.schema
+include         $(ldap_server.ldap_schema_dir)/automount.schema
 
-pidfile         /var/run/openldap/slapd.pid
-argsfile        /var/run/openldap/slapd.args
+pidfile         $(ldap_server.ldap_run_dir)/slapd.pid
+argsfile        $(ldap_server.ldap_run_dir)/slapd.args
 
-modulepath      /usr/local/libexec/openldap
+modulepath      $(ldap_server.ldap_module_dir)
 moduleload      back_bdb
 
 database        bdb
-suffix          "dc=metricspace,dc=net"
-directory       /var/db/openldap-data
+suffix          "$(ldap_config.ldap_base)"
+directory       $(ldap_server.ldap_db_dir)
 
 index           objectClass             eq
 index           uid                     eq
@@ -30,22 +30,27 @@ index           automountKey            eq
 index           automountMapName        eq
 
 TLSVerifyClient         try
-TLSCertificateFile      /etc/ssl/certs/ldap-cert.pem
-TLSCertificateKeyFile   /etc/ssl/private/ldap-key.pem
-TLSCACertificateFile    /etc/ssl/certs/ca-cert.pem
+TLSCertificateFile      $(ldap_server.slapd_cert_file)
+TLSCertificateKeyFile   $(ldap_server.slapd_key_file)
+TLSCACertificateFile    $(ca_cert.ca_cert_path)
+TLSCRLFile              $(ca_cert.ca_crl_path)
+TLSCRLCheck             all
 
-include /usr/local/etc/openldap/slapd.access
+include $(ldap_server.slapd_access_path)
 authz-policy from
-authz-regexp "uid=admin/admin,cn=metricspace.net,cn=gssapi,cn=auth" "cn=admin,dc=metricspace,dc=net"
-authz-regexp "uid=admin/admin,cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=admin,dc=metricspace,dc=net"
-authz-regexp "uid=host/([^,]+).metricspace.net,cn=metricspace.net,cn=gssapi,cn=auth" "cn=$1.metricspace.net,ou=hosts,dc=metricspace,dc=net"
-authz-regexp "uid=host/([^,]+).metricspace.net,cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=$1.metricspace.net,ou=hosts,dc=metricspace,dc=net"
-authz-regexp "uid=([^/,]+)/([^/\.,]+).metricspace.net,cn=metricspace.net,cn=gssapi,cn=auth" "cn=$1,cn=$2.metricspace.net,ou=hosts,dc=metricspace,dc=net"
-authz-regexp "uid=([^/,]+)/([^/\.,]+).metricspace.net,cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=$1,cn=$2.metricspace.net,ou=hosts,dc=metricspace,dc=net"
-authz-regexp "uid=([^/.,]+),cn=metricspace.net,cn=gssapi,cn=auth" "cn=$1,ou=people,dc=metricspace,dc=net"
-authz-regexp "uid=([^/.,]+),cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=$1,ou=people,dc=metricspace,dc=net"
-authz-regexp "cn=([^/\.]+).metricspace.net,ou=hosts,o=metricspace.net,st=massachusetts,c=us" "cn=$1.metricspace.net,ou=hosts,dc=metricspace,dc=net"
 
-sasl-host ldap.metricspace.net
-sasl-realm METRICSPACE.NET
+[%CFEngine BEGIN %]
+authz-regexp "uid=admin/admin,cn=$(kerberos_config.realm),cn=gssapi,cn=auth" "cn=admin,$(ldap_config.ldap_base)"
+authz-regexp "uid=admin/admin,cn=$(kerberos_config.realm),cn=gss-spnego,cn=auth" "cn=admin,$(ldap_config.ldap_base)"
+authz-regexp "uid=host/([^,]+).$(kerberos_config.realm),cn=$(kerberos_config.realm),cn=gssapi,cn=auth" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=host/([^,]+).$(kerberos_config.realm),cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=([^/,]+)/([^/\.,]+).$(kerberos_config.realm),cn=$(kerberos_config.realm_domain),cn=gssapi,cn=auth" "cn=$1,cn=$2.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=([^/,]+)/([^/\.,]+).$(kerberos_config.realm_domain),cn=$(kerberos_config.realm),cn=gss-spnego,cn=auth" "cn=$1,cn=$2.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=([^/.,]+),cn=$(kerberos_config.realm),cn=gssapi,cn=auth" "cn=$1,ou=people,$(ldap_config.ldap_base)"
+authz-regexp "uid=([^/.,]+),cn=$(kerberos_config.realm),cn=gss-spnego,cn=auth" "cn=$1,ou=people,$(ldap_config.ldap_base)"
+authz-regexp "cn=([^/\.]+).$(kerberos_config.realm_domain),ou=hosts,o=$(kerberos_config.realm_domain),st=massachusetts,c=us" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+[%CFEngine END %]
+
+sasl-host       $(sys.uqhost)
+sasl-realm      $(kerberos_config.realm)
 sasl-secprops   noplain,noanonymous
