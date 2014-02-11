@@ -42,10 +42,10 @@ include $(ldap_server.slapd_access_path)
 authz-policy from
 authz-regexp "uid=admin/admin,cn=$(kerberos_config.realm),cn=gssapi,cn=auth" "cn=admin,$(ldap_config.ldap_base)"
 authz-regexp "uid=admin/admin,cn=$(kerberos_config.realm),cn=gss-spnego,cn=auth" "cn=admin,$(ldap_config.ldap_base)"
-authz-regexp "uid=host/([^,]+).$(kerberos_config.realm),cn=$(kerberos_config.domain_realm),cn=gssapi,cn=auth" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=host/([^,]+).$(kerberos_config.realm),cn=$(kerberos_config.realm_domain),cn=gssapi,cn=auth" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
 authz-regexp "uid=host/([^,]+).$(kerberos_config.realm),cn=metricspace.net,cn=gss-spnego,cn=auth" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
 authz-regexp "uid=([^/,]+)/([^/\.,]+).$(kerberos_config.realm),cn=$(kerberos_config.realm_domain),cn=gssapi,cn=auth" "cn=$1,cn=$2.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
-authz-regexp "uid=([^/,]+)/([^/\.,]+).$(kerberos_config.realm),cn=$(kerberos_config.domain_realm),cn=gss-spnego,cn=auth" "cn=$1,cn=$2.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
+authz-regexp "uid=([^/,]+)/([^/\.,]+).$(kerberos_config.realm),cn=$(kerberos_config.realm_domain),cn=gss-spnego,cn=auth" "cn=$1,cn=$2.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
 authz-regexp "uid=([^/.,]+),cn=$(kerberos_config.realm),cn=gssapi,cn=auth" "cn=$1,ou=people,$(ldap_config.ldap_base)"
 authz-regexp "uid=([^/.,]+),cn=$(kerberos_config.realm),cn=gss-spnego,cn=auth" "cn=$1,ou=people,$(ldap_config.ldap_base)"
 authz-regexp "cn=([^/\.]+).$(kerberos_config.realm_domain),ou=hosts,o=$(kerberos_config.realm_domain),st=massachusetts,c=us" "cn=$1.$(kerberos_config.realm_domain),ou=hosts,$(ldap_config.ldap_base)"
