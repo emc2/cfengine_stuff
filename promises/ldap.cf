@@ -110,7 +110,7 @@ bundle agent ldap_server
       # Path to slapd certificate file
       "slapd_cert_path" string => "$(base_config.cert_files_path)/$(slapd_cert_file)";
       # Path to slapd file
-      "slapd_key_path" string => "$(base_config.key_files_path)/$(slapd_key_file)"
+      "slapd_key_path" string => "$(base_config.key_files_path)/$(slapd_key_file)";
       # NSS kerberos credential
       "slapd_cred" string => "ldap/$(sys.fqhost)";
       # slapd keytab file
