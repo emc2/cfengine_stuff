@@ -1,0 +1,16 @@
+access to attrs=userPassword
+        by dn="cn=admin,$(ldap_config.ldap_base)" write
+        by anonymous auth
+        by * none
+
+access to attrs=loginShell,sn
+        by dn="cn=admin,$(ldap_config.ldap_base)" write
+        by self write
+        by * read
+
+access to dn.base=""
+        by * read
+
+access to *
+        by dn="cn=admin,$(ldap_config.ldap_base)" write
+        by * read
