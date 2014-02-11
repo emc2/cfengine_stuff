@@ -33,6 +33,8 @@ TLSVerifyClient         try
 TLSCertificateFile      $(ldap_server.slapd_cert_path)
 TLSCertificateKeyFile   $(ldap_server.slapd_key_path)
 TLSCACertificateFile    $(ca_cert.ca_cert_path)
+TLSCRLFile              $(ca_cert.ca_crl_path)
+TLSCRLCheck             all
 
 include $(ldap_server.slapd_access_path)
 
