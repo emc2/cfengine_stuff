@@ -109,7 +109,7 @@ bundle agent nslcd
       "Set crontab entry to refresh nslcd credentials periodically";
 
     nss_keytab_wrong_perms::
-      "Set permissions on $(nss_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+      "Set permissions on $(nslcd_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 
     enable_nslcd_rc_conf::
       "Enabled nslcd in rc.conf";
