@@ -103,9 +103,9 @@ bundle agent ldap_server
                                     "saslauthd_path: $(sasl_auth_mux_path)" };
 
       "rc_conf[saslauthd_enable]" string => "YES";
-      "rc_conf[saslauthd_flags]" string => "-a kerberos5";
+      "rc_conf[saslauthd_flags]" string => "\"-a kerberos5\"";
       "rc_conf[slapd_enable]" string => "YES";
-      "rc_conf[slapd_flags]" string => "-h 'ldapi:/// ldap:/// ldaps:///'";
+      "rc_conf[slapd_flags]" string => "\"-h 'ldapi:/// ldap:/// ldaps:///'\"";
       "rc_conf[slapd_sockets]" string => "/var/run/openldap/ldapi";
       "rc_conf[slapd_krb5_ktname]" string => "/etc/keytabs/ldap.keytab";
 
