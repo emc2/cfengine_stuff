@@ -100,6 +100,12 @@ bundle common master_config
     !ldap_server::
       "ldap_server_bundles" slist => {};
 
+    pam::
+      "pam_bundles" slist => { "pam" };
+
+    !pam::
+      "pam_bundles" slist => {};
+
     nslcd::
       "nslcd_bundles" slist => { "nslcd" };
 
@@ -135,6 +141,7 @@ bundle common master_config
                           "promises/src_conf.cf",
                           "promises/ssh.cf",
                           "promises/nslcd.cf",
+                          "promises/pam.cf",
                           "promises/kerberos.cf",
                           "promises/ldap.cf",
                           "promises/postgresql.cf",
@@ -155,6 +162,7 @@ bundle common master_config
                            @(ldap_client_bundles),
                            @(ldap_server_bundles),
                            @(nslcd_bundles),
+                           @(pam_bundles),
                            @(postgresql_client_bundles),
                            @(postgresql_server_bundles),
                            @(mail_server_bundles)
