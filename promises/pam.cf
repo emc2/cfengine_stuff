@@ -12,7 +12,7 @@ bundle agent pam {
 
     any::
 
-      "filepath_$(pam_files)" string => "$(pam_dir)/$(filename)";
+      "filepath_$(pam_files)" string => "$(pam_dir)/$(pam_files)";
 
   files:
       "$(filepath_$(pam_files))"
