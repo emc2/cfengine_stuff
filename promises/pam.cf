@@ -1,12 +1,6 @@
 # Basic configuration for pluggable authentication modules.  This sets
 # up kerberos authentication using PAM, thereby allowing su, console
 # logins, and other such tools to use kerberos.
-bundle agent pam_config
-{
-  vars:
-}
-
-# The bundle to actually do the work of configuring pam
 bundle agent pam {
   vars:
     freebsd::
