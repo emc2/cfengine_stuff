@@ -1,0 +1,19 @@
+[%CFEngine BEGIN %]
+auth            sufficient      pam_opie.so             no_warn no_fake_prompts
+auth            requisite       pam_opieaccess.so       no_warn allow_local
+auth            sufficient      pam_krb5.so             try_first_pass
+auth            required        pam_unix.so             no_warn try_first_pass nullok
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+account         required        pam_krb5.so
+account         required        pam_login_access.so
+account         required        pam_unix.so
+[%CFEngine END %]
+
+session         required        pam_lastlog.so          no_fail
+
+[%CFEngine BEGIN %]
+password        sufficient      pam_krb5.so             no_warn try_first_pass
+password        required        pam_unix.so             no_warn try_first_pass
+[%CFEngine END %]
