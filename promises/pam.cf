@@ -1,0 +1,34 @@
+# Basic configuration for pluggable authentication modules.  This sets
+# up kerberos authentication using PAM, thereby allowing su, console
+# logins, and other such tools to use kerberos.
+bundle agent pam_config
+{
+  vars:
+    freebsd::
+      # The directory containing pam files
+      "pam_dir" string => "/etc/pam.d";
+      # The files that need updating
+      "pam_files" slist => { "system" };
+}
+
+# The bundle to actually do the work of configuring pam
+bundle agent pam {
+  vars:
+      "filename" string => "$(pam_config.pam_files)";
+      "filepath" string => "$(pam_config.pam_dir)/$(filename)";
+
+    freebsd::
+      "template_file" string => "pam.template.freebsd";
+
+  files:
+      "$(filepath)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/$(template_file)",
+      comment => "Set pam configuration",
+      classes => if_repaired("edit_pam_conf_$(filename)");
+
+  reports:
+      "Edited pam configuration in $(filepath)"
+      ifvarclass => "edit_pam_conf_$(filename)";
+}
