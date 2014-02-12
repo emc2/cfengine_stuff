@@ -4,21 +4,22 @@
 bundle agent pam_config
 {
   vars:
-    freebsd::
-      # The directory containing pam files
-      "pam_dir" string => "/etc/pam.d";
-      # The files that need updating
-      "pam_files" slist => { "system" };
 }
 
 # The bundle to actually do the work of configuring pam
 bundle agent pam {
   vars:
-      "filename" string => "$(pam_config.pam_files)";
-      "filepath" string => "$(pam_config.pam_dir)/$(filename)";
-
     freebsd::
+      # The directory containing pam files
+      "pam_dir" string => "/etc/pam.d";
+      # The files that need updating
+      "pam_files" slist => { "system" };
       "template_file" string => "pam.template.freebsd";
+
+    any::
+
+      "filename" string => "$(pam_files)";
+      "filepath" string => "$(pam_dir)/$(filename)";
 
   files:
       "$(filepath)"
