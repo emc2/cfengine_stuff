@@ -3,21 +3,15 @@ access to attrs=userPassword
         by dn="cn=admin,$(ldap_config.ldap_base)" write
         by anonymous auth
         by * none
-[%CFEngine END %]
 
-[%CFEngine BEGIN %]
 access to attrs=loginShell,sn
         by dn="cn=admin,$(ldap_config.ldap_base)" write
         by self write
         by * read
-[%CFEngine END %]
 
-[%CFEngine BEGIN %]
 access to dn.base=""
         by * read
-[%CFEngine END %]
 
-[%CFEngine BEGIN %]
 access to *
         by dn="cn=admin,$(ldap_config.ldap_base)" write
         by * read
