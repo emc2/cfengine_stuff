@@ -143,10 +143,10 @@ bundle agent dovecot
       "Copied dovecot-to-LDAP SSL certificate";
 
     dovecot_external_key::
-      "Copied dovecot-to-LDAP SSL key";
+      "Copied dovecot server SSL key";
 
     dovecot_external_cert::
-      "Copied dovecot-to-LDAP SSL certificate";
+      "Copied dovecot server SSL certificate";
 
     set_dovecot_crontab::
       "Set crontab entry to refresh dovecot credentials periodically";
