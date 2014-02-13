@@ -18,7 +18,7 @@ bundle agent postfix
       "rc_conf[sendmail_outbound_enable]" string => "NO";
       "rc_conf[sendmail_map_queue_enable]" string => "NO";
       "rc_conf[postfix_enable]" string => "YES";
-      "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab)";
+      "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab_path)";
 
       "mailbox_command" string => "/usr/local/bin/procmail";
       "sendmail_path" string => "/usr/local/sbin/sendmail";
