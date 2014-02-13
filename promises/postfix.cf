@@ -126,7 +126,7 @@ bundle agent postfix
       "$(postfix_internal_cert_path)"
       create => "true",
       perms => mog("644", "postfix", "postfix"),
-      copy_from => secure_cp("$(base_config.file_store)/$(postfix_internal_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_internal_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy postfix-to-LDAP certificate file",
       classes => if_repaired("postfix_internal_cert");
@@ -135,7 +135,7 @@ bundle agent postfix
       "$(postfix_internal_key_path)"
       create => "true",
       perms => mog("600", "postfix", "postfix"),
-      copy_from => secure_cp("$(base_config.file_store)/$(postfix_internal_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_internal_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy postfix-to-LDAP key file",
       classes => if_repaired("postfix_internal_key");
@@ -144,7 +144,7 @@ bundle agent postfix
       "$(postfix_external_cert_path)"
       create => "true",
       perms => mog("644", "postfix", "postfix"),
-      copy_from => secure_cp("$(base_config.file_store)/$(postfix_external_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy postfix-to-LDAP certificate file",
       classes => if_repaired("postfix_external_cert");
@@ -153,7 +153,7 @@ bundle agent postfix
       "$(postfix_external_key_path)"
       create => "true",
       perms => mog("600", "postfix", "postfix"),
-      copy_from => secure_cp("$(base_config.file_store)/$(postfix_external_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy postfix-to-LDAP key file",
       classes => if_repaired("postfix_external_key");

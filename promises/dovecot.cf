@@ -94,7 +94,7 @@ bundle agent dovecot
       "$(dovecot_internal_cert_path)"
       create => "true",
       perms => mog("644", "dovecot", "dovecot"),
-      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_internal_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(dovecot_internal_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy dovecot-to-LDAP certificate file",
       classes => if_repaired("dovecot_internal_cert");
@@ -103,7 +103,7 @@ bundle agent dovecot
       "$(dovecot_internal_key_path)"
       create => "true",
       perms => mog("600", "dovecot", "dovecot"),
-      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_internal_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(dovecot_internal_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy dovecot-to-LDAP key file",
       classes => if_repaired("dovecot_internal_key");
@@ -112,7 +112,7 @@ bundle agent dovecot
       "$(dovecot_external_cert_path)"
       create => "true",
       perms => mog("644", "dovecot", "dovecot"),
-      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_external_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(dovecot_external_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy dovecot-to-LDAP certificate file",
       classes => if_repaired("dovecot_external_cert");
@@ -121,7 +121,7 @@ bundle agent dovecot
       "$(dovecot_external_key_path)"
       create => "true",
       perms => mog("600", "dovecot", "dovecot"),
-      copy_from => secure_cp("$(base_config.file_store)/$(dovecot_external_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(dovecot_external_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy dovecot-to-LDAP key file",
       classes => if_repaired("dovecot_external_key");
