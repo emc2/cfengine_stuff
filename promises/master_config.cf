@@ -126,7 +126,7 @@ bundle common master_config
       "postgresql_server_bundles" slist => {};
 
     mail_server::
-      "mail_server_bundles" slist => { "dovecot" };
+      "mail_server_bundles" slist => { "dovecot", "postfix" };
 
     !mail_server::
       "mail_server_bundles" slist => {};
