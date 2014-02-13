@@ -6,13 +6,14 @@ mail_owner = postfix
 myhostname = $(sys.fqhost)
 mydomain = $(mail_config.mail_domain)
 myorigin = $(mail_config.mail_domain)
-mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost, shadowsun.net
+mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost, $(mail_config.additional_domains)
 unknown_local_recipient_reject_code = 550
 
 soft_bounce = no
 mynetworks_style = host
 in_flow_delay = 1s
 
+mailbox_command = $(postfix.mailbox_command)
 sendmail_path = $(postfix.sendmail_path)
 newaliases_path = $(postfix.newaliases_path)
 mailq_path = $(postfix.mailq_path)
