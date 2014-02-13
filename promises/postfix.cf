@@ -6,6 +6,18 @@
 bundle agent postfix
 {
   vars:
+    freebsd::
+      "postfix_conf_dir" string => "/usr/local/etc/postfix";
+
+      "rc_conf[postfix_enable]" string => "YES";
+      "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab)";
+
+    any::
+      # Filename for ldap configuration file
+      "postfix_ldap_conf_file" string => "postfix-ldap.conf";
+      # Path to ldap configuration file
+      "postfix_ldap_conf_path" string => "$(postfix_conf_dir)/$(postfix_ldap_conf_file)";
+
       # Postfix kerberos credential.  This is used both for
       # authentication with clients, as well as for authentication
       # with the LDAP database.
@@ -34,12 +46,6 @@ bundle agent postfix
       "postfix_external_key_file" string => "smtp-key.pem";
       "postfix_external_key_path" string => "$(base_config.key_files_path)/$(postfix_external_key_file)";
 
-    freebsd::
-      "postfix_conf_dir" string => "/usr/local/etc/postfix";
-
-      "rc_conf[postfix_enable]" string => "YES";
-      "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab)";
-
   files:
       # Create postfix configuration directory
       "$(postfix_conf_dir)/."
@@ -54,6 +60,14 @@ bundle agent postfix
       perms => mog("600", "postfix", "postfix"),
       comment => "Set permission of postfix keytab",
       classes => if_repaired("postfix_keytab_wrong_perms");
+
+      # Set LDAP configuation variables
+      "$(postfix_ldap_conf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/postfix-ldap.conf.template",
+      comment => "Set LDAP configuration variables in postfix LDAP configuration file",
+      classes => if_repaired("set_postfix_ldap_vars");
 
       # Copy the postfix-to-LDAP certificate file from the policy host
       "$(postfix_internal_cert_path)"
@@ -101,10 +115,25 @@ bundle agent postfix
       classes => if_repaired("enable_postfix_rc_conf");
 
   reports:
+    postfix_internal_key::
+      "Copied postfix-to-LDAP SSL key";
+
+    postfix_internal_cert::
+      "Copied postfix-to-LDAP SSL certificate";
+
+    postfix_external_key::
+      "Copied postfix server SSL key";
+
+    postfix_external_cert::
+      "Copied postfix server SSL certificate";
+
     create_postfix_conf_dir::
       "Created postfix configuration directory";
 
     enable_postfix_rc_conf::
       "Enabled postfix in rc.conf";
+
+    set_postfix_ldap_vars::
+      "Set LDAP configuration variables in $(postfix_ldap_conf_path)";
 
 }
