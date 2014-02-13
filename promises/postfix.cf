@@ -1,0 +1,110 @@
+# Bundle to manage a postfix configuration, which gets users and
+# aliases from LDAP, and uses Kerberos for authentication.
+#
+# The server uses GSSAPI to authenticate to the LDAP server and client
+# certificates for SSL.
+bundle agent postfix
+{
+  vars:
+      # Postfix kerberos credential.  This is used both for
+      # authentication with clients, as well as for authentication
+      # with the LDAP database.
+      "postfix_cred" string => "postfix/$(sys.fqhost)";
+      # NSS keytab file
+      "postfix_keytab_file" string => "postfix.keytab";
+      # Path to NSS keytab
+      "postfix_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(postfix_keytab_file)";
+
+      # A crontab entry to refresh the kerberos credentials every 8 hours
+      "postfix_crontab_entry" string => "0       */8     *       *       *       postfix   /usr/bin/kinit -t $(postfix_keytab_path) $(postfix_cred)";
+
+      # The client certificate used by postfix to talk to LDAP
+      "postfix_internal_cert_file" string => "$(sys.uqhost)-postfix-ldap-cert.pem";
+      "postfix_internal_cert_path" string => "$(base_config.cert_files_path)/$(postfix_internal_cert_file)";
+
+      # The client key used by postfix to talk to LDAP
+      "postfix_internal_key_file" string => "$(sys.uqhost)-postfix-ldap-key.pem";
+      "postfix_internal_key_path" string => "$(base_config.key_files_path)/$(postfix_internal_key_file)";
+
+      # The client certificate used by postfix to talk to clients
+      "postfix_external_cert_file" string => "smtp-cert.pem";
+      "postfix_external_cert_path" string => "$(base_config.cert_files_path)/$(postfix_external_cert_file)";
+
+      # The client key used by postfix to talk to clients
+      "postfix_external_key_file" string => "smtp-key.pem";
+      "postfix_external_key_path" string => "$(base_config.key_files_path)/$(postfix_external_key_file)";
+
+    freebsd::
+      "postfix_conf_dir" string => "/usr/local/etc/postfix";
+
+      "rc_conf[postfix_enable]" string => "YES";
+      "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab)";
+
+  files:
+      # Create postfix configuration directory
+      "$(postfix_conf_dir)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create postfix configuration directory",
+      classes => if_repaired("create_postfix_conf_dir");
+
+      # Make sure the keytab has the right permissions
+      "$(postfix_keytab_path)"
+      create => "false",
+      perms => mog("600", "postfix", "postfix"),
+      comment => "Set permission of postfix keytab",
+      classes => if_repaired("postfix_keytab_wrong_perms");
+
+      # Copy the postfix-to-LDAP certificate file from the policy host
+      "$(postfix_internal_cert_path)"
+      create => "true",
+      perms => mog("644", "postfix", "postfix"),
+      copy_from => secure_cp("$(base_config.file_store)/$(postfix_internal_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy postfix-to-LDAP certificate file",
+      classes => if_repaired("postfix_internal_cert");
+
+      # Copy the postfix-to-LDAP key file from the policy host
+      "$(postfix_internal_key_path)"
+      create => "true",
+      perms => mog("600", "postfix", "postfix"),
+      copy_from => secure_cp("$(base_config.file_store)/$(postfix_internal_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy postfix-to-LDAP key file",
+      classes => if_repaired("postfix_internal_key");
+
+      # Copy the server certificate file from the policy host
+      "$(postfix_external_cert_path)"
+      create => "true",
+      perms => mog("644", "postfix", "postfix"),
+      copy_from => secure_cp("$(base_config.file_store)/$(postfix_external_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy postfix-to-LDAP certificate file",
+      classes => if_repaired("postfix_external_cert");
+
+      # Copy the server key file from the policy host
+      "$(postfix_external_key_path)"
+      create => "true",
+      perms => mog("600", "postfix", "postfix"),
+      copy_from => secure_cp("$(base_config.file_store)/$(postfix_external_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy postfix-to-LDAP key file",
+      classes => if_repaired("postfix_external_key");
+
+    freebsd::
+      # Make sure the nslcd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("postfix.rc_conf"),
+      comment => "Enable postfix in rc.conf",
+      classes => if_repaired("enable_postfix_rc_conf");
+
+  reports:
+    create_postfix_conf_dir::
+      "Created postfix configuration directory";
+
+    enable_postfix_rc_conf::
+      "Enabled postfix in rc.conf";
+
+}
