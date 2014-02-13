@@ -35,11 +35,11 @@ bundle agent dovecot
       "dovecot_crontab_entry" string => "0       */8     *       *       *       dovecot   /usr/bin/kinit -t $(dovecot_keytab_path) $(dovecot_cred)";
 
       # The client certificate used by dovecot to talk to LDAP
-      "dovecot_internal_cert_file" string => "mail-cert.pem";
+      "dovecot_internal_cert_file" string => "$(sys.uqhost)-dovecot-ldap-cert.pem";
       "dovecot_internal_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_internal_cert_file)";
 
       # The client key used by dovecot to talk to LDAP
-      "dovecot_internal_key_file" string => "mail-key.pem";
+      "dovecot_internal_key_file" string => "$(sys.uqhost)-dovecot-ldap-key.pem";
       "dovecot_internal_key_path" string => "$(base_config.key_files_path)/$(dovecot_internal_key_file)";
 
       # The certificate used by dovecot to talk to clients
@@ -99,7 +99,7 @@ bundle agent dovecot
       comment => "Copy dovecot-to-LDAP certificate file",
       classes => if_repaired("dovecot_internal_cert");
 
-      # Copy this host's NSS key file from the policy host
+      # Copy the dovecot-to-LDAP key file from the policy host
       "$(dovecot_internal_key_path)"
       create => "true",
       perms => mog("600", "dovecot", "dovecot"),
@@ -108,7 +108,7 @@ bundle agent dovecot
       comment => "Copy dovecot-to-LDAP key file",
       classes => if_repaired("dovecot_internal_key");
 
-      # Copy the dovecot-to-LDAP certificate file from the policy host
+      # Copy the server certificate file from the policy host
       "$(dovecot_external_cert_path)"
       create => "true",
       perms => mog("644", "dovecot", "dovecot"),
@@ -117,7 +117,7 @@ bundle agent dovecot
       comment => "Copy dovecot-to-LDAP certificate file",
       classes => if_repaired("dovecot_external_cert");
 
-      # Copy this host's NSS key file from the policy host
+      # Copy the server key file from the policy host
       "$(dovecot_external_key_path)"
       create => "true",
       perms => mog("600", "dovecot", "dovecot"),
