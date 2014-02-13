@@ -8,11 +8,39 @@ bundle agent postfix
   vars:
     freebsd::
       "postfix_conf_dir" string => "/usr/local/etc/postfix";
+      "queue_dir" string => "/var/spool/postfix";
+      "command_dir" string => "/usr/local/sbin";
+      "daemon_dir" string => "/usr/local/libexec/postfix";
+      "data_dir" string => "/var/db/postfix";
 
+      "rc_conf[sendmail_enable]" string => "NO";
+      "rc_conf[sendmail_submit_enable]" string => "NO";
+      "rc_conf[sendmail_outbound_enable]" string => "NO";
+      "rc_conf[sendmail_map_queue_enable]" string => "NO";
       "rc_conf[postfix_enable]" string => "YES";
       "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab)";
 
+      "mailbox_command" string => "/usr/local/bin/procmail";
+      "sendmail_path" string => "/usr/local/sbin/sendmail";
+      "newaliases_path" string => "/usr/local/bin/newaliases";
+      "mailq_path" string => "/usr/local/bin/mailq";
+
     any::
+      # Filename for ldap configuration file
+      "postfix_master_cf_file" string => "master.cf";
+      # Path to ldap configuration file
+      "postfix_master_cf_path" string => "$(postfix_conf_dir)/$(postfix_master_cf_file)";
+
+      # Filename for ldap configuration file
+      "postfix_main_cf_file" string => "main.cf";
+      # Path to ldap configuration file
+      "postfix_main_cf_path" string => "$(postfix_conf_dir)/$(postfix_main_cf_file)";
+
+      # Filename for ldap configuration file
+      "postfix_master_cf_file" string => "master.cf";
+      # Path to ldap configuration file
+      "postfix_master_cf_path" string => "$(postfix_conf_dir)/$(postfix_master_cf_file)";
+
       # Filename for ldap configuration file
       "postfix_ldap_conf_file" string => "postfix-ldap.conf";
       # Path to ldap configuration file
@@ -54,13 +82,6 @@ bundle agent postfix
       comment => "Create postfix configuration directory",
       classes => if_repaired("create_postfix_conf_dir");
 
-      # Make sure the keytab has the right permissions
-      "$(postfix_keytab_path)"
-      create => "false",
-      perms => mog("600", "postfix", "postfix"),
-      comment => "Set permission of postfix keytab",
-      classes => if_repaired("postfix_keytab_wrong_perms");
-
       # Set LDAP configuation variables
       "$(postfix_ldap_conf_path)"
       create => "true",
@@ -68,6 +89,38 @@ bundle agent postfix
       edit_template => "$(sys.workdir)/inputs/promises/postfix-ldap.conf.template",
       comment => "Set LDAP configuration variables in postfix LDAP configuration file",
       classes => if_repaired("set_postfix_ldap_vars");
+
+      # Set configuation variables
+      "$(postfix_main_cf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/postfix-main.cf.template",
+      comment => "Set postfix configuration variables",
+      classes => if_repaired("set_postfix_main_vars");
+
+      # Set configuation variables
+      "$(postfix_master_cf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/postfix-main.cf.template",
+      comment => "Set postfix master process configuration",
+      classes => if_repaired("set_postfix_master_cf");
+
+      # Set up a crontab entry to refresh the kerberos credentials
+      # every 8 hours (by default, they expire in 10 hours, so this is
+      # ok).
+      "$(base_config.system_crontab)"
+      create => "false",
+      edit_line => append_if_no_line("$(postfix_crontab_entry)"),
+      comment => "Set crontab entry to refresh postfix credentials periodically",
+      classes => if_repaired("set_postfix_crontab");
+
+      # Make sure the keytab has the right permissions
+      "$(postfix_keytab_path)"
+      create => "false",
+      perms => mog("600", "postfix", "postfix"),
+      comment => "Set permission of postfix keytab",
+      classes => if_repaired("postfix_keytab_wrong_perms");
 
       # Copy the postfix-to-LDAP certificate file from the policy host
       "$(postfix_internal_cert_path)"
@@ -127,6 +180,9 @@ bundle agent postfix
     postfix_external_cert::
       "Copied postfix server SSL certificate";
 
+    set_postfix_crontab::
+      "Set crontab entry to refresh postfix credentials periodically";
+
     create_postfix_conf_dir::
       "Created postfix configuration directory";
 
@@ -134,6 +190,12 @@ bundle agent postfix
       "Enabled postfix in rc.conf";
 
     set_postfix_ldap_vars::
-      "Set LDAP configuration variables in $(postfix_ldap_conf_path)";
+      "Set postfix LDAP configuration variables in $(postfix_ldap_conf_path)";
+
+    set_postfix_main_vars::
+      "Set postfix configuration variables in $(postfix_main_cf_path)";
+
+    set_postfix_main_vars::
+      "Setup postfix process configuration in $(postfix_master_cf_path)";
 
 }
