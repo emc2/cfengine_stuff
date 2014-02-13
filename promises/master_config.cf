@@ -146,7 +146,8 @@ bundle common master_config
                           "promises/ldap.cf",
                           "promises/postgresql.cf",
                           "promises/mail.cf",
-                          "promises/dovecot.cf"
+                          "promises/dovecot.cf",
+                          "promises/postfix.cf"
                         };
 
       # This is the master list of bundles that will be run.  We
