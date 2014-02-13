@@ -20,7 +20,7 @@ bundle agent postfix
       "rc_conf[postfix_enable]" string => "YES";
       "rc_conf[postfix_krb5_ktname]" string => "$(postfix.postfix_keytab_path)";
 
-      "mailbox_command" string => "/usr/local/bin/procmail";
+      "mailbox_command" string => "/usr/local/libexec/dovecot/dovecot-lda -f \"$SENDER\" -a \"$RECIPIENT\"";
       "sendmail_path" string => "/usr/local/sbin/sendmail";
       "newaliases_path" string => "/usr/local/bin/newaliases";
       "mailq_path" string => "/usr/local/bin/mailq";
