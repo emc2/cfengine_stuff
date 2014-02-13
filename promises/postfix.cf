@@ -190,7 +190,7 @@ bundle agent postfix
       "Enabled postfix in rc.conf";
 
     set_postfix_ldap_vars::
-      "Set postfix LDAP configuration variables in $(postfix_ldap_conf_path)";
+      "Set postfix LDAP configuration variables in $(postfix_ldap_cf_path)";
 
     set_postfix_main_vars::
       "Set postfix configuration variables in $(postfix_main_cf_path)";
