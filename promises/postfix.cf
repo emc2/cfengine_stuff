@@ -195,7 +195,7 @@ bundle agent postfix
     set_postfix_main_vars::
       "Set postfix configuration variables in $(postfix_main_cf_path)";
 
-    set_postfix_main_vars::
+    set_postfix_master_cf::
       "Setup postfix process configuration in $(postfix_master_cf_path)";
 
 }
