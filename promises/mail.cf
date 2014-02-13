@@ -5,4 +5,7 @@ bundle agent mail_config
   vars:
       # The domain for which we are serving mail
       "mail_domain" string => "metricspace.net";
+      # Additional domains for which we receive mail
+      "additional_domains" string => "shadowsun.net";
 }
+
