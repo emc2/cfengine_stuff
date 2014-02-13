@@ -41,6 +41,6 @@ smtpd_tls_auth_only = yes
 smtpd_tls_loglevel = 0
 smtpd_tls_received_header = yes
 smtpd_tls_session_cache_timeout = 3600s
-tls_random_source = dev:/dev/urandom    
+tls_random_source = dev:/dev/urandom
 
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
