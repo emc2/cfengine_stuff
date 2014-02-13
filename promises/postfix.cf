@@ -42,9 +42,9 @@ bundle agent postfix
       "postfix_master_cf_path" string => "$(postfix_conf_dir)/$(postfix_master_cf_file)";
 
       # Filename for ldap configuration file
-      "postfix_ldap_conf_file" string => "postfix-ldap.conf";
+      "postfix_ldap_cf_file" string => "postfix-ldap.cf";
       # Path to ldap configuration file
-      "postfix_ldap_conf_path" string => "$(postfix_conf_dir)/$(postfix_ldap_conf_file)";
+      "postfix_ldap_cf_path" string => "$(postfix_conf_dir)/$(postfix_ldap_cf_file)";
 
       # Postfix kerberos credential.  This is used both for
       # authentication with clients, as well as for authentication
@@ -83,10 +83,10 @@ bundle agent postfix
       classes => if_repaired("create_postfix_conf_dir");
 
       # Set LDAP configuation variables
-      "$(postfix_ldap_conf_path)"
+      "$(postfix_ldap_cf_path)"
       create => "true",
       perms => m("644"),
-      edit_template => "$(sys.workdir)/inputs/promises/postfix-ldap.conf.template",
+      edit_template => "$(sys.workdir)/inputs/promises/postfix-ldap.cf.template",
       comment => "Set LDAP configuration variables in postfix LDAP configuration file",
       classes => if_repaired("set_postfix_ldap_vars");
 
