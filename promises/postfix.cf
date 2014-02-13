@@ -102,7 +102,7 @@ bundle agent postfix
       "$(postfix_master_cf_path)"
       create => "true",
       perms => m("644"),
-      edit_template => "$(sys.workdir)/inputs/promises/postfix-main.cf.template",
+      edit_template => "$(sys.workdir)/inputs/promises/postfix-master.cf.template",
       comment => "Set postfix master process configuration",
       classes => if_repaired("set_postfix_master_cf");
 
