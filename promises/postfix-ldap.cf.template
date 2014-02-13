@@ -1,0 +1,13 @@
+server_host = $(ldap_config.ldap_server_uri)
+search_base = ou=people,$(ldap_config.ldap_base)
+version = 3
+bind = no
+sasl_mechs = GSSAPI
+sasl_realm = $(kerberos_config.realm)
+scope = sub
+query_filter = mail=%s@$(mail_config.mail_domain)
+result_attribute = maildrop
+tls_ca_cert_file = $(ca_cert.ca_cert_path)
+tls_cert = $(postfix.postfix_internal_cert_path)
+tls_key = $(postfix.postfix_internal_key_path)
+tls_require_cert = yes
