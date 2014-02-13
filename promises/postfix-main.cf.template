@@ -18,8 +18,8 @@ newaliases_path = $(postfix.newaliases_path)
 mailq_path = $(postfix.mailq_path)
 setgid_group = maildrop
 inet_protocols = all
-alias_maps = ldap:$(postfix_ldap_cf_path)
-local_recipient_maps = ldap:$(postfix_ldap_cf_path)
+alias_maps = ldap:$(postfix.postfix_ldap_cf_path)
+local_recipient_maps = ldap:$(postfix.postfix_ldap_cf_path)
 masquerade_domains = $(mail_config.mail_domain)
 
 smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks
