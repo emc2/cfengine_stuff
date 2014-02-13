@@ -42,11 +42,11 @@ bundle agent dovecot
       "dovecot_internal_key_file" string => "mail-key.pem";
       "dovecot_internal_key_path" string => "$(base_config.key_files_path)/$(dovecot_internal_key_file)";
 
-      # The client certificate used by dovecot to talk to LDAP
+      # The certificate used by dovecot to talk to clients
       "dovecot_external_cert_file" string => "imap-cert.pem";
       "dovecot_external_cert_path" string => "$(base_config.cert_files_path)/$(dovecot_external_cert_file)";
 
-      # The client key used by dovecot to talk to LDAP
+      # The key used by dovecot to talk to clients
       "dovecot_external_key_file" string => "imap-key.pem";
       "dovecot_external_key_path" string => "$(base_config.key_files_path)/$(dovecot_external_key_file)";
 
@@ -162,4 +162,7 @@ bundle agent dovecot
 
     dovecot_keytab_wrong_perms::
       "Set permissions on $(dovecot_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
+    enable_dovecot_rc_conf::
+      "Enabled dovecot in rc.conf";
 }
