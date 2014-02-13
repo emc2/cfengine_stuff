@@ -1,0 +1,46 @@
+queue_directory = $(postfix.queue_dir)
+command_directory = $(postfix.command_dir)
+daemon_directory = $(postfix.daemon_dir)
+data_directory = $(postfix.data_dir)
+mail_owner = postfix
+myhostname = $(sys.fqhost)
+mydomain = $(mail_config.mail_domain)
+myorigin = $(mail_config.mail_domain)
+mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost, shadowsun.net
+unknown_local_recipient_reject_code = 550
+
+soft_bounce = no
+mynetworks_style = host
+in_flow_delay = 1s
+mailbox_command = $(postfix.mailbox_command)
+sendmail_path = $(postfix.sendmail_path)
+newaliases_path = $(newaliases_path)
+mailq_path = $(mailq_path)
+setgid_group = maildrop
+inet_protocols = all
+alias_maps = ldap:$(postfix_ldap_conf_path)
+local_recipient_maps = ldap:$(postfix_ldap_conf_path)
+masquerade_domains = $(mail_config.mail_domain)
+
+smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_non_fqdn_hostname, reject_non_fqdn_sender, reject_non_fqdn_recipient, reject_unauth_destination, reject_unauth_pipelining, reject_invalid_hostname
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_authenticated_header = yes
+smtpd_sasl_local_domain = $(kerberos_config.realm)
+broken_sasl_auth_clients = yes
+
+smtpd_use_tls = yes
+smtpd_tls_CAfile = $(ca_cert.ca_cert_path)
+smtpd_tls_key_file = $(postfix.postfix_external_key_path)
+smtpd_tls_cert_file = $(postfix.postfix_external_cert_path)
+smtpd_tls_ask_ccert = yes
+smtpd_tls_auth_only = yes
+smtpd_tls_loglevel = 0
+smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
+tls_random_source = dev:/dev/urandom    
+
+smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
