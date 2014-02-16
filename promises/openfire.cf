@@ -66,6 +66,24 @@ bundle agent openfire
       comment => "Set permission of openfire keytab",
       classes => if_repaired("openfire_keytab_wrong_perms");
 
+      # Copy the openfire truststore
+      "$(truststore_path)"
+      create => "true",
+      perms => mog("600", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(truststore_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire truststore file",
+      classes => if_repaired("openfire_truststore");
+
+      # Copy the openfire keystore
+      "$(keystore_path)"
+      create => "true",
+      perms => mog("600", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(keystore_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire keystore file",
+      classes => if_repaired("openfire_keystore");
+
       # Copy the openfire-to-LDAP certificate file from the policy host
       "$(openfire_internal_cert_path)"
       create => "true",
@@ -121,6 +139,12 @@ bundle agent openfire
       classes => if_repaired("enable_openfire_rc_conf");
 
   reports:
+    openfire_truststore::
+      "Copied openfire truststore";
+
+    openfire_keystore::
+      "Copied openfire keystore";
+
     openfire_internal_key::
       "Copied openfire-to-LDAP SSL key";
 
