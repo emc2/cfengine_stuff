@@ -7,7 +7,7 @@ bundle common host_config
       # These clients get Kerberized/LDAPized NSS and PAM.  Note: a
       # lot of the rest of this configuration assumes these bundles
       # are run.
-      "global_auth_clients" slist => { "proton"
+      "global_auth_clients" slist => { "proton",
                                        # Dovecot needs PAM
                                        "mail",
                                        "tachyon"
