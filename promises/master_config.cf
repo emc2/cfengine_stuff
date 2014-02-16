@@ -76,7 +76,7 @@ bundle common host_config
       "mail_server" expression => "mail";
 
       # Set up an xmpp server running openfire.
-      "xmpp_server" expression => "mail";
+      "xmpp_server" expression => "xmpp";
 }
 
 bundle common master_config 
