@@ -7,7 +7,7 @@ bundle agent openfire
 
       # Variables to get set in rc.conf
       "rc_conf[openfire_enable]" string => "YES";
-      "rc_conf[openfire_javargs]" string => "\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.trustStore=$(truststore_path) -Dxmpp.socket.ssl.trustStorePassword=$(keystore_password) -Djava.awt.headless=true -server\"";
+      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.trustStore=$(truststore_path) -Dxmpp.socket.ssl.trustStorePassword=$(keystore_password) -Djava.awt.headless=true -server\"";
 
     any::
       # The keystore password that is used.  As this winds up in
@@ -135,6 +135,14 @@ bundle agent openfire
       create => "true",
       perms => mog("644", "root", "wheel"),
       edit_line => set_variable_values("openfire.rc_conf"),
+      comment => "Enable openfire in rc.conf",
+      classes => if_repaired("enable_openfire_rc_conf");
+
+      # Make sure the nslcd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => append_if_no_line("$(openfire_javargs)"),
       comment => "Enable openfire in rc.conf",
       classes => if_repaired("enable_openfire_rc_conf");
 
