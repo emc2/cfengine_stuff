@@ -1,0 +1,144 @@
+bundle agent openfire
+{
+  vars:
+    freebsd::
+      # Master config directory
+      "openfire_conf_dir" string => "/usr/local/etc/openfire";
+
+      # Variables to get set in rc.conf
+      "rc_conf[openfire_enable]" string => "YES";
+      "rc_conf[openfire_javargs]" string => "\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.trustStore=$(truststore_path) -Dxmpp.socket.ssl.trustStorePassword=$(keystore_password) -Djava.awt.headless=true -server\""
+
+    any::
+      # The keystore password that is used.  As this winds up in
+      # rc.conf, this is more of a formality, not an actual security
+      # measure.
+      "keystore_password" string => "unimportant";
+
+      # The keystore file
+      "keystore_file" string => "keystore";
+      "keystore_path" string => "$(openfire_conf_dir)/$(keystore_file)";
+
+      # The truststore file
+      "truststore_file" string => "cacerts";
+      "truststore_path" string => "$(openfire_conf_dir)/$(truststore_file)";
+
+      # The JAAS login.conf file
+      "openfire_login_conf_file" string => "login.conf";
+      "openfire_login_conf_path" string => "$(openfire_conf_dir)/$(openfire_login_conf_file)";
+
+      # Openfire kerberos credential.  This is used both for
+      # authentication with clients, as well as for authentication
+      # with the LDAP database.
+      "openfire_cred" string => "xmpp/$(sys.fqhost)";
+      # NSS keytab file
+      "openfire_keytab_file" string => "xmpp.keytab";
+      # Path to NSS keytab
+      "openfire_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(openfire_keytab_file)";
+
+      # The client certificate used by openfire to talk to LDAP
+      "openfire_internal_cert_file" string => "$(sys.uqhost)-openfire-ldap-cert.pem";
+      "openfire_internal_cert_path" string => "$(base_config.cert_files_path)/$(openfire_internal_cert_file)";
+
+      # The client key used by openfire to talk to LDAP
+      "openfire_internal_key_file" string => "$(sys.uqhost)-openfire-ldap-key.pem";
+      "openfire_internal_key_path" string => "$(base_config.key_files_path)/$(openfire_internal_key_file)";
+
+      # The client certificate used by openfire to talk to clients
+      "openfire_external_cert_file" string => "xmpp-cert.pem";
+      "openfire_external_cert_path" string => "$(base_config.cert_files_path)/$(openfire_external_cert_file)";
+
+      # The client key used by openfire to talk to clients
+      "openfire_external_key_file" string => "xmpp-key.pem";
+      "openfire_external_key_path" string => "$(base_config.key_files_path)/$(openfire_external_key_file)";
+
+  files:
+      # Create openfire configuration directory
+      "$(openfire_conf_dir)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create openfire configuration directory",
+      classes => if_repaired("create_openfire_conf_dir");
+      # Make sure the keytab has the right permissions
+      "$(openfire_keytab_path)"
+      create => "false",
+      perms => mog("600", "openfire", "openfire"),
+      comment => "Set permission of openfire keytab",
+      classes => if_repaired("openfire_keytab_wrong_perms");
+
+      # Copy the openfire-to-LDAP certificate file from the policy host
+      "$(openfire_internal_cert_path)"
+      create => "true",
+      perms => mog("644", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire-to-LDAP certificate file",
+      classes => if_repaired("openfire_internal_cert");
+
+      # Copy the openfire-to-LDAP key file from the policy host
+      "$(openfire_internal_key_path)"
+      create => "true",
+      perms => mog("600", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire-to-LDAP key file",
+      classes => if_repaired("openfire_internal_key");
+
+      # Copy the server certificate file from the policy host
+      "$(openfire_external_cert_path)"
+      create => "true",
+      perms => mog("644", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire-to-LDAP certificate file",
+      classes => if_repaired("openfire_external_cert");
+
+      # Copy the server key file from the policy host
+      "$(openfire_external_key_path)"
+      create => "true",
+      perms => mog("600", "openfire", "openfire"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire-to-LDAP key file",
+      classes => if_repaired("openfire_external_key");
+
+      # Set configuation variables
+      "$(openfire_login_conf_path)"
+      create => "true",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/openfire-login.conf.template",
+      comment => "Set JAAS login.conf variables",
+      classes => if_repaired("set_openfire_login_conf_vars");
+
+
+    freebsd::
+      # Make sure the nslcd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("openfire.rc_conf"),
+      comment => "Enable openfire in rc.conf",
+      classes => if_repaired("enable_openfire_rc_conf");
+
+  reports:
+    openfire_internal_key::
+      "Copied openfire-to-LDAP SSL key";
+
+    openfire_internal_cert::
+      "Copied openfire-to-LDAP SSL certificate";
+
+    openfire_external_key::
+      "Copied openfire server SSL key";
+
+    openfire_external_cert::
+      "Copied openfire server SSL certificate";
+
+    create_openfire_conf_dir::
+      "Created openfire configuration directory";
+
+    enable_openfire_rc_conf::
+      "Enabled openfire in rc.conf";
+
+    set_openfire_login_conf_vars::
+      "Set JAAS configuration variables in $(openfire_login_conf_path)"
+}
