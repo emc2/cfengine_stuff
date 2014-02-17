@@ -83,6 +83,24 @@ bundle agent postgresql_server
                              "$(sys.policy_hub)"),
       classes => if_repaired("postgres_ca_crl_copy");
 
+      # Copy the server cert into place
+      "$(postgresql_cert_path)"
+      create => "true",
+      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy postgresql server cert into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(sys.uqhost)-postgresql-cert.pem",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_cert_copy");
+
+      # Copy the server cert into place
+      "$(postgresql_key_path)"
+      create => "true",
+      perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy postgresql server key into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(sys.uqhost)-postgresql-key.pem",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_key_copy");
+
       # Set configuration variables in postgresql.conf
       "$(postgresql_conf_path)"
       perms => m("600"),
@@ -117,4 +135,9 @@ bundle agent postgresql_server
     edit_postgresq_conf::
       "Set configuration variables in $(postgresql_config.postgresql_conf_path)";
 
+    postgres_cert_copy::
+      "Copied postgresql SSL cert into PostgreSQL database directory";
+
+    postgres_key_copy::
+      "Copied postgresql SSL key into PostgreSQL database directory";
 }
