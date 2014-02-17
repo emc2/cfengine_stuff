@@ -189,7 +189,6 @@ bundle agent openfire
 bundle edit_xml admin_console
 {
   insert_tree:
-      "<securePort>9091</securePort>";
-
+      "<securePort>9091</securePort>"
       select_xpath => "/jive/adminConsole";
 }
