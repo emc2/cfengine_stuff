@@ -27,6 +27,10 @@ bundle agent openfire
       "openfire_login_conf_file" string => "login.conf";
       "openfire_login_conf_path" string => "$(openfire_conf_dir)/$(openfire_login_conf_file)";
 
+      # The openfire xml configuration file
+      "openfire_config_file" string => "openfire.xml";
+      "openfire_config_path" string => "$(openfire_conf_dir)/$(openfire_config_file)";
+
       # Openfire kerberos credential.  This is used both for
       # authentication with clients, as well as for authentication
       # with the LDAP database.
@@ -128,6 +132,13 @@ bundle agent openfire
       comment => "Set JAAS login.conf variables",
       classes => if_repaired("set_openfire_login_conf_vars");
 
+      # Set admin console configuation variables
+      "$(openfire_config_path)"
+      create => "true",
+      perms => m("644"),
+      edit_xml => admin_console,
+      comment => "Set openfire admin console variables",
+      classes => if_repaired("set_openfire_admin_console_vars");
 
     freebsd::
       # Make sure the nslcd daemon is turned on
@@ -173,4 +184,12 @@ bundle agent openfire
 
     set_openfire_login_conf_vars::
       "Set JAAS configuration variables in $(openfire_login_conf_path)";
+}
+
+bundle edit_xml admin_console
+{
+  insert_tree:
+      "<securePort>9091</securePort>";
+
+      select_xpath => "/jive/adminConsole";
 }
