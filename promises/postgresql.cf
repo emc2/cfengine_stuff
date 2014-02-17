@@ -4,6 +4,11 @@
 bundle agent postgresql_config
 {
   vars:
+      # URI for the network's postgresql server
+      "postgresql_uri" string => "postgresql://higgs.metricspace.net:5432";
+      # The same URI, for JDBC
+      "postgresql_jdbc_uri" string => "jdbc:$(postgresql_uri)";
+
     freebsd::
       # The master database directory
       "postgresql_db_dir" string => "/var/db/pgsql";
