@@ -69,7 +69,7 @@ bundle agent postgresql_server
       create => "true",
       perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Copy CA cert into PostgreSQL database directory",
-      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_cert_file)",
                              "$(sys.policy_hub)"),
       classes => if_repaired("postgres_ca_cert_copy");
 
@@ -78,7 +78,7 @@ bundle agent postgresql_server
       create => "true",
       perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Copy CA revocation list into PostgreSQL database directory",
-      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_crl_file)",
                              "$(sys.policy_hub)"),
       classes => if_repaired("postgres_ca_crl_copy");
 
