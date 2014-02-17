@@ -65,22 +65,22 @@ bundle agent postgresql_server
 
   files:
       # Copy the CA cert into place
-#      "$(postgresql_ca_cert_path)"
-#      create => "true",
-#      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
-#      comment => "Copy CA cert into PostgreSQL database directory",
-#      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
-#                             "$(sys.policy_hub)"),
-#      classes => if_repaired("postgres_ca_cert_copy");
+      "$(postgresql_ca_cert_path)"
+      create => "true",
+      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy CA cert into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_cert_file)",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_ca_cert_copy");
 
       # Copy the CA CRL into place
-#      "$(postgresql_ca_crl_path)"
-#      create => "true",
-#      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
-#      comment => "Copy CA revocation list into PostgreSQL database directory",
-#      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
-#                             "$(sys.policy_hub)"),
-#      classes => if_repaired("postgres_ca_crl_copy");
+      "$(postgresql_ca_crl_path)"
+      create => "true",
+      perms => mog("644", "$(postgresql_user)", "$(postgresql_group)"),
+      comment => "Copy CA revocation list into PostgreSQL database directory",
+      copy_from => secure_cp("$(base_config.file_store)/$(ca_crl_file)",
+                             "$(sys.policy_hub)"),
+      classes => if_repaired("postgres_ca_crl_copy");
 
       # Set configuration variables in postgresql.conf
       "$(postgresql_conf_path)"
