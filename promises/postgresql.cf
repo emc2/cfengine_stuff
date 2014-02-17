@@ -12,10 +12,6 @@ bundle agent postgresql_config
     freebsd::
       # The master database directory
       "postgresql_db_dir" string => "/var/db/pgsql";
-
-      # The user and group for the PostgreSQL database server.
-      "postgresql_user" string => "pgsql";
-      "postgresql_group" string => "pgsql";
 }
 
 bundle agent postgresql_server
@@ -62,6 +58,11 @@ bundle agent postgresql_server
       # database directory.
       "postgresql_key_file" string => "server.key";
       "postgresql_key_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_key_file)";
+
+    freebsd::
+      # The user and group for the PostgreSQL database server.
+      "postgresql_user" string => "pgsql";
+      "postgresql_group" string => "pgsql";
 
   files:
       # Copy the CA cert into place
