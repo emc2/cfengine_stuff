@@ -7,5 +7,7 @@ bundle agent mail_config
       "mail_domain" string => "metricspace.net";
       # Additional domains for which we receive mail
       "additional_domains" string => "shadowsun.net";
+      # Admin email
+      "admin_addr" string => "admin@$(mail_domain)";
 }
 
