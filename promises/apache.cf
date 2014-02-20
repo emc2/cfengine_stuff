@@ -12,7 +12,7 @@ bundle agent apache
 
       # The client certificate used by postfix to talk to clients
       "external_cert_chain_file" string => "https-cert-chain.pem";
-      "external_cert_chain_path" string => "$(base_config.cert_files_path)/$(external_cert_file)";
+      "external_cert_chain_path" string => "$(base_config.cert_files_path)/$(external_cert_chain_file)";
 
       # The client key used by postfix to talk to clients
       "external_key_file" string => "https-key.pem";
