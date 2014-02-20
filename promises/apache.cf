@@ -1,0 +1,49 @@
+bundle agent apache
+{
+  vars:
+    freebsd::
+      "server_root" string => "/usr/local";
+      "server_conf_dir" string => "$(server_root)/etc/apache22";
+
+    any::
+      # The client certificate used by postfix to talk to clients
+      "external_cert_file" string => "https-cert.pem";
+      "external_cert_path" string => "$(base_config.cert_files_path)/$(external_cert_file)";
+
+      # The client certificate used by postfix to talk to clients
+      "external_cert_chain_file" string => "https-cert-chain.pem";
+      "external_cert_chain_path" string => "$(base_config.cert_files_path)/$(external_cert_file)";
+
+      # The client key used by postfix to talk to clients
+      "external_key_file" string => "https-key.pem";
+      "external_key_path" string => "$(base_config.key_files_path)/$(external_key_file)";
+
+      "workers_properties" string => "$(server_conf_dir)/workers.properties";
+
+  files:
+      # Copy the server certificate file from the policy host
+      "$(external_cert_path)"
+      create => "true",
+      perms => mog("644", "www", "www"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy https SSL certificate file",
+      classes => if_repaired("external_cert");
+
+      # Copy the server key file from the policy host
+      "$(external_key_path)"
+      create => "true",
+      perms => mog("600", "www", "www"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy https SSL key file",
+      classes => if_repaired("external_key");
+
+  reports:
+    external_key::
+      "Copied https server SSL key";
+
+    external_cert::
+      "Copied https server SSL certificate";
+
+}
