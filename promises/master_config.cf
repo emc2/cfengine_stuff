@@ -75,6 +75,9 @@ bundle common host_config
       # Set up a mail server running dovecot and postfix.
       "mail_server" expression => "mail";
 
+      # Set up an apache server.
+      "apache_server" expression => "www";
+
       # Set up an xmpp server running openfire.
       "xmpp_server" expression => "xmpp";
 }
@@ -154,6 +157,12 @@ bundle common master_config
     !xmpp_server::
       "xmpp_server_bundles" slist => {};
 
+    apache_server::
+      "apache_server_bundles" slist => { "apache" };
+
+    !apache_server::
+      "apache_server_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -171,7 +180,8 @@ bundle common master_config
                           "promises/mail.cf",
                           "promises/dovecot.cf",
                           "promises/postfix.cf",
-                          "promises/openfire.cf"
+                          "promises/openfire.cf",
+                          "promises/apache.cf"
                         };
 
       # This is the master list of bundles that will be run.  We
@@ -191,6 +201,7 @@ bundle common master_config
                            @(postgresql_client_bundles),
                            @(postgresql_server_bundles),
                            @(mail_server_bundles),
-                           @(xmpp_server_bundles)
+                           @(xmpp_server_bundles),
+                           @(apache_server_bundles)
                          };
 }
