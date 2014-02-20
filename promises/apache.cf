@@ -30,11 +30,20 @@ bundle agent apache
       comment => "Copy https SSL certificate file",
       classes => if_repaired("external_cert");
 
+      # Copy the server certificate file from the policy host
+      "$(external_cert_chain_path)"
+      create => "true",
+      perms => mog("644", "www", "www"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_cert_chain_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy https SSL certificate chain file",
+      classes => if_repaired("external_cert_chain");
+
       # Copy the server key file from the policy host
       "$(external_key_path)"
       create => "true",
       perms => mog("600", "www", "www"),
-      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy https SSL key file",
       classes => if_repaired("external_key");
@@ -45,5 +54,8 @@ bundle agent apache
 
     external_cert::
       "Copied https server SSL certificate";
+
+    external_cert_chain::
+      "Copied https server SSL certificate chain";
 
 }
