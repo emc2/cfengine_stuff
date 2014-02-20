@@ -146,7 +146,7 @@ bundle agent postfix
       perms => mog("644", "postfix", "postfix"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_cert_file)",
                              "$(sys.policy_hub)"),
-      comment => "Copy postfix-to-LDAP certificate file",
+      comment => "Copy external SSL certificate file",
       classes => if_repaired("postfix_external_cert");
 
       # Copy the server key file from the policy host
@@ -155,7 +155,7 @@ bundle agent postfix
       perms => mog("600", "postfix", "postfix"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(postfix_external_key_file)",
                              "$(sys.policy_hub)"),
-      comment => "Copy postfix-to-LDAP key file",
+      comment => "Copy external SSL key file",
       classes => if_repaired("postfix_external_key");
 
     freebsd::
