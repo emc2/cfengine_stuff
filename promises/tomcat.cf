@@ -33,11 +33,14 @@ bundle agent tomcat {
       "keystore_file" string => "keystore";
       "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
 
+      "user" string => "www";
+      "group" string => "www";
+
   files:
       # Copy the server certificate file from the policy host
       "$(ldap_cert_path)"
       create => "true",
-      perms => mog("644", "tomcat", "tomcat"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy tomcat-to-ldap certificate file",
@@ -46,7 +49,7 @@ bundle agent tomcat {
       # Copy the server key file from the policy host
       "$(ldap_key_path)"
       create => "true",
-      perms => mog("600", "tomcat", "tomcat"),
+      perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy tomcat-to-ldap key file",
@@ -55,7 +58,7 @@ bundle agent tomcat {
       # Make sure the keytab has the right permissions
       "$(keytab_path)"
       create => "false",
-      perms => mog("600", "tomcat", "tomcat"),
+      perms => mog("600", "$(user)", "$(group)"),
       comment => "Set permission of postfix keytab",
       classes => if_repaired("postfix_keytab_wrong_perms");
 
