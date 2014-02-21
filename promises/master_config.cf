@@ -86,11 +86,6 @@ bundle common host_config
 
       # Set up an xmpp server running openfire.
       "xmpp_server" expression => "xmpp";
-
-      # Need the java keystore for these
-      "ca_keystore" or => { "tomcat_server",
-                            "xmpp_server"
-                          };
 }
 
 bundle common master_config 
@@ -101,6 +96,10 @@ bundle common master_config
 
     # These are lists of bundles to be run for each option.  Most of
     # the time an option isn't chosen, nothing is done.
+    #
+    # We do this as bundle-lists, so that we can write bundles that do
+    # one thing, and don't have to worry about the master
+    # configuration.
     ssh_server::
       "ssh_server_bundles" slist => { "ssh_server" };
 
@@ -223,4 +222,11 @@ bundle common master_config
                            @(apache_server_bundles),
                            @(tomcat_server_bundles)
                          };
+
+  # Set classes that will be observed by the individual bundles.
+  classes:
+      # Need the java keystore for these
+      "ca_keystore" or => { "tomcat_server",
+                            "xmpp_server"
+                          };
 }
