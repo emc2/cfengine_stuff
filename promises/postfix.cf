@@ -52,7 +52,7 @@ bundle agent postfix
       "postfix_cred" string => "postfix/$(sys.fqhost)";
       # NSS keytab file
       "postfix_keytab_file" string => "postfix.keytab";
-      # Path to NSS keytab
+      # Path to postfix keytab
       "postfix_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(postfix_keytab_file)";
 
       # A crontab entry to refresh the kerberos credentials every 8 hours
