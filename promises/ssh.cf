@@ -120,7 +120,7 @@ bundle agent no_ssh_server
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
-      edit_line => set_variable_values("ssh_server.rc_conf"),
+      edit_line => set_variable_values("no_ssh_server.rc_conf"),
       comment => "Disable nslcd in rc.conf",
       classes => if_repaired("disable_sshd_rc_conf");
 
