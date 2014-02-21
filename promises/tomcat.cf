@@ -21,4 +21,48 @@ bundle agent tomcat {
       # Path to tomcat keytab
       "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
 
+      # The client certificate used by postfix to talk to clients
+      "ldap_cert_file" string => "$(sys.uqhost)-tomcat-ldap-cert.pem";
+      "ldap_cert_path" string => "$(base_config.cert_files_path)/$(ldap_cert_file)";
+
+      # The client key used by postfix to talk to clients
+      "ldap_key_file" string => "$(sys.uqhost)-tomcat-ldap-key.pem";
+      "ldap_key_path" string => "$(base_config.key_files_path)/$(ldap_key_file)";
+
+      # The keystore file
+      "keystore_file" string => "keystore";
+      "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
+
+  files:
+      # Copy the server certificate file from the policy host
+      "$(ldap_cert_path)"
+      create => "true",
+      perms => mog("644", "tomcat", "tomcat"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_cert_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy tomcat-to-ldap certificate file",
+      classes => if_repaired("ldap_cert");
+
+      # Copy the server key file from the policy host
+      "$(ldap_key_path)"
+      create => "true",
+      perms => mog("600", "tomcat", "tomcat"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_key_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy tomcat-to-ldap key file",
+      classes => if_repaired("ldap_key");
+
+      # Make sure the keytab has the right permissions
+      "$(keytab_path)"
+      create => "false",
+      perms => mog("600", "tomcat", "tomcat"),
+      comment => "Set permission of postfix keytab",
+      classes => if_repaired("postfix_keytab_wrong_perms");
+
+  reports:
+    ldap_key::
+      "Copied tomcat-to-ldap SSL key";
+
+    ldap_cert::
+      "Copied tomcat-to-ldap SSL certificate";
 }
