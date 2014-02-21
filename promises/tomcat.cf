@@ -1,0 +1,24 @@
+bundle agent tomcat {
+
+  vars:
+    freebsd::
+      "base_dir" string => "/usr/local/apache-tomcat-7.0";
+
+    any::
+      # Directory for config files
+      "conf_dir" string => "$(base_dir)/conf";
+
+      # JAAS login.conf
+      "login_conf_file" string => "login.conf";
+      "login_conf_path" string => "$(conf_dir)/$(login_conf_file)";
+
+      # Tomcat kerberos credential.  This is used both for
+      # authentication with clients, as well as for authentication
+      # with the LDAP database.
+      "cred" string => "tomcat/$(sys.fqhost)";
+      # NSS keytab file
+      "keytab_file" string => "tomcat.keytab";
+      # Path to tomcat keytab
+      "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
+
+}
