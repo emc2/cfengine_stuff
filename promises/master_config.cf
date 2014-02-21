@@ -66,7 +66,8 @@ bundle common host_config
       # Set up a PostgreSQL client installation.
       "postgresql_client" or => { "www",
                                   "higgs",
-                                  "xmpp"
+                                  "xmpp",
+                                  "tachyon"
                                 };
 
       # Set up the PostgreSQL server.
@@ -78,8 +79,18 @@ bundle common host_config
       # Set up an apache server.
       "apache_server" expression => "www";
 
+      # Set up a tomcat instance.
+      "tomcat_server" or => { "www",
+                              "tachyon"
+                            };
+
       # Set up an xmpp server running openfire.
       "xmpp_server" expression => "xmpp";
+
+      # Need the java keystore for these
+      "ca_keystore" or => { "tomcat_server",
+                            "xmpp_server"
+                          };
 }
 
 bundle common master_config 
@@ -163,6 +174,12 @@ bundle common master_config
     !apache_server::
       "apache_server_bundles" slist => {};
 
+    tomcat_server::
+      "tomcat_server_bundles" slist => { "tomcat" };
+
+    !tomcat_server::
+      "tomcat_server_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -181,7 +198,8 @@ bundle common master_config
                           "promises/dovecot.cf",
                           "promises/postfix.cf",
                           "promises/openfire.cf",
-                          "promises/apache.cf"
+                          "promises/apache.cf",
+                          "promises/tomcat.cf"
                         };
 
       # This is the master list of bundles that will be run.  We
@@ -202,6 +220,7 @@ bundle common master_config
                            @(postgresql_server_bundles),
                            @(mail_server_bundles),
                            @(xmpp_server_bundles),
-                           @(apache_server_bundles)
+                           @(apache_server_bundles),
+                           @(tomcat_server_bundles)
                          };
 }
