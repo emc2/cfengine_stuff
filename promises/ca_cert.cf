@@ -12,7 +12,7 @@ bundle agent ca_cert
 
       # CA keys Java keystore
       "ca_keystore_file" string => "cacerts";
-      "ca_keystore_path" string => "$(base_config.crl_files_path)/$(ca_keystore_file)";
+      "ca_keystore_path" string => "$(base_config.cert_files_path)/$(ca_keystore_file)";
 
   files:
       # Ensure cert files directory exists
