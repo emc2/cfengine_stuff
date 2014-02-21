@@ -10,6 +10,10 @@ bundle agent ca_cert
       "ca_crl_file" string => "ca-crl.pem";
       "ca_crl_path" string => "$(base_config.crl_files_path)/$(ca_crl_file)";
 
+      # CA keys Java keystore
+      "ca_keystore_file" string => "cacerts";
+      "ca_keystore_path" string => "$(base_config.crl_files_path)/$(ca_keystore_file)";
+
   files:
       # Ensure cert files directory exists
       "$(base_config.cert_files_path)/."
@@ -58,6 +62,21 @@ bundle agent ca_cert
       comment => "Copy CA crlificate file into place",
       classes => if_repaired("ca_crl_set_perms");
 
+    # Only do the keystore if it's necessary
+    ca_keystore::
+      # Copy CA keystore into place
+      "$(ca_keystore_path)"
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_keystore_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy CA keystore file into place",
+      classes => if_repaired("ca_keystore_copy");
+
+      # Set permissions on CA keystore
+      "$(ca_keystore_path)"
+      perms => m("644"),
+      comment => "Copy CA keystore into place",
+      classes => if_repaired("ca_keystore_set_perms");
+
   reports:
     ca_cert_copy::
       "Copied CA certificate into place";
@@ -70,6 +89,12 @@ bundle agent ca_cert
 
     ca_crl_set_perms::
       "Set permissions on CA revocation list to 644";
+
+    ca_keystore_copy::
+      "Copied CA keystore into place";
+
+    ca_keystore_set_perms::
+      "Set permissions on CA keystore to 644";
 
     create_cert_dir::
       "Create SSL certificate files directory";
