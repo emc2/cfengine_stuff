@@ -30,7 +30,7 @@ bundle agent tomcat {
       "ldap_key_path" string => "$(base_config.key_files_path)/$(ldap_key_file)";
 
       # The keystore file
-      "keystore_file" string => "keystore";
+      "keystore_file" string => "tomcat.keystore";
       "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
 
       "user" string => "www";
@@ -55,6 +55,15 @@ bundle agent tomcat {
       comment => "Copy tomcat-to-ldap key file",
       classes => if_repaired("ldap_key");
 
+      # Copy the openfire keystore
+      "$(keystore_path)"
+      create => "true",
+      perms => mog("600", "$(user)", "$(group)"),
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(keystore_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy tomcat keystore file",
+      classes => if_repaired("copy_keystore");
+
       # Make sure the keytab has the right permissions
       "$(keytab_path)"
       create => "false",
@@ -68,4 +77,7 @@ bundle agent tomcat {
 
     ldap_cert::
       "Copied tomcat-to-ldap SSL certificate";
+
+    copy_keystore::
+      "Copied tomcat keystore"
 }
