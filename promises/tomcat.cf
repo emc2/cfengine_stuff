@@ -79,5 +79,5 @@ bundle agent tomcat {
       "Copied tomcat-to-ldap SSL certificate";
 
     copy_keystore::
-      "Copied tomcat keystore"
+      "Copied tomcat keystore";
 }
