@@ -8,6 +8,10 @@ bundle agent tomcat {
       "user" string => "www";
       "group" string => "www";
 
+      # Variables to get set in rc.conf
+      "rc_conf[tomcat7_enable]" string => "YES";
+      "tomcat7_javargs" string => "tomcat7_javargs=\"-Djava.security.auth.login.config=$(login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.trustStore=$(ca_cert.ca_keystore_path) -Dxmpp.socket.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server -Xmx1536m -Xms1536m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC\"";
+
     any::
       # Directory for config files
       "conf_dir" string => "$(base_dir)/conf";
@@ -36,6 +40,18 @@ bundle agent tomcat {
       # The keystore file
       "keystore_file" string => "tomcat.keystore";
       "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
+      # The keystore password is not important, as file permissions
+      # protect the file.  It has to go in rc.conf anyway, so it
+      # cannot be properly secured.
+      "keystore_password" string => "unimportant";
+
+      # The login.conf file for tomcat
+      "login_conf_file" string => "login.conf";
+      "login_conf_path" string => "$(tomcat.conf_dir)/$(login_conf_file)";
+
+      # The tomcat server.xml file
+      "server_xml_file" string => "server.xml";
+      "server_xml_path" string => "$(tomcat.conf_dir)/$(server_xml_file)";
 
   files:
       # Copy the server certificate file from the policy host
@@ -72,6 +88,14 @@ bundle agent tomcat {
       comment => "Set permission of postfix keytab",
       classes => if_repaired("keytab_wrong_perms");
 
+      # Set configuation variables
+      "$(login_conf_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/tomcat-login.conf.template",
+      comment => "Set JAAS login.conf variables",
+      classes => if_repaired("set_login_conf_vars");
+
   reports:
     ldap_key::
       "Copied tomcat-to-ldap SSL key";
@@ -84,5 +108,8 @@ bundle agent tomcat {
 
     keytab_wrong_perms::
       "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
+    set_login_conf_vars::
+      "Set JAAS configuration variables in $(login_conf_path)";
 
 }
