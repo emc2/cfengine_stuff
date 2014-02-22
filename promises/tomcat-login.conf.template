@@ -1,0 +1,50 @@
+[%CFEngine BEGIN %]
+com.sun.security.jgss.krb5.accept {
+  com.sun.security.auth.module.Krb5LoginModule REQUIRED
+    useKeyTab = true
+    keyTab = "$(tomcat.keytab_path)"
+    storeKey = true
+    principal = "$(tomcat.cred)";
+};
+[%CFEngine END %]
+[%CFEngine BEGIN %]
+com.sun.security.jgss.krb5.initiate {
+  com.sun.security.auth.module.Krb5LoginModule REQUIRED
+    useKeyTab = true
+    keyTab = "$(tomcat.keytab_path)"
+    storeKey = true
+    principal = "$(tomcat.cred)";
+};
+[%CFEngine END %]
+[%CFEngine xwiki_server:: %]
+[%CFEngine BEGIN %]
+techwiki {
+  com.sun.security.auth.module.Krb5LoginModule REQUIRED
+    useKeyTab = true
+    keyTab = "$(tomcat.keytab_path)"
+    principal = "$(tomcat.cred)"
+    storeKey = true
+    doNotPrompt = true;
+};
+[%CFEngine END %]
+[%CFEngine BEGIN %]
+gwiki {
+  com.sun.security.auth.module.Krb5LoginModule REQUIRED
+    useKeyTab = true
+    keyTab = "$(tomcat.keytab_path)"
+    principal = "$(tomcat.cred)"
+    storeKey = true
+    doNotPrompt = true;
+};
+[%CFEngine END %]
+[%CFEngine jenkins_master:: %]
+[%CFEngine BEGIN %]
+jenkins {
+  com.sun.security.auth.module.Krb5LoginModule REQUIRED
+    useKeyTab = true
+    keyTab = "$(tomcat.keytab_path)"
+    principal = "$(tomcat.cred)"
+    storeKey = true
+    doNotPrompt = true;
+};
+[%CFEngine END %]
