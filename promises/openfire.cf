@@ -21,8 +21,8 @@ bundle agent openfire
       "keystore_password" string => "unimportant";
 
        # The keystore file
-      "keystore_file" string => "keystore";
-      "keystore_path" string => "$(openfire_conf_dir)/$(keystore_file)";
+      "keystore_file" string => "openfire.keystore";
+      "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
 
       # The JAAS login.conf file
       "openfire_login_conf_file" string => "login.conf";
