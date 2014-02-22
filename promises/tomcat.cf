@@ -4,6 +4,10 @@ bundle agent tomcat {
     freebsd::
       "base_dir" string => "/usr/local/apache-tomcat-7.0";
 
+      # User and group
+      "user" string => "www";
+      "group" string => "www";
+
     any::
       # Directory for config files
       "conf_dir" string => "$(base_dir)/conf";
@@ -32,9 +36,6 @@ bundle agent tomcat {
       # The keystore file
       "keystore_file" string => "tomcat.keystore";
       "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
-
-      "user" string => "www";
-      "group" string => "www";
 
   files:
       # Copy the server certificate file from the policy host
@@ -69,7 +70,7 @@ bundle agent tomcat {
       create => "false",
       perms => mog("600", "$(user)", "$(group)"),
       comment => "Set permission of postfix keytab",
-      classes => if_repaired("postfix_keytab_wrong_perms");
+      classes => if_repaired("keytab_wrong_perms");
 
   reports:
     ldap_key::
@@ -80,4 +81,8 @@ bundle agent tomcat {
 
     copy_keystore::
       "Copied tomcat keystore";
+
+    keytab_wrong_perms::
+      "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
 }
