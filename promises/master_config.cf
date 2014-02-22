@@ -86,6 +86,12 @@ bundle common host_config
 
       # Set up an xmpp server running openfire.
       "xmpp_server" expression => "xmpp";
+
+      # Set up a server running two wikis
+      "xwiki_server" expression => "www";
+
+      # Set up a server running a jenkins master
+      "jenkins_master" expression => "www";
 }
 
 bundle common master_config 
@@ -179,6 +185,15 @@ bundle common master_config
     !tomcat_server::
       "tomcat_server_bundles" slist => {};
 
+    jenkins_master::
+      "jenkin_bundles" slist => {};
+
+    !jenkins_master&jenkins_slave::
+      "jenkin_bundles" slist => {};
+
+    !jenkins_master&!jenkins_slave::
+      "jenkins_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -220,7 +235,8 @@ bundle common master_config
                            @(mail_server_bundles),
                            @(xmpp_server_bundles),
                            @(apache_server_bundles),
-                           @(tomcat_server_bundles)
+                           @(tomcat_server_bundles),
+                           @(jenkins_bundles)
                          };
 
   # Set classes that will be observed by the individual bundles.
