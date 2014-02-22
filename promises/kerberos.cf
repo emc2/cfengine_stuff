@@ -20,6 +20,9 @@ bundle agent kerberos_config
       "keytabs_dir" string => "/etc/keytabs";
       "system_keytab" string => "/etc/krb5.keytab";
       "kdc_config_dir" string => "/usr/local/var/krb5kdc";
+
+    macos::
+      "keytabs_dir" string => "/etc/keytabs";      
 }
 
 # Set up the basic kerberos realm configuration.  This assumes we're
@@ -33,6 +36,9 @@ bundle agent kerberos_client
       "make_conf[KRB5_HOME]" string => "/usr";
 
       "krb5_conf_file" string => "/etc/krb5.conf";
+
+    macos::
+      "krb5_conf_file" string => "/Library/Preferences/edu.mit.Kerberos";
 
   files:
       # Make sure the keytabs directory exists
