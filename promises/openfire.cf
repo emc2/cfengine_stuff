@@ -9,6 +9,11 @@ bundle agent openfire
       "rc_conf[openfire_enable]" string => "YES";
       "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password)  -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server\"";
 
+      # Openfire's postgresql JDBC driver
+      "openfire_postgres_jar" string => "/usr/local/share/java/openfire/lib/postgres.jar";
+      # The postgresql JDBC driver installed by FreeBSD ports
+      "port_postgres_jar" string => "/usr/local/share/java/classes/postgresql.jar";
+
     any::
       # The keystore password that is used.  As this winds up in
       # rc.conf, this is more of a formality, not an actual security
@@ -145,6 +150,15 @@ bundle agent openfire
       comment => "Enable openfire in rc.conf",
       classes => if_repaired("enable_openfire_rc_conf");
 
+      # By default, openfire installs a postgresql driver that doesn't
+      # support GSSAPI.  We need to replace it with one that does.
+      "$(openfire_postgres_jar)"
+      create => "true",
+      perms => mog("644", "openfire", "openfire"),
+      copy_from => local_cp("$(port_postgres_jar)"),
+      comment => "Install PostgreSQL JDBC driver",
+      classes => if_repaired("postgresql_jdbc_driver");
+
   reports:
     openfire_keystore::
       "Copied openfire keystore";
@@ -172,4 +186,7 @@ bundle agent openfire
 
     set_base_config_vars::
       "Set openfire base configuration variables in $(openfire_config_path)";
+
+    postgresql_jdbc_driver::
+      "Installed PostgreSQL JDBC driver";
 }
