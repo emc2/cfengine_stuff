@@ -22,7 +22,7 @@ bundle agent kerberos_config
       "kdc_config_dir" string => "/usr/local/var/krb5kdc";
 
     macos::
-      "keytabs_dir" string => "/etc/keytabs";      
+      "keytabs_dir" string => "/etc/keytabs";
 }
 
 # Set up the basic kerberos realm configuration.  This assumes we're
