@@ -7,7 +7,7 @@ bundle agent openfire
 
       # Variables to get set in rc.conf
       "rc_conf[openfire_enable]" string => "YES";
-      "openfire_java_opts" string => "openfire_java_opts=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.truststore=$(truststore_path) -Dxmpp.socket.ssl.trustpass=$(keystore_password) -Djava.awt.headless=true -server\"";
+      "openfire_javargs" string => "openfire_javargs=\"-Djavax.net.debug=all -Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.truststore=$(truststore_path) -Dxmpp.socket.ssl.trustpass=$(keystore_password) -Djava.awt.headless=true -server\"";
 
     any::
       # The keystore password that is used.  As this winds up in
