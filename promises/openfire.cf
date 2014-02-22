@@ -7,7 +7,7 @@ bundle agent openfire
 
       # Variables to get set in rc.conf
       "rc_conf[openfire_enable]" string => "YES";
-      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.trustStore=$(truststore_path) -Dxmpp.socket.ssl.trustStorePassword=$(keystore_password) -Djava.awt.headless=true -server\"";
+      "openfire_java_opts" string => "openfire_java_opts=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password) -Dxmpp.socket.ssl.truststore=$(truststore_path) -Dxmpp.socket.ssl.trustpass=$(keystore_password) -Djava.awt.headless=true -server\"";
 
     any::
       # The keystore password that is used.  As this winds up in
@@ -15,7 +15,7 @@ bundle agent openfire
       # measure.
       "keystore_password" string => "unimportant";
 
-      # The keystore file
+       # The keystore file
       "keystore_file" string => "keystore";
       "keystore_path" string => "$(openfire_conf_dir)/$(keystore_file)";
 
@@ -63,6 +63,7 @@ bundle agent openfire
       perms => m("755"),
       comment => "Create openfire configuration directory",
       classes => if_repaired("create_openfire_conf_dir");
+
       # Make sure the keytab has the right permissions
       "$(openfire_keytab_path)"
       create => "false",
@@ -141,7 +142,7 @@ bundle agent openfire
       classes => if_repaired("set_base_config_vars");
 
     freebsd::
-      # Make sure the nslcd daemon is turned on
+      # Make sure openfire is enabled
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
@@ -149,7 +150,7 @@ bundle agent openfire
       comment => "Enable openfire in rc.conf",
       classes => if_repaired("enable_openfire_rc_conf");
 
-      # Make sure the nslcd daemon is turned on
+      # Set java arguments to openfire
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
