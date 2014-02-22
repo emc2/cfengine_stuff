@@ -96,6 +96,23 @@ bundle agent tomcat {
       comment => "Set JAAS login.conf variables",
       classes => if_repaired("set_login_conf_vars");
 
+    freebsd::
+      # Make sure tomcat is enabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("tomcat.rc_conf"),
+      comment => "Enable tomcat in rc.conf",
+      classes => if_repaired("enable_rc_conf");
+
+      # Set java arguments to tomcat
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => append_if_no_line("$(tomcat_javargs)"),
+      comment => "Enable tomcat in rc.conf",
+      classes => if_repaired("enable_rc_conf");
+
   reports:
     ldap_key::
       "Copied tomcat-to-ldap SSL key";
@@ -111,5 +128,11 @@ bundle agent tomcat {
 
     set_login_conf_vars::
       "Set JAAS configuration variables in $(login_conf_path)";
+
+    enable_rc_conf::
+      "Enabled tomcat in rc.conf";
+
+    enable_rc_conf::
+      "Enabled tomcat in rc.conf";
 
 }
