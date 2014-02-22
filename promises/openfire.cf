@@ -35,7 +35,7 @@ bundle agent openfire
       # Openfire kerberos credential.  This is used both for
       # authentication with clients, as well as for authentication
       # with the LDAP database.
-      "openfire_cred" string => "xmpp/$(sys.fqhost)";
+      "openfire_cred" string => "xmpp/$(sys.fqhost)@$(kerberos_config.realm)";
       # NSS keytab file
       "openfire_keytab_file" string => "xmpp.keytab";
       # Path to NSS keytab
