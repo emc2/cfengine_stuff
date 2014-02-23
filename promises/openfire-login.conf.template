@@ -2,8 +2,8 @@
 openfire {
   com.sun.security.auth.module.Krb5LoginModule REQUIRED
     useKeyTab = true
-    keyTab = "$(openfire.openfire_keytab_path)"
-    principal = "$(openfire.openfire_cred)@$(kerberos_config.realm)"
+    keyTab = "$(openfire.keytab_path)"
+    principal = "$(openfire.kerberos_cred)@$(kerberos_config.realm)"
     storeKey = true
     doNotPrompt = true;
 };
@@ -12,17 +12,17 @@ openfire {
 com.sun.security.jgss.krb5.accept {
   com.sun.security.auth.module.Krb5LoginModule REQUIRED
     useKeyTab = true
-    keyTab = "$(openfire.openfire_keytab_path)"
+    keyTab = "$(openfire.keytab_path)"
     storeKey = true
-    principal = "$(openfire.openfire_cred)@$(kerberos_config.realm)";
+    principal = "$(openfire.kerberos_cred)@$(kerberos_config.realm)";
 };
 [%CFEngine END %]
 [%CFEngine BEGIN %]
 com.sun.security.jgss.krb5.initiate {
   com.sun.security.auth.module.Krb5LoginModule REQUIRED
     useKeyTab = true
-    keyTab = "$(openfire.openfire_keytab_path)"
+    keyTab = "$(openfire.keytab_path)"
     storeKey = true
-    principal = "$(openfire.openfire_cred)@$(kerberos_config.realm)";
+    principal = "$(openfire.kerberos_cred)@$(kerberos_config.realm)";
 };
 [%CFEngine END %]
