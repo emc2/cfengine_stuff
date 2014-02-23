@@ -13,6 +13,8 @@
     <defaultProvider> 
       <driver>org.postgresql.Driver</driver>  
       <serverURL>$(postgresql_config.postgresql_jdbc_uri)/openfire?jaasApplicationName=openfire&amp;ssl=true</serverURL>
+      <username>$(openfire.kerberos_cred)</username>
+      <password/>
       <testSQL>select 1</testSQL>  
       <testBeforeUse>true</testBeforeUse>  
       <testAfterUse>true</testAfterUse>  
