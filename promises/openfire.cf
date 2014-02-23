@@ -3,11 +3,11 @@ bundle agent openfire
   vars:
     freebsd::
       # Master config directory
-      "openfire_conf_dir" string => "/usr/local/etc/openfire";
+      "conf_dir" string => "/usr/local/etc/openfire";
 
       # Variables to get set in rc.conf
       "rc_conf[openfire_enable]" string => "YES";
-      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Dxmpp.socket.ssl.keystore=$(keystore_path) -Dxmpp.socket.ssl.keypass=$(keystore_password)  -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server\"";
+      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server\"";
 
       # Openfire's postgresql JDBC driver
       "openfire_postgres_jar" string => "/usr/local/share/java/openfire/lib/postgres.jar";
@@ -15,31 +15,26 @@ bundle agent openfire
       "port_postgres_jar" string => "/usr/local/share/java/classes/postgresql.jar";
 
     any::
-      # The keystore password that is used.  As this winds up in
-      # rc.conf, this is more of a formality, not an actual security
-      # measure.
-      "keystore_password" string => "unimportant";
-
-       # The keystore file
-      "keystore_file" string => "openfire.keystore";
-      "keystore_path" string => "$(base_config.key_files_path)/$(keystore_file)";
+      # The keystore file
+      "keystore_file" string => "keystore";
+      "keystore_path" string => "$(conf_dir)/$(keystore_file)";
 
       # The JAAS login.conf file
       "openfire_login_conf_file" string => "login.conf";
-      "openfire_login_conf_path" string => "$(openfire_conf_dir)/$(openfire_login_conf_file)";
+      "openfire_login_conf_path" string => "$(conf_dir)/$(openfire_login_conf_file)";
 
       # The openfire xml configuration file
       "openfire_config_file" string => "openfire.xml";
-      "openfire_config_path" string => "$(openfire_conf_dir)/$(openfire_config_file)";
+      "openfire_config_path" string => "$(conf_dir)/$(openfire_config_file)";
 
       # Openfire kerberos credential.  This is used both for
       # authentication with clients, as well as for authentication
       # with the LDAP database.
-      "openfire_cred" string => "xmpp/$(sys.fqhost)";
+      "kerberos_cred" string => "xmpp/$(sys.fqhost)";
       # NSS keytab file
-      "openfire_keytab_file" string => "xmpp.keytab";
+      "keytab_file" string => "xmpp.keytab";
       # Path to NSS keytab
-      "openfire_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(openfire_keytab_file)";
+      "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
 
       # The client certificate used by openfire to talk to LDAP
       "openfire_internal_cert_file" string => "$(sys.uqhost)-openfire-ldap-cert.pem";
@@ -59,24 +54,17 @@ bundle agent openfire
 
   files:
       # Create openfire configuration directory
-      "$(openfire_conf_dir)/."
+      "$(conf_dir)/."
       create => "true",
       perms => m("755"),
       comment => "Create openfire configuration directory",
-      classes => if_repaired("create_openfire_conf_dir");
-
-      # Make sure the keytab has the right permissions
-      "$(openfire_keytab_path)"
-      create => "false",
-      perms => mog("600", "openfire", "openfire"),
-      comment => "Set permission of openfire keytab",
-      classes => if_repaired("openfire_keytab_wrong_perms");
+      classes => if_repaired("create_conf_dir");
 
       # Copy the openfire keystore
       "$(keystore_path)"
       create => "true",
       perms => mog("600", "openfire", "openfire"),
-      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(keystore_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/openfire.keystore",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire keystore file",
       classes => if_repaired("openfire_keystore");
@@ -160,6 +148,9 @@ bundle agent openfire
       classes => if_repaired("postgresql_jdbc_driver");
 
   reports:
+    keytab_wrong_perms::
+      "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+
     openfire_keystore::
       "Copied openfire keystore";
 
@@ -175,7 +166,7 @@ bundle agent openfire
     openfire_external_cert::
       "Copied openfire server SSL certificate";
 
-    create_openfire_conf_dir::
+    create_conf_dir::
       "Created openfire configuration directory";
 
     enable_openfire_rc_conf::
