@@ -1,4 +1,4 @@
 ssl = on
-krb_server_keyfile = '$(postgresql_keytab_path)'
+krb_server_keyfile = '$(postgresql_server.postgresql_keytab_path)'
 krb_srvname = 'postgres'
 log_destination = 'syslog'
