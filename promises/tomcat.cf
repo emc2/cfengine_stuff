@@ -10,7 +10,7 @@ bundle agent tomcat {
 
       # Variables to get set in rc.conf
       "rc_conf[tomcat7_enable]" string => "YES";
-      "tomcat7_java_opts" string => "tomcat7_java_opts=\"-Djavax.net.debug=all -Djava.security.auth.login.config=$(login_conf_path) -Djavax.net.ssl.keyStore=$(keystore_path) -Djavax.net.ssl.keyStorePassword=$(keystore_password) -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server -Xmx1536m -Xms1536m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC\"";
+      "tomcat7_java_opts" string => "tomcat7_java_opts=\"-Djava.security.auth.login.config=$(login_conf_path) -Djavax.net.ssl.keyStore=$(keystore_path) -Djavax.net.ssl.keyStorePassword=$(keystore_password) -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server -Xmx1536m -Xms1536m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC\"";
 
     any::
       # Directory for config files
