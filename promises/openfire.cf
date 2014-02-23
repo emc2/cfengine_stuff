@@ -77,7 +77,6 @@ bundle agent openfire
 
       # Copy the openfire keystore
       "$(keystore_path)"
-      create => "true",
       perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/openfire.keystore",
                              "$(sys.policy_hub)"),
@@ -86,7 +85,6 @@ bundle agent openfire
 
       # Copy the openfire client truststore
       "$(truststore_path)"
-      create => "true",
       perms => mog("644", "$(user)", "$(group)"),
       copy_from => local_cp("$(java_cacerts_path)"),
       comment => "Copy openfire truststore file",
@@ -94,7 +92,6 @@ bundle agent openfire
 
       # Copy the openfire client truststore
       "$(client_truststore_path)"
-      create => "true",
       perms => mog("644", "$(user)", "$(group)"),
       copy_from => local_cp("$(ca_cert.ca_keystore_path)"),
       comment => "Copy openfire client truststore file",
