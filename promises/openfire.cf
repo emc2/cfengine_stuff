@@ -87,7 +87,7 @@ bundle agent openfire
       # Copy the openfire client truststore
       "$(truststore_path)"
       create => "true",
-      perms => mog("600", "$(user)", "$(group)"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => local_cp("$(java_cacerts_path)"),
       comment => "Copy openfire truststore file",
       classes => if_repaired("truststore");
@@ -95,9 +95,8 @@ bundle agent openfire
       # Copy the openfire client truststore
       "$(client_truststore_path)"
       create => "true",
-      perms => mog("600", "$(user)", "$(group)"),
-      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_keystore_file)",
-                             "$(sys.policy_hub)"),
+      perms => mog("644", "$(user)", "$(group)"),
+      copy_from => local_cp("$(ca_cert.ca_keystore_path)"),
       comment => "Copy openfire client truststore file",
       classes => if_repaired("client_truststore");
 
@@ -187,10 +186,10 @@ bundle agent openfire
       "Copied openfire keystore to $(keystore_path)";
 
     truststore::
-      "Copied Java truststore to $(truststore_path)";
+      "Copied Java truststore $(java_cacerts_path) to $(truststore_path)";
 
     client_truststore::
-      "Copied openfire client truststore to $(client_truststore_path)";
+      "Copied CA truststore $(ca_cert.ca_keystore_path) to $(client_truststore_path)";
 
     openfire_internal_key::
       "Copied openfire-to-LDAP SSL key";
