@@ -7,17 +7,32 @@ bundle agent openfire
 
       # Variables to get set in rc.conf
       "rc_conf[openfire_enable]" string => "YES";
-      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true -server\"";
+      "openfire_javargs" string => "openfire_javargs=\"-Djava.security.auth.login.config=$(openfire_login_conf_path) -Djavax.net.ssl.trustStore=$(ca_cert.ca_keystore_path) -Djavax.net.ssl.trustStorePassword=$(ca_cert.ca_keystore_password) -Djava.awt.headless=true\"";
 
       # Openfire's postgresql JDBC driver
       "openfire_postgres_jar" string => "/usr/local/share/java/openfire/lib/postgres.jar";
       # The postgresql JDBC driver installed by FreeBSD ports
       "port_postgres_jar" string => "/usr/local/share/java/classes/postgresql.jar";
 
+      # Java system-wide truststore
+      "java_cacerts_path" string => "/usr/local/openjdk7/jre/lib/security/cacerts";
+
+      # User and group
+      "user" string => "openfire";
+      "group" string => "openfire";
+
     any::
       # The keystore file
       "keystore_file" string => "keystore";
       "keystore_path" string => "$(conf_dir)/$(keystore_file)";
+
+      # The truststore file
+      "truststore_file" string => "truststore";
+      "truststore_path" string => "$(conf_dir)/$(truststore_file)";
+
+      # The client truststore file
+      "client_truststore_file" string => "client.truststore";
+      "client_truststore_path" string => "$(conf_dir)/$(client_truststore_file)";
 
       # The JAAS login.conf file
       "openfire_login_conf_file" string => "login.conf";
@@ -63,16 +78,33 @@ bundle agent openfire
       # Copy the openfire keystore
       "$(keystore_path)"
       create => "true",
-      perms => mog("600", "openfire", "openfire"),
+      perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/openfire.keystore",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire keystore file",
-      classes => if_repaired("openfire_keystore");
+      classes => if_repaired("keystore");
+
+      # Copy the openfire client truststore
+      "$(truststore_path)"
+      create => "true",
+      perms => mog("600", "$(user)", "$(group)"),
+      copy_from => local_cp("$(java_cacerts_path)"),
+      comment => "Copy openfire truststore file",
+      classes => if_repaired("truststore");
+
+      # Copy the openfire client truststore
+      "$(client_truststore_path)"
+      create => "true",
+      perms => mog("600", "$(user)", "$(group)"),
+      copy_from => secure_cp("$(base_config.file_store)/CA/$(ca_keystore_file)",
+                             "$(sys.policy_hub)"),
+      comment => "Copy openfire client truststore file",
+      classes => if_repaired("client_truststore");
 
       # Copy the openfire-to-LDAP certificate file from the policy host
       "$(openfire_internal_cert_path)"
       create => "true",
-      perms => mog("644", "openfire", "openfire"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire-to-LDAP certificate file",
@@ -81,7 +113,7 @@ bundle agent openfire
       # Copy the openfire-to-LDAP key file from the policy host
       "$(openfire_internal_key_path)"
       create => "true",
-      perms => mog("600", "openfire", "openfire"),
+      perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire-to-LDAP key file",
@@ -90,7 +122,7 @@ bundle agent openfire
       # Copy the server certificate file from the policy host
       "$(openfire_external_cert_path)"
       create => "true",
-      perms => mog("644", "openfire", "openfire"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire-to-LDAP certificate file",
@@ -99,7 +131,7 @@ bundle agent openfire
       # Copy the server key file from the policy host
       "$(openfire_external_key_path)"
       create => "true",
-      perms => mog("600", "openfire", "openfire"),
+      perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy openfire-to-LDAP key file",
@@ -108,7 +140,7 @@ bundle agent openfire
       # Set configuation variables
       "$(openfire_login_conf_path)"
       create => "true",
-      perms => mog("644", "openfire", "openfire"),
+      perms => mog("644", "$(user)", "$(group)"),
       edit_template => "$(sys.workdir)/inputs/promises/openfire-login.conf.template",
       comment => "Set JAAS login.conf variables",
       classes => if_repaired("set_openfire_login_conf_vars");
@@ -116,7 +148,7 @@ bundle agent openfire
       # Set admin console configuation variables
       "$(openfire_config_path)"
       create => "true",
-      perms => mog("644", "openfire", "openfire"),
+      perms => mog("644", "$(user)", "$(group)"),
       edit_template => "$(sys.workdir)/inputs/promises/openfire.xml.template",
       comment => "Set openfire admin console variables",
       classes => if_repaired("set_base_config_vars");
@@ -142,7 +174,7 @@ bundle agent openfire
       # support GSSAPI.  We need to replace it with one that does.
       "$(openfire_postgres_jar)"
       create => "true",
-      perms => mog("644", "openfire", "openfire"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => local_cp("$(port_postgres_jar)"),
       comment => "Install PostgreSQL JDBC driver",
       classes => if_repaired("postgresql_jdbc_driver");
@@ -151,8 +183,14 @@ bundle agent openfire
     keytab_wrong_perms::
       "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 
-    openfire_keystore::
-      "Copied openfire keystore";
+    keystore::
+      "Copied openfire keystore to $(keystore_path)";
+
+    truststore::
+      "Copied Java truststore to $(truststore_path)";
+
+    client_truststore::
+      "Copied openfire client truststore to $(client_truststore_path)";
 
     openfire_internal_key::
       "Copied openfire-to-LDAP SSL key";
