@@ -109,7 +109,7 @@ bundle agent tomcat {
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
-      edit_line => append_if_no_line("$(tomcat7_javargs)"),
+      edit_line => append_if_no_line("$(tomcat7_java_opts)"),
       comment => "Enable tomcat in rc.conf",
       classes => if_repaired("enable_rc_conf");
 
