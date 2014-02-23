@@ -99,7 +99,6 @@ bundle agent openfire
 
       # Copy the openfire-to-LDAP certificate file from the policy host
       "$(openfire_internal_cert_path)"
-      create => "true",
       perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_cert_file)",
                              "$(sys.policy_hub)"),
@@ -108,7 +107,6 @@ bundle agent openfire
 
       # Copy the openfire-to-LDAP key file from the policy host
       "$(openfire_internal_key_path)"
-      create => "true",
       perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_internal_key_file)",
                              "$(sys.policy_hub)"),
@@ -117,7 +115,6 @@ bundle agent openfire
 
       # Copy the server certificate file from the policy host
       "$(openfire_external_cert_path)"
-      create => "true",
       perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_cert_file)",
                              "$(sys.policy_hub)"),
@@ -126,7 +123,6 @@ bundle agent openfire
 
       # Copy the server key file from the policy host
       "$(openfire_external_key_path)"
-      create => "true",
       perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(openfire_external_key_file)",
                              "$(sys.policy_hub)"),
