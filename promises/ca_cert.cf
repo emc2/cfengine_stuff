@@ -16,7 +16,7 @@ bundle agent ca_cert
       # The keystore password is not important, as file permissions
       # protect the file.  It has to go in rc.conf anyway, so it
       # cannot be properly secured.
-      "ca_keystore_password" string => "unimportant";
+      "ca_keystore_password" string => "changeit";
 
   files:
       # Ensure cert files directory exists
