@@ -1,0 +1,6 @@
+worker.list=wiki
+
+worker.wiki.port=8009
+worker.wiki.host=localhost
+worker.wiki.type=ajp13
+worker.wiki.lbfactor=1
