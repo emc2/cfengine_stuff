@@ -4,7 +4,7 @@ com.sun.security.jgss.krb5.accept {
     useKeyTab = true
     keyTab = "$(tomcat.keytab_path)"
     storeKey = true
-    principal = "$(tomcat.cred)";
+    principal = "$(tomcat.cred)@$(kerberos_config.realm)";
 };
 [%CFEngine END %]
 [%CFEngine BEGIN %]
