@@ -53,6 +53,10 @@ bundle agent tomcat {
       "server_xml_file" string => "server.xml";
       "server_xml_path" string => "$(tomcat.conf_dir)/$(server_xml_file)";
 
+      # The tomcat server.xml file
+      "context_xml_file" string => "context.xml";
+      "context_xml_path" string => "$(tomcat.conf_dir)/$(context_xml_file)";
+
   files:
       # Copy the server certificate file from the policy host
       "$(ldap_cert_path)"
@@ -96,6 +100,22 @@ bundle agent tomcat {
       comment => "Set JAAS login.conf variables",
       classes => if_repaired("set_login_conf_vars");
 
+      # Set configuation variables
+      "$(server_xml_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/tomcat-server.xml.template",
+      comment => "Set tomcat server configuration",
+      classes => if_repaired("edit_server_xml");
+
+      # Set configuation variables
+      "$(context_xml_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/tomcat-context.xml.template",
+      comment => "Set tomcat context configuration",
+      classes => if_repaired("edit_context_xml");
+
     freebsd::
       # Make sure tomcat is enabled
       "/etc/rc.conf"
@@ -128,6 +148,12 @@ bundle agent tomcat {
 
     set_login_conf_vars::
       "Set JAAS configuration variables in $(login_conf_path)";
+
+    edit_server_xml::
+      "Edited $(server_xml_path)";
+
+    edit_context_xml::
+      "Edited $(context_xml_path)";
 
     enable_rc_conf::
       "Enabled tomcat in rc.conf";
