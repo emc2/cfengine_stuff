@@ -26,7 +26,7 @@
       <Realm className="org.apache.catalina.realm.LockOutRealm">
         <Realm className="org.apache.catalina.realm.JNDIRealm"
                authentication="EXTERNAL"
-               connectionURL="$(ldap_config.ldap_uri)"
+               connectionURL="$(ldap_config.ldap_server_uri)"
                userPattern="cn={0},ou=people,$(ldap_config.ldap_base)"
                roleBase="ou=groups,$(ldap_config.ldap_base)"
                roleName="cn"
