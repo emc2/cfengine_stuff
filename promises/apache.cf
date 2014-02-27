@@ -100,7 +100,7 @@ bundle agent apache
 
   reports:
     edit_httpd_conf::
-      "Set up apache configuration in $(http_conf_path)";
+      "Set up apache configuration in $(httpd_conf_path)";
 
     edit_workers_properties::
       "Set jakarta worker properties in $(workers_properties_path)";
