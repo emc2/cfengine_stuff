@@ -99,7 +99,7 @@ Include etc/apache22/Includes/*.conf
     SSLProtocol all -SSLv2
     SSLCipherSuite HIGH
     SSLCertificateFile "$(apache.external_cert_path)"
-    SSLCertificateKeyFile "$(apache.external_cert_path)"
+    SSLCertificateKeyFile "$(apache.external_key_path)"
     SSLCertificateChainFile "$(apache.external_cert_chain_path)"
     SSLCACertificateFile "$(ca_cert.ca_cert_path)"
     SSLCARevocationFile "$(ca_cert.ca_crl_path)"
