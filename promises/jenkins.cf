@@ -1,0 +1,5 @@
+bundle agent jenkins_master
+{
+  vars:
+      "jenkins_home_dir" string => "/var/jenkins";
+}
