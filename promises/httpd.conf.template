@@ -93,7 +93,7 @@ Include etc/apache22/Includes/*.conf
     ServerAdmin $(mail_config.admin_addr)
     ErrorLog "$(apache.log_dir)/httpd-error.log"
     TransferLog "$(apache.log_dir)/httpd-access.log"
-    JkMount  /techwiki/* wikis
+    JkMount  /techwiki/* wiki
     JkMount  /jenkins/* jenkins
     SSLEngine on
     SSLProtocol all -SSLv2
