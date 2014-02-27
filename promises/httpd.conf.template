@@ -52,7 +52,7 @@ Group www
 Listen 80
 Listen 443
 
-JkWorkersFile   $(apache.workers_properties)
+JkWorkersFile   $(apache.workers_properties_path)
 JkShmFile       $(apache.var_run_dir)/mod_jk.shm
 JkLogFile       $(apache.log_dir)/httpd-mod_jk.log
 JkLogLevel      info
