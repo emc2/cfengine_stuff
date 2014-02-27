@@ -98,9 +98,9 @@ Include etc/apache22/Includes/*.conf
     SSLEngine on
     SSLProtocol all -SSLv2
     SSLCipherSuite HIGH
-    SSLCertificateFile "$(apache.external_cert_file)"
-    SSLCertificateKeyFile "$(apache.external_cert_file)"
-    SSLCertificateChainFile "$(apache.external_cert_chain_file)"
+    SSLCertificateFile "$(apache.external_cert_path)"
+    SSLCertificateKeyFile "$(apache.external_cert_path)"
+    SSLCertificateChainFile "$(apache.external_cert_chain_path)"
     SSLCACertificateFile "$(ca_cert.ca_cert_path)"
     SSLCARevocationFile "$(ca_cert.ca_crl_path)"
     SSLVerifyClient optional
