@@ -4,7 +4,7 @@ bundle agent mail_config
 {
   vars:
       # The domain for which we are serving mail
-      "mail_domain" string => "$(base_config.domain)";
+      "mail_domain" string => "$(host_config.domain)";
       # Additional domains for which we receive mail
       "additional_domains" string => "shadowsun.net";
       # Admin email

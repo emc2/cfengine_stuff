@@ -5,7 +5,7 @@ bundle agent ldap_config
       # Base for the LDAP database.
       "ldap_base" string => "dc=metricspace,dc=net";
       # FQDN of the LDAP server.
-      "ldap_server" string => "ldap.$(base_config.domain)";
+      "ldap_server" string => "ldap.$(host_config.domain)";
       # URI for LDAP server
       "ldap_server_uri" string => "ldaps://$(ldap_config.ldap_server)";
 

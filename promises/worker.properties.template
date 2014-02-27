@@ -6,6 +6,6 @@ worker.wiki.type=ajp13
 worker.wiki.lbfactor=1
 
 worker.jenkins.port=8009
-worker.jenkins.host=$(host_config.jenkins_master).$(base_config.domain)
+worker.jenkins.host=$(host_config.jenkins_master).$(host_config.domain)
 worker.jenkins.type=ajp13
 worker.jenkins.lbfactor=1
