@@ -6,6 +6,12 @@ bundle common host_config
       # The domain name for all servers
       "domain" string => "metricspace.net";
 
+      # The jenkins master server
+      "jenkins_master" string => "tachyon";
+
+      # The PostgreSQL database server
+      "postgresql_server" string => "higgs";
+
       # Clients for globally-controlled LDAP+Kerberos authentication.
       # These clients get Kerberized/LDAPized NSS and PAM.  Note: a
       # lot of the rest of this configuration assumes these bundles
@@ -23,12 +29,6 @@ bundle common host_config
       # Clients for global authentication with no logins and no nss
       # support.
       "nonss_global_auth_clients" slist => { "xmpp" };
-
-      # The jenkins master server
-      "jenkins_master" string => "tachyon";
-
-      # The PostgreSQL database server
-      "postgresql_server" string => "higgs";
 
   classes:
       # Set this machine up as an ssh server (meaning it runs sshd).
