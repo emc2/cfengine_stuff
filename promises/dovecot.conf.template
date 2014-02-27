@@ -90,7 +90,7 @@ protocol pop3 {
 [%CFEngine BEGIN %]
 protocol lda {
   mail_plugins = sieve
-  postmaster_address = postmaster@metricspace.net
+  postmaster_address = postmaster@$(mail_config.mail_domain)
   sendmail_path = /usr/local/bin/sendmail
 }
 [%CFEngine END %]

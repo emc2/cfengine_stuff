@@ -11,9 +11,9 @@ bundle agent kerberos_config
 {
   vars:
       "realm" string => "METRICSPACE.NET";
-      "kdc_server" string => "kdc.metricspace.net:88";
-      "kadmin_server" string => "kdc.metricspace.net:749";
-      "realm_domain" string => "metricspace.net";
+      "kdc_server" string => "kdc.$(base_config.domain):88";
+      "kadmin_server" string => "kdc.$(base_config.domain):749";
+      "realm_domain" string => "$(base_config.domain)";
       "host_cred" string => "host/$(sys.fqhost)";
 
     freebsd::
