@@ -41,7 +41,8 @@ bundle agent apache
       "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
 
       # Main domain's document root
-      "main_domain_doc_root" string => "$(apache.doc_dir)/$(host_config.domain)"
+      "main_domain_doc_root" string => "$(apache.doc_dir)/$(host_config.domain)";
+
   files:
       # Copy the server certificate file from the policy host
       "$(external_cert_path)"
