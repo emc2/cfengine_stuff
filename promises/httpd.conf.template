@@ -1,0 +1,208 @@
+ServerRoot "$(apache.server_root)"
+
+LoadModule authz_host_module    libexec/apache22/mod_authz_host.so
+LoadModule authz_user_module    libexec/apache22/mod_authz_user.so
+LoadModule authz_owner_module   libexec/apache22/mod_authz_owner.so
+LoadModule file_cache_module    libexec/apache22/mod_file_cache.so
+LoadModule cache_module         libexec/apache22/mod_cache.so
+LoadModule disk_cache_module    libexec/apache22/mod_disk_cache.so
+LoadModule dbd_module           libexec/apache22/mod_dbd.so
+LoadModule dumpio_module        libexec/apache22/mod_dumpio.so
+LoadModule reqtimeout_module    libexec/apache22/mod_reqtimeout.so
+LoadModule include_module       libexec/apache22/mod_include.so
+LoadModule filter_module        libexec/apache22/mod_filter.so
+LoadModule charset_lite_module  libexec/apache22/mod_charset_lite.so
+LoadModule deflate_module       libexec/apache22/mod_deflate.so
+LoadModule ldap_module          libexec/apache22/mod_ldap.so
+LoadModule log_config_module    libexec/apache22/mod_log_config.so
+LoadModule logio_module         libexec/apache22/mod_logio.so
+LoadModule env_module           libexec/apache22/mod_env.so
+LoadModule mime_magic_module    libexec/apache22/mod_mime_magic.so
+LoadModule cern_meta_module     libexec/apache22/mod_cern_meta.so
+LoadModule expires_module       libexec/apache22/mod_expires.so
+LoadModule headers_module       libexec/apache22/mod_headers.so
+LoadModule usertrack_module     libexec/apache22/mod_usertrack.so
+LoadModule unique_id_module     libexec/apache22/mod_unique_id.so
+LoadModule setenvif_module      libexec/apache22/mod_setenvif.so
+LoadModule version_module       libexec/apache22/mod_version.so
+LoadModule ssl_module           libexec/apache22/mod_ssl.so
+LoadModule mime_module          libexec/apache22/mod_mime.so
+LoadModule dav_module           libexec/apache22/mod_dav.so
+LoadModule status_module        libexec/apache22/mod_status.so
+LoadModule autoindex_module     libexec/apache22/mod_autoindex.so
+LoadModule asis_module          libexec/apache22/mod_asis.so
+LoadModule info_module          libexec/apache22/mod_info.so
+LoadModule cgi_module           libexec/apache22/mod_cgi.so
+LoadModule dav_fs_module        libexec/apache22/mod_dav_fs.so
+LoadModule vhost_alias_module   libexec/apache22/mod_vhost_alias.so
+LoadModule negotiation_module   libexec/apache22/mod_negotiation.so
+LoadModule dir_module           libexec/apache22/mod_dir.so
+LoadModule imagemap_module      libexec/apache22/mod_imagemap.so
+LoadModule actions_module       libexec/apache22/mod_actions.so
+LoadModule speling_module       libexec/apache22/mod_speling.so
+LoadModule userdir_module       libexec/apache22/mod_userdir.so
+LoadModule alias_module         libexec/apache22/mod_alias.so
+LoadModule rewrite_module       libexec/apache22/mod_rewrite.so
+LoadModule auth_kerb_module     libexec/apache22/mod_auth_kerb.so
+LoadModule jk_module            libexec/apache22/mod_jk.so
+
+User www
+Group www
+
+Listen 80
+Listen 443
+
+JkWorkersFile   $(apache.workers_properties)
+JkShmFile       $(apache.var_run_dir)/mod_jk.shm
+JkLogFile       $(apache.log_dir)/httpd-mod_jk.log
+JkLogLevel      info
+JkLogStampFormat "[%a %b %d %H:%M:%S %Y] "
+
+ErrorLog "$(apache.log_dir)/httpd-error.log"
+LogLevel warn
+DefaultType text/plain
+
+NameVirtualHost *:80
+
+Include etc/apache22/Includes/*.conf
+
+[%CFEngine BEGIN %]
+<Directory />
+    AllowOverride None
+    Order deny,allow
+    Deny from all
+</Directory>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<VirtualHost *:80>
+  ServerAdmin $(mail_config.admin_addr)
+  ServerName $(sys.fqhost)
+  ServerAlias $(sys.fqhost)
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+  DocumentRoot "$(apache.main_domain_doc_root)"
+</VirtualHost>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<VirtualHost _default_:443>
+    DocumentRoot "$(apache.main_domain_doc_root)"
+    ServerName $(sys.fqhost):443
+    ServerAdmin $(mail_config.admin_addr)
+    ErrorLog "$(apache.log_dir)/httpd-error.log"
+    TransferLog "$(apache.log_dir)/httpd-access.log"
+    JkMount  /techwiki/* wikis
+    JkMount  /jenkins/* jenkins
+    SSLEngine on
+    SSLProtocol all -SSLv2
+    SSLCipherSuite HIGH
+    SSLCertificateFile "$(apache.external_cert_file)"
+    SSLCertificateKeyFile "$(apache.external_cert_file)"
+    SSLCertificateChainFile "$(apache.external_cert_chain_file)"
+    SSLCACertificateFile "$(ca_cert.ca_cert_path)"
+    SSLCARevocationFile "$(ca_cert.ca_crl_path)"
+    SSLVerifyClient optional
+    BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+
+    <Location /techwiki/>
+        AuthType Kerberos
+        AuthName "Please enter your Kerberos password"
+        KrbAuthRealms $(kerberos_config.realm)
+        Krb5Keytab "$(apache.keytab_path)"
+        KrbMethodK5Passwd on
+        KrbMethodNegotiate on
+        KrbSaveCredentials on
+        KrbLocalUserMapping on
+        KrbAuthoritative on
+        KrbVerifyKDC on
+        KrbServiceName apache
+        Require valid-user
+    </Location>
+
+    <Location /jenkins/>
+        AuthType Kerberos
+        AuthName "Please enter your Kerberos password"
+        KrbAuthRealms $(kerberos_config.realm)
+        Krb5Keytab "$(apache.keytab_path)"
+        KrbMethodK5Passwd on
+        KrbMethodNegotiate on
+        KrbSaveCredentials on
+        KrbLocalUserMapping on
+        KrbAuthoritative on
+        KrbVerifyKDC on
+        KrbServiceName apache
+        Require valid-user
+    </Location>
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+
+    <Directory "$(apache.server_root)/www/apache22/cgi-bin">
+        SSLOptions +StdEnvVars
+    </Directory>
+    CustomLog "$(apache.log_dir)/httpd-ssl_request.log" "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+
+</VirtualHost>
+[%CFEngine END %]
+
+
+[%CFEngine BEGIN %]
+<Directory "$(apache.main_domain_doc_root)">
+    Options Indexes FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<IfModule log_config_module>
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+
+    <IfModule logio_module>
+      # You need to enable mod_logio.c to use %I and %O
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+
+    CustomLog "$(apache.log_dir)/httpd-access.log" combined
+</IfModule>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<IfModule mime_module>
+    TypesConfig etc/apache22/mime.types
+
+    AddEncoding         x-compress              .Z
+    AddEncoding         x-gzip                  .gz .tgz
+    AddType     application/x-gzip              .tgz
+    AddType     application/x-compress          .Z
+    AddType     application/x-gzip              .gz .tgz
+    AddType     application/x-x509-ca-cert      .crt
+    AddType     application/x-pkcs7-crl         .crl
+
+</IfModule>
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+<IfModule ssl_module>
+    SSLRandomSeed startup builtin
+    SSLRandomSeed connect builtin
+    SSLPassPhraseDialog  builtin
+SSLSessionCache        "shmcb:$(apache.var_run_dir)/ssl_scache(512000)"
+SSLSessionCacheTimeout  300
+SSLMutex  "file:$(apache.var_run_dir)/ssl_mutex"
+
+</IfModule>
+[%CFEngine END %]
