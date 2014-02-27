@@ -74,7 +74,7 @@ bundle agent apache
       classes => if_repaired("external_key");
 
       # Create main configuration file
-      "$(http_conf_path)"
+      "$(httpd_conf_path)"
       create => "true",
       perms => mog("644", "$(user)", "$(group)"),
       edit_template => "$(sys.workdir)/inputs/promises/httpd.conf.template",
