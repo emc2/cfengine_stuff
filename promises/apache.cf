@@ -12,6 +12,8 @@ bundle agent apache
       "user" string => "www";
       "group" string => "www";
 
+      "rc_conf[apache22_enable]" string => "YES";
+
     any::
       # The client certificate used by postfix to talk to clients
       "external_cert_file" string => "https-cert.pem";
@@ -92,7 +94,7 @@ bundle agent apache
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
-      edit_line => set_variable_values("openfire.rc_conf"),
+      edit_line => set_variable_values("apache.rc_conf"),
       comment => "Enable openfire in rc.conf",
       classes => if_repaired("enable_apache_rc_conf");
 
