@@ -6,7 +6,7 @@ bundle agent apache
       "conf_dir" string => "$(server_root)/etc/apache22";
       "doc_dir" string => "/var/www";
       "var_run_dir" string => "/var/run";
-      "log_dir" string => "/var/run";
+      "log_dir" string => "/var/log";
 
       # User and group
       "user" string => "www";
