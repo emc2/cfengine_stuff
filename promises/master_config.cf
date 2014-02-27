@@ -17,8 +17,15 @@ bundle common host_config
       # PAM is not installed on these.
       "nologin_global_auth_clients" slist => { "www" };
 
-      # Clients for
+      # Clients for global authentication with no logins and no nss
+      # support.
       "nonss_global_auth_clients" slist => { "xmpp" };
+
+      # The jenkins master server
+      "jenkins_master" string => "tachyon";
+
+      # The PostgreSQL database server
+      "postgresql_server" string => "higgs";
 
   classes:
       # Set this machine up as an ssh server (meaning it runs sshd).
@@ -36,7 +43,7 @@ bundle common host_config
       # Set these machines up as users of kerberos authentication.
       "kerberos_client" or => { "kdc",
                                 "ldap",
-                                "higgs",
+                                "$(postgresql_server)",
                                 @(nonss_global_auth_clients),
                                 @(nologin_global_auth_clients),
                                 @(global_auth_clients)
@@ -65,13 +72,13 @@ bundle common host_config
 
       # Set up a PostgreSQL client installation.
       "postgresql_client" or => { "www",
-                                  "higgs",
+                                  "$(postgresql_server)",
                                   "xmpp",
-                                  "tachyon"
+                                  "$(jenkins_master)"
                                 };
 
       # Set up the PostgreSQL server.
-      "postgresql_server" expression => "higgs";
+      "postgresql_server" expression => "$(postgresql_server)";
 
       # Set up a mail server running dovecot and postfix.
       "mail_server" expression => "mail";
@@ -81,7 +88,7 @@ bundle common host_config
 
       # Set up a tomcat instance.
       "tomcat_server" or => { "www",
-                              "tachyon"
+                              "$(jenkins_master)"
                             };
 
       # Set up an xmpp server running openfire.
@@ -91,7 +98,7 @@ bundle common host_config
       "xwiki_server" expression => "www";
 
       # Set up a server running a jenkins master
-      "jenkins_master" expression => "tachyon";
+      "jenkins_master" expression => "$(jenkins_master)";
 }
 
 bundle common master_config 
