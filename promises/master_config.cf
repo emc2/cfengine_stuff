@@ -3,6 +3,9 @@
 bundle common host_config
 {
   vars:
+      # The domain name for all servers
+      "domain" string => "metricspace.net";
+
       # Clients for globally-controlled LDAP+Kerberos authentication.
       # These clients get Kerberized/LDAPized NSS and PAM.  Note: a
       # lot of the rest of this configuration assumes these bundles

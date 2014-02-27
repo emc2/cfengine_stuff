@@ -7,8 +7,6 @@ bundle agent base_config
       # Path to files on the policy host
       "file_store" string => "/var/cfengine/files";
 
-      "domain" string => "metricspace.net";
-
     freebsd::
       # Where to keep public key certificates
       "cert_files_path" string => "/etc/ssl/certs";
