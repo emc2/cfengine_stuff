@@ -200,9 +200,8 @@ Include etc/apache22/Includes/*.conf
     SSLRandomSeed startup builtin
     SSLRandomSeed connect builtin
     SSLPassPhraseDialog  builtin
-SSLSessionCache        "shmcb:$(apache.var_run_dir)/ssl_scache(512000)"
-SSLSessionCacheTimeout  300
-SSLMutex  "file:$(apache.var_run_dir)/ssl_mutex"
-
+    SSLSessionCache        "shmcb:$(apache.var_run_dir)/ssl_scache(512000)"
+    SSLSessionCacheTimeout  300
+    SSLMutex  "file:$(apache.var_run_dir)/ssl_mutex"
 </IfModule>
 [%CFEngine END %]
