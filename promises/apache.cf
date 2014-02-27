@@ -3,7 +3,14 @@ bundle agent apache
   vars:
     freebsd::
       "server_root" string => "/usr/local";
-      "server_conf_dir" string => "$(server_root)/etc/apache22";
+      "conf_dir" string => "$(server_root)/etc/apache22";
+      "doc_dir" string => "/var/www";
+      "var_run_dir" string => "/var/run";
+      "log_dir" string => "/var/run";
+
+      # User and group
+      "user" string => "www";
+      "group" string => "www";
 
     any::
       # The client certificate used by postfix to talk to clients
@@ -18,13 +25,28 @@ bundle agent apache
       "external_key_file" string => "https-key.pem";
       "external_key_path" string => "$(base_config.key_files_path)/$(external_key_file)";
 
-      "workers_properties" string => "$(server_conf_dir)/workers.properties";
+      # The openfire xml configuration file
+      "workers_properties_file" string => "workers.properties";
+      "workers_properties_path" string => "$(conf_dir)/$(workers_properties_file)";
 
+      # The openfire xml configuration file
+      "httpd_conf_file" string => "httpd.conf";
+      "httpd_conf_path" string => "$(conf_dir)/$(httpd_conf_file)";
+
+      # Apache kerberos credential
+      "kerberos_cred" string => "apache/$(sys.fqhost)";
+      # NSS keytab file
+      "keytab_file" string => "apache.keytab";
+      # Path to NSS keytab
+      "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
+
+      # Main domain's document root
+      "main_domain_doc_root" string => "$(apache.doc_dir)/$(host_config.domain)"
   files:
       # Copy the server certificate file from the policy host
       "$(external_cert_path)"
       create => "true",
-      perms => mog("644", "www", "www"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy https SSL certificate file",
@@ -33,7 +55,7 @@ bundle agent apache
       # Copy the server certificate file from the policy host
       "$(external_cert_chain_path)"
       create => "true",
-      perms => mog("644", "www", "www"),
+      perms => mog("644", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_cert_chain_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy https SSL certificate chain file",
@@ -42,13 +64,47 @@ bundle agent apache
       # Copy the server key file from the policy host
       "$(external_key_path)"
       create => "true",
-      perms => mog("600", "www", "www"),
+      perms => mog("600", "$(user)", "$(group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(external_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy https SSL key file",
       classes => if_repaired("external_key");
 
+      # Create main configuration file
+      "$(http_conf_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/httpd.conf.template",
+      comment => "Set openfire admin console variables",
+      classes => if_repaired("edit_httpd_conf");
+
+      # Create workers.properties file
+      "$(workers_properties_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/workers.properties.template",
+      comment => "Set openfire admin console variables",
+      classes => if_repaired("edit_workers_properties");
+
+    freebsd::
+      # Make sure openfire is enabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("openfire.rc_conf"),
+      comment => "Enable openfire in rc.conf",
+      classes => if_repaired("enable_apache_rc_conf");
+
   reports:
+    edit_httpd_conf::
+      "Set up apache configuration in $(http_conf_path)";
+
+    edit_workers_properties::
+      "Set jakarta worker properties in $(workers_properties_path)";
+
+    enable_apache_rc_conf::
+      "Enabled apache in rc.conf";
+
     external_key::
       "Copied https server SSL key";
 
