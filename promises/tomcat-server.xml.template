@@ -21,7 +21,7 @@
                redirectPort="8443" URIEncoding="UTF-8" />
 
     <Connector port="8009" protocol="AJP/1.3" redirectPort="8443"
-                           request.tomcatAuthentication="false" />
+                           tomcatAuthentication="false" />
 
     <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
       <Realm className="org.apache.catalina.realm.LockOutRealm">
