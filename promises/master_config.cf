@@ -208,6 +208,9 @@ bundle common master_config
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
+    macos::
+      "os_bundles" slist => {};
+
     any::
       # List of all input files for promise bundles we use.
       "inputs" slist => { "promises/base_config.cf",
