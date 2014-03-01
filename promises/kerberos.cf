@@ -21,7 +21,7 @@ bundle agent kerberos_config
       "system_keytab" string => "/etc/krb5.keytab";
       "kdc_config_dir" string => "/usr/local/var/krb5kdc";
 
-    macos::
+    darwin::
       "keytabs_dir" string => "/etc/keytabs";
 }
 
@@ -37,7 +37,7 @@ bundle agent kerberos_client
 
       "krb5_conf_file" string => "/etc/krb5.conf";
 
-    macos::
+    darwin::
       "krb5_conf_file" string => "/Library/Preferences/edu.mit.Kerberos";
 
   files:

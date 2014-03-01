@@ -208,7 +208,7 @@ bundle common master_config
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
-    macos::
+    darwin::
       "os_bundles" slist => {};
 
     any::
