@@ -19,7 +19,8 @@ bundle common host_config
       "global_auth_clients" slist => { "proton",
                                        # Dovecot needs PAM
                                        "mail",
-                                       "tachyon"
+                                       "tachyon",
+                                       "neutrino"
                                      };
 
       # Clients for global authentication that don't allow logins.
