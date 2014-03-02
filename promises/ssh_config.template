@@ -7,5 +7,5 @@ Host *
   HostKeyAlgorithms $(ssh_config.hostkey)
   KexAlgorithms $(ssh_config.kex)
   GSSAPIAuthentication yes
-  GSSAPIDelegateCredential yes
+  GSSAPIDelegateCredentials yes
 [%CFEngine END %]
