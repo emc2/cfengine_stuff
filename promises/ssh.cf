@@ -65,7 +65,6 @@ bundle agent ssh_server
       # There is another SSH configuration file in /usr/local, if
       # anyone's installed any ssh ports (most commonly,
       # openssh-portable)
-      "usr_local_ssh_config_path" string => "/usr/local$(ssh_config_path)";
       "usr_local_sshd_config_path" string => "/usr/local$(sshd_config_path)";
 
       "rc_conf[sshd_enable]" string => "YES";
@@ -81,7 +80,7 @@ bundle agent ssh_server
 
     freebsd::
       # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
-      "$(usr_local_ssh_config_path)"
+      "$(usr_local_sshd_config_path)"
       create => "true",
       perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
