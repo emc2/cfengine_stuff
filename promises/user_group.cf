@@ -45,7 +45,7 @@ bundle agent create_local_groups(info)
       ifvarclass => "add_$(group)";
 
     freebsd::
-      "/usr/sbin/pw groupadd $($(info)[$(group)][flags]) -g $($(info)[$(group)][gid]) $(group)"
+      "/usr/sbin/pw groupadd $($(info)[$(group)][flags]) -g $($(info)[$(group)][gid]) $(group)";
 
   reports:
       "Created group $(group)"
