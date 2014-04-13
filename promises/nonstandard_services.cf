@@ -7,6 +7,11 @@ body service_method nonstandard_service
                                              "$(this.service_policy)");
 }
 
+body contain useshell
+{
+  useshell => "useshell";
+}
+
 bundle agent nonstandard_services(service, state) {
   vars:
       "stakeholders[postfix]" slist => { "smtp_in" };
