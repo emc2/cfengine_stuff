@@ -73,11 +73,17 @@ bundle agent nslcd
       # Copy this host's NSS certificate file from the policy host
       "$(nslcd_cert_path)"
       create => "true",
-      perms => mog("644", "nslcd", "nslcd"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS certificate file",
       classes => if_repaired("nss_cert");
+
+      # Set permissions of the NSS certificate file
+      "$(nslcd_cert_path)"
+      create => "false",
+      perms => mog("644", "nslcd", "nslcd"),
+      comment => "Set NSS certificate file permissions",
+      classes => if_repaired("nss_cert_perms");
 
       # Make sure the keytab has the right permissions
       "$(nslcd_keytab_path)"
@@ -89,11 +95,17 @@ bundle agent nslcd
       # Copy this host's NSS key file from the policy host
       "$(nslcd_key_path)"
       create => "true",
-      perms => mog("600", "nslcd", "nslcd"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS key file",
       classes => if_repaired("nss_key");
+
+      # Set permissions of the NSS key file
+      "$(nslcd_key_path)"
+      create => "false",
+      perms => mog("600", "nslcd", "nslcd"),
+      comment => "Set NSS key file permissions",
+      classes => if_repaired("nss_key_perms");
 
     freebsd::
       # Make sure the nslcd daemon is turned on
@@ -117,6 +129,12 @@ bundle agent nslcd
 
     nss_cert::
       "Copied NSS host SSL certificate";
+
+    nss_key_perms::
+      "Set $(nslcd_key_path) permissions to 600";
+
+    nss_cert_perms::
+      "Set $(nslcd_cert_path) permissions to 644";
 
     edit_nslcd_conf::
       "Set configuration variables in $(nslcd_conf_path)";
