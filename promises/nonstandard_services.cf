@@ -41,9 +41,9 @@ bundle agent nonstandard_services(service, state) {
       module => "true";
 
     start::
-      "$(startcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      "$(startcommand[$(service)])"
       comment => "Execute command to start the $(service) service",
-      ifvarclass => canonify("start_$(service)");
+      ifvarclass => canonify("$(service)_stopped");
 
     stop::
       "$(stopcommand)"
@@ -51,10 +51,10 @@ bundle agent nonstandard_services(service, state) {
       ifvarclass => "$(service)_running";
 
     restart::
-      "$(restartcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      "$(restartcommand[$(service)])"
       comment => "Execute command to restart the $(service) service";
 
     reload::
-      "$(reloadcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      "$(reloadcommand[$(service)])"
       comment => "Execute command to reload the $(service) service";
 }
