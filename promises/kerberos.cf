@@ -60,13 +60,19 @@ bundle agent kerberos_client
       comment => "Assert that the system keytab is present and has the correct permissions",
       classes => if_repaired("keytab_wrong_perms");
 
-      # Ensure that there is a krb5.conf file
+      # Set variables in krb5.conf
       "$(krb5_conf_file)"
       create => "true",
-      perms => mog ("644", "root", "wheel"),
       edit_template => "$(sys.workdir)/inputs/promises/krb5.conf.template",
       comment => "Create krb5.conf",
       classes => if_repaired("create_krb5_conf");
+
+      # Set permissions of krb5.conf
+      "$(krb5_conf_file)"
+      create => "false",
+      perms => mog ("644", "root", "wheel"),
+      comment => "Set krb5.conf permissions",
+      classes => if_repaired("krb5_conf_set_perms");
 
     freebsd::
       # Ensure that make.conf sets KRB5_IMPL and KRB5_HOME correctly
@@ -100,7 +106,10 @@ bundle agent kerberos_client
       "The system keytab does not exist.  It needs to be created manually.";
 
     create_krb5_conf::
-      "Set configuration variables in /etc/krb5.conf";
+      "Set configuration variables in $(krb5_conf_file)";
+
+    krb5_conf_set_perms::
+      "Set permissions of $(krb5_conf_file)";
 
     create_keytabs_dir::
       "Created keytabs directory";
@@ -135,18 +144,30 @@ bundle agent kerberos_server
       # Make sure the kerberos acl grants admins access to everything
       "$(kadm_acl_path)"
       create => "true",
-      perms => mog("644", "root", "wheel"),
       edit_line => append_if_no_line("*/admin@$(kerberos_config.realm) *"),
       comment => "Grant universal access to admins",
       classes => if_repaired("grant_admin_access");
 
+      # Make sure the kerberos acl grants admins access to everything
+      "$(kadm_acl_path)"
+      create => "false",
+      perms => mog("644", "root", "wheel"),
+      comment => "Grant universal access to admins",
+      classes => if_repaired("kadm_acl_perms");
+
       # Set config variables in the kdc.conf file
       "$(kdc_conf_path)"
       create => "true",
-      perms => mog("644", "root", "wheel"),
       edit_template => "$(sys.workdir)/inputs/promises/kdc.conf.template",
       comment => "Grant universal access to admins",
-      classes => if_repaired("grant_admin_access");      
+      classes => if_repaired("kdc_conf_edit");
+
+      # Set permissions of kdc.conf file
+      "$(kdc_conf_path)"
+      create => "false",
+      perms => mog("644", "root", "wheel"),
+      comment => "Grant universal access to admins",
+      classes => if_repaired("kdc_conf_edit");
 
       # Make sure the principal database exists and is only
       # accessible to root
@@ -173,7 +194,39 @@ bundle agent kerberos_server
       comment => "Enable kerberos and kadmind in rc.conf",
       classes => if_repaired("enable_kerberos_rc_conf");
 
+  services:
+      # Start the kerberos service
+      "kerberos"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Start the kadmin service
+      "kadmin"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the kdc config files if they were updated
+    kdc_conf_edit::
+      "kerberos"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Reload the kdc config files if they were updated
+    grant_admin_access::
+      "kadmin"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
   reports:
+    kdc_conf_edit::
+      "Edit configuration variables in $(kdc_conf_path)";
+
+    kdc_conf_perms::
+      "Set permissions of $(kdc_conf_path) to 644";
+
+    kadm_acl_perms::
+      "Set permissions of $(kadm_acl_path) to 644";
+
     enable_kerberos_rc_conf::
       "Enable kerberos and kadmind in /etc/rc.conf";
 
