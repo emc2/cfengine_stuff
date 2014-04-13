@@ -122,7 +122,7 @@ bundle agent ssh_server
       service_method => nonstandard_service;
 
       # Reload the config files if they were updated
-    ssh_config_edit|usr_local_ssh_config_edit::
+    sshd_config_edit|usr_local_sshd_config_edit::
       "ssh"
       service_policy => "reload",
       service_method => nonstandard_service;
