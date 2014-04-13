@@ -1,0 +1,53 @@
+# Promise bundle for creating users.  This takes an array as an
+# argument, and creates users from the data it contains.
+#
+# This promise uses commands like useradd and pw in lieu of editing
+# passwd files.
+bundle agent create_local_users(info)
+{
+  vars:
+      "user" slist => getindices("$(info)");
+
+  classes:
+      "add_$(user)" not => userexists("$(user)");
+
+  commands:
+    linux::
+      "/usr/sbin/useradd $($(info)[$(user)][flags]) -u $($(info)[$(user)][uid]) -g $($(info)[$(user)][gid]) -d $($(info)[$(user)][home]) -s $($(info)[$(user)][shell]) -c '$($(info)[$(user)][fullname])' $(user)"
+      ifvarclass => "add_$(user)";
+
+    solaris::
+      "/usr/sbin/useradd $($(info)[$(user)][flags]) -u $($(info)[$(user)][uid]) -g $($(info)[$(user)][gid]) -d $($(info)[$(user)][home]) -s $($(info)[$(user)][shell]) -c '$($(info)[$(user)][fullname])' $(user)"
+      ifvarclass => "add_$(user)";
+
+  reports:
+      "Created user $(user)"
+      ifvarclass => "add_$(user)";
+}
+
+# Promise bundle for creating groups.  As with create_local_users, it
+# uses commands like groupadd as opposed to editing files.
+bundle agent create_local_groups(info)
+{
+  vars:
+      "group" slist => getindices("$(info)");
+
+  classes:
+      "add_$(group)" not => groupexists("$(group)");
+
+  commands:
+    linux::
+      "/usr/sbin/groupadd $($(info)[$(group)][flags]) -g $($(info)[$(group)][gid]) $(group)"
+      ifvarclass => "add_$(group)";
+
+    solaris::
+      "/usr/sbin/groupadd $($(info)[$(group)][flags]) -g $($(info)[$(group)][gid]) $(group)"
+      ifvarclass => "add_$(group)";
+
+    freebsd::
+      "/usr/sbin/pw groupadd $($(info)[$(group)][flags]) -g $($(info)[$(group)][gid]) $(group)"
+
+  reports:
+      "Created group $(group)"
+      ifvarclass => "add_$(group)";
+}

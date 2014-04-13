@@ -17,9 +17,6 @@
 bundle agent nslcd
 {
   vars:
-      # TODO: these keys currently are the same as the host keys.
-      # Change them to service-specific keys.
-
       # NSS certificate file
       "nslcd_cert_file" string => "$(sys.uqhost)-nss-cert.pem";
       # NSS key file
@@ -37,6 +34,10 @@ bundle agent nslcd
 
       # A crontab entry to refresh the kerberos credentials every 8 hours
       "nslcd_crontab_entry" string => "0       */8     *       *       *       nslcd   /usr/bin/kinit -t $(nslcd_keytab_path) $(nslcd_cred)";
+
+      # The nslcd group info
+      "nslcd_group[nslcd][gid]" string => "928";
+      "nslcd_group[nslcd][flags]" string => "";
 
     freebsd::
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
@@ -94,6 +95,10 @@ bundle agent nslcd
       edit_line => set_variable_values("nslcd.rc_conf"),
       comment => "Enable nslcd in rc.conf",
       classes => if_repaired("enable_nslcd_rc_conf");
+
+  methods:
+      # Create nslcd group
+      "nslcd_group" usebundle => create_local_groups("nslcd.nslcd_group");
 
   reports:
     nss_key::

@@ -214,6 +214,7 @@ bundle common master_config
     any::
       # List of all input files for promise bundles we use.
       "inputs" slist => { "promises/base_config.cf",
+                          "promises/user_group.cf",
                           "promises/ca_cert.cf",
                           "promises/src_conf.cf",
                           "promises/ssh.cf",
