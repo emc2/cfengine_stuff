@@ -45,7 +45,10 @@ bundle agent ssh_client
       classes => if_repaired("ssh_config_perms");
 
     freebsd::
-      # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
+      # Set variables in the client SSH configuration file in
+      # /usr/local.  Don't symlink this, but rather set all the
+      # variables.  This is in case someone's installed one of the ssh
+      # ports.
       "$(usr_local_ssh_config_path)"
       create => "true",
       perms => m("644"),
@@ -90,22 +93,37 @@ bundle agent ssh_server
       "rc_conf[sshd_enable]" string => "YES";
 
  files:
-      # Set variables in the client SSH configuration file
+      # Set variables in the server SSH configuration file
       "$(sshd_config_path)"
       create => "true",
-      perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
       comment => "Set variables in sshd_config",
       classes => if_repaired("sshd_config_edit");
 
+      # Set permissions of the server SSH configuration file
+      "$(sshd_config_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set permissions of sshd_config",
+      classes => if_repaired("sshd_config_perms");
+
     freebsd::
-      # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
+      # Set variables in the client SSH configuration file in
+      # /usr/local.  Don't symlink this, but rather set all the
+      # variables.  This is in case someone's installed one of the ssh
+      # ports.
       "$(usr_local_sshd_config_path)"
       create => "true",
-      perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
       comment => "Set variables in sshd_config",
       classes => if_repaired("usr_local_sshd_config_edit");
+
+      "$(usr_local_sshd_config_path)"
+      create => "false",
+      perms => m("644"),
+      edit_template => "$(sys.workdir)/inputs/promises/sshd_config.template",
+      comment => "Set permissions of sshd_config",
+      classes => if_repaired("usr_local_sshd_config_perms");
 
       # Make sure the sshd server is turned on
       "/etc/rc.conf"
@@ -116,7 +134,7 @@ bundle agent ssh_server
       classes => if_repaired("enable_sshd_rc_conf");
 
   services:
-      # Start the nslcd service
+      # Start the ssh service
       "ssh"
       service_policy => "start",
       service_method => nonstandard_service;
@@ -131,8 +149,14 @@ bundle agent ssh_server
     sshd_config_edit::
       "Set variables in Host * section in $(sshd_config_path)";
 
+    sshd_config_perms::
+      "Set permissions of $(sshd_config_path) to 644";
+
     usr_local_sshd_config_edit::
       "Set variables in Host * section in $(usr_local_sshd_config_path)";
+
+    usr_local_sshd_config_perms::
+      "Set permissions of $(usr_local_sshd_config_path) to 644";
 
     enable_sshd_rc_conf::
       "Enabled sshd in rc.conf";
@@ -155,6 +179,12 @@ bundle agent no_ssh_server
       edit_line => set_variable_values("no_ssh_server.rc_conf"),
       comment => "Disable nslcd in rc.conf",
       classes => if_repaired("disable_sshd_rc_conf");
+
+  services:
+      # Ensure the ssh service is not running
+      "ssh"
+      service_policy => "start",
+      service_method => nonstandard_service;
 
   reports:
     disable_sshd_rc_conf::
