@@ -129,7 +129,7 @@ bundle agent nslcd
   services:
       # Start the nslcd service
       "$(nslcd_service)"
-      service_policy => "start"
+      service_policy => "start",
       service_method => nonstandard_service;
 
   reports:
