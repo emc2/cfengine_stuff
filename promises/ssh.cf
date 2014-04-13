@@ -12,7 +12,8 @@ bundle agent ssh_config
 }
 
 # Bundle to manage the SSH configuration.  This sets configuration
-# parameters for ssh and sshd.
+# parameters for the ssh program, configuring it to use more secure
+# ciphers, and to properly manage kerberos logins.
 bundle agent ssh_client
 {
   vars:
@@ -36,6 +37,13 @@ bundle agent ssh_client
       comment => "Set variables in Host * section in ssh_config",
       classes => if_repaired("ssh_config_edit");
 
+      # Set variables in the client SSH configuration file
+      "$(ssh_config_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set variables in Host * section in ssh_config",
+      classes => if_repaired("ssh_config_perms");
+
     freebsd::
       # Set variables in the client SSH configuration file in /usr/local.  Don't symlink this, but rather set all the variables.  This is in case someone's put 
       "$(usr_local_ssh_config_path)"
@@ -45,12 +53,36 @@ bundle agent ssh_client
       comment => "Set variables in Host * section in ssh_config",
       classes => if_repaired("usr_local_ssh_config_edit");
 
+      "$(usr_local_ssh_config_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set variables in Host * section in ssh_config",
+      classes => if_repaired("usr_local_ssh_config_perms");
+
+  services:
+      # Start the nslcd service
+      "ssh"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    ssh_config_edit|usr_local_ssh_config_edit::
+      "ssh"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
   reports:
     ssh_config_edit::
       "Set variables in Host * section in $(ssh_config_path)";
 
+    ssh_config_perms::
+      "Set permissions of $(ssh_config_path) to 644";
+
     usr_local_ssh_config_edit::
       "Set variables in Host * section in $(usr_local_ssh_config_path)";
+
+    usr_local_ssh_config_perms::
+      "Set permissions of $(usr_local_ssh_config_path) to 644";
 }
 
 bundle agent ssh_server

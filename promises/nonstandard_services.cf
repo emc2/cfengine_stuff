@@ -19,6 +19,14 @@ bundle agent nonstandard_services(service, state) {
       "stakeholders[nfs]" slist => { "nfsd_in" };
 
     freebsd::
+      # sshd
+      "startcommand[ssh]" string => "/usr/sbin/service sshd start";
+      "restartcommand[ssh]" string => "/usr/sbin/service sshd restart";
+      "reloadcommand[ssh]" string => "/usr/sbin/service sshd restart";
+      "stopcommand[ssh]" string => "/usr/sbin/service sshd stop";
+      "statuscommand[ssh]" string => "/usr/sbin/service sshd status";
+
+      # nslcd
       "startcommand[nslcd]" string => "/usr/sbin/service nslcd start";
       "restartcommand[nslcd]" string => "/usr/sbin/service nslcd restart";
       "reloadcommand[nslcd]" string => "/usr/sbin/service nslcd restart";
