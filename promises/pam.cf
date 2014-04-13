@@ -22,12 +22,20 @@ bundle agent pam {
   files:
       "$(filepath_$(pam_files))"
       create => "true",
-      perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/$(template_file)",
       comment => "Set pam configuration",
       classes => if_repaired("edit_pam_conf_$(pam_files)");
 
+      "$(filepath_$(pam_files))"
+      create => "false",
+      perms => m("644"),
+      comment => "Set pam configuration",
+      classes => if_repaired("pam_conf_perms_$(pam_files)");
+
   reports:
       "Edited pam configuration in $(filepath_$(pam_files))"
       ifvarclass => "edit_pam_conf_$(pam_files)";
+
+      "Set permissions of $(filepath_$(pam_files)) to 644"
+      ifvarclass => "pam_conf_perms_$(pam_files)";
 }
