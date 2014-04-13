@@ -33,6 +33,20 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[nslcd]" string => "/usr/sbin/service nslcd stop";
       "statuscommand[nslcd]" string => "/usr/sbin/service nslcd status";
 
+      # kerberos
+      "startcommand[kerberos]" string => "/usr/sbin/service kerberos start";
+      "restartcommand[kerberos]" string => "/usr/sbin/service kerberos restart";
+      "reloadcommand[kerberos]" string => "/usr/sbin/service kerberos restart";
+      "stopcommand[kerberos]" string => "/usr/sbin/service kerberos stop";
+      "statuscommand[kerberos]" string => "/usr/sbin/service kerberos status";
+
+      # kadmin
+      "startcommand[kadmin]" string => "/usr/sbin/service kadmind start";
+      "restartcommand[kadmin]" string => "/usr/sbin/service kadmind restart";
+      "reloadcommand[kadmin]" string => "/usr/sbin/service kadmind restart";
+      "stopcommand[kadmin]" string => "/usr/sbin/service kadmind stop";
+      "statuscommand[kadmin]" string => "/usr/sbin/service kadmind status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
