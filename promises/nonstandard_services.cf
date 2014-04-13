@@ -36,7 +36,6 @@ bundle agent nonstandard_services(service, state) {
       comment => "Check if to stop a service";
 
   commands:
-    unix::
       "$(statuscommand[$(service)]) > /dev/null && echo '+$(service)_running' || echo '+$(service)_stopped'"
       contain => useshell,
       module => "true";
