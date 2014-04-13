@@ -130,6 +130,18 @@ bundle agent nslcd
       service_policy => "start",
       service_method => nonstandard_service;
 
+      # Reload the config files if they were updated
+    edit_nslcd_conf::
+      "nslcd"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the service if the keys were updated
+    nss_key|nss_cert::
+      "nslcd"
+      service_policy => "restart",
+      service_method => nonstandard_service;
+
   reports:
     nss_key::
       "Copied NSS host SSL key";
