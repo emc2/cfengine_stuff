@@ -35,6 +35,14 @@ bundle agent nslcd
       # A crontab entry to refresh the kerberos credentials every 8 hours
       "nslcd_crontab_entry" string => "0       */8     *       *       *       nslcd   /usr/bin/kinit -t $(nslcd_keytab_path) $(nslcd_cred)";
 
+      # The nslcd user info
+      "nslcd_user[nslcd][uid]" string => "928";
+      "nslcd_user[nslcd][gid]" string => "nslcd";
+      "nslcd_user[nslcd][fullname]" string => "nslcd daemon";
+      "nslcd_user[nslcd][home]" string => "$(base_config.nonexistent_dir)";
+      "nslcd_user[nslcd][shell]" string => "$(base_config.nologin_shell)";
+      "nslcd_user[nslcd][flags]" string => "";
+
       # The nslcd group info
       "nslcd_group[nslcd][gid]" string => "928";
       "nslcd_group[nslcd][flags]" string => "";
@@ -97,6 +105,9 @@ bundle agent nslcd
       classes => if_repaired("enable_nslcd_rc_conf");
 
   methods:
+      # Create nslcd user
+      "nslcd_user" usebundle => create_local_users("nslcd.nslcd_user");
+
       # Create nslcd group
       "nslcd_group" usebundle => create_local_groups("nslcd.nslcd_group");
 

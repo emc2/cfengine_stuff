@@ -20,6 +20,9 @@ bundle agent create_local_users(info)
       "/usr/sbin/useradd $($(info)[$(user)][flags]) -u $($(info)[$(user)][uid]) -g $($(info)[$(user)][gid]) -d $($(info)[$(user)][home]) -s $($(info)[$(user)][shell]) -c '$($(info)[$(user)][fullname])' $(user)"
       ifvarclass => "add_$(user)";
 
+    freebsd::
+      "/usr/sbin/pw useradd $(user) -u $($(info)[$(user)][uid]) -g $($(info)[$(user)][gid]) -d $($(info)[$(user)][home]) -s $($(info)[$(user)][shell]) -c '$($(info)[$(user)][fullname])' $($(info)[$(user)][flags])"
+
   reports:
       "Created user $(user)"
       ifvarclass => "add_$(user)";
