@@ -20,12 +20,14 @@ bundle agent pam {
       "filepath_$(pam_files)" string => "$(pam_dir)/$(pam_files)";
 
   files:
+      # Edit specific pam configuration files
       "$(filepath_$(pam_files))"
       create => "true",
       edit_template => "$(sys.workdir)/inputs/promises/$(template_file)",
       comment => "Set pam configuration",
       classes => if_repaired("edit_pam_conf_$(pam_files)");
 
+      # Set permission of pam configuration files
       "$(filepath_$(pam_files))"
       create => "false",
       perms => m("644"),
