@@ -59,18 +59,6 @@ bundle agent ssh_client
       comment => "Set variables in Host * section in ssh_config",
       classes => if_repaired("usr_local_ssh_config_perms");
 
-  services:
-      # Start the nslcd service
-      "ssh"
-      service_policy => "start",
-      service_method => nonstandard_service;
-
-      # Reload the config files if they were updated
-    ssh_config_edit|usr_local_ssh_config_edit::
-      "ssh"
-      service_policy => "reload",
-      service_method => nonstandard_service;
-
   reports:
     ssh_config_edit::
       "Set variables in Host * section in $(ssh_config_path)";
@@ -126,6 +114,18 @@ bundle agent ssh_server
       edit_line => set_variable_values("ssh_server.rc_conf"),
       comment => "Enable nslcd in rc.conf",
       classes => if_repaired("enable_sshd_rc_conf");
+
+  services:
+      # Start the nslcd service
+      "ssh"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    ssh_config_edit|usr_local_ssh_config_edit::
+      "ssh"
+      service_policy => "reload",
+      service_method => nonstandard_service;
 
   reports:
     sshd_config_edit::
