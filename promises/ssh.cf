@@ -65,6 +65,7 @@ bundle agent ssh_server
       # There is another SSH configuration file in /usr/local, if
       # anyone's installed any ssh ports (most commonly,
       # openssh-portable)
+      "usr_local_ssh_config_path" string => "/usr/local$(ssh_config_path)";
       "usr_local_sshd_config_path" string => "/usr/local$(sshd_config_path)";
 
       "rc_conf[sshd_enable]" string => "YES";
