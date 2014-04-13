@@ -52,8 +52,6 @@ bundle agent nslcd
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
       # rc vars to set
       "rc_conf[nslcd_enable]" string => "YES";
-      # service to start
-      "nslcd_service" string => "nslcd";
 
   files:
       # Set basic configuration variables in nslcd.conf
@@ -128,7 +126,7 @@ bundle agent nslcd
 
   services:
       # Start the nslcd service
-      "$(nslcd_service)"
+      "nslcd"
       service_policy => "start",
       service_method => nonstandard_service;
 
