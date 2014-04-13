@@ -16,7 +16,6 @@ bundle agent pam {
       "template_file" string => "pam.template.darwin";
 
     any::
-
       "filepath_$(pam_files)" string => "$(pam_dir)/$(pam_files)";
 
   files:
