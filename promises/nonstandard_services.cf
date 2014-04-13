@@ -21,7 +21,7 @@ bundle agent nonstandard_services(service, state) {
     freebsd::
       "startcommand[nslcd]" string => "/usr/sbin/service nslcd start";
       "restartcommand[nslcd]" string => "/usr/sbin/service nslcd restart";
-      "reloadcommand[nslcd]" string => "/usr/sbin/service nslcd reload";
+      "reloadcommand[nslcd]" string => "/usr/sbin/service nslcd restart";
       "stopcommand[nslcd]" string => "/usr/sbin/service nslcd stop";
       "statuscommand[nslcd]" string => "/usr/sbin/service nslcd status";
 
