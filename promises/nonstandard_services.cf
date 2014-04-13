@@ -1,0 +1,56 @@
+# Duplicates standard_services, expanded to handle freebsd and other
+# OSes.  Includes entries to manage services configured by this
+# package.
+body service_method nonstandard_service
+{
+      service_bundle => nonstandard_services("$(this.promiser)",
+                                             "$(this.service_policy)");
+}
+
+bundle agent nonstandard_services(service, state) {
+  vars:
+      "stakeholders[postfix]" slist => { "smtp_in" };
+      "stakeholders[ssh]" slist => { "ssh_in" };
+      "stakeholders[nfs]" slist => { "nfsd_in" };
+
+    freebsd::
+      "startcommand[nslcd]" string => "/usr/sbin/service nslcd start";
+      "restartcommand[nslcd]" string => "/usr/sbin/service nslcd restart";
+      "reloadcommand[nslcd]" string => "/usr/sbin/service nslcd reload";
+      "stopcommand[nslcd]" string => "/usr/sbin/service nslcd stop";
+      "statuscommand[nslcd]" string => "/usr/sbin/service nslcd status";
+
+  classes:
+      "start" expression => strcmp("start","$(state)"),
+      comment => "Check if to start a service";
+      "restart" expression => strcmp("restart","$(state)"),
+      comment => "Check if to restart a service";
+      "reload" expression => strcmp("reload","$(state)"),
+      comment => "Check if to reload a service";
+      "stop"  expression => strcmp("stop","$(state)"),
+      comment => "Check if to stop a service";
+
+  commands:
+    unix::
+      "$(statuscommand[$(service)]) > /dev/null && echo '+$(service)_running' || echo '+$(service)_stopped'"
+      contain => useshell,
+      module => "true";
+
+    start::
+      "$(startcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      comment => "Execute command to start the $(service) service",
+      ifvarclass => canonify("start_$(service)");
+
+    stop::
+      "$(stopcommand)"
+      comment => "Execute command to stop the $(service) service",
+      ifvarclass => "$(service)_running";
+
+    restart::
+      "$(restartcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      comment => "Execute command to restart the $(service) service";
+
+    reload::
+      "$(reloadcommand[$(service)])" -> { "@(stakeholders[$(service)])" }
+      comment => "Execute command to reload the $(service) service";
+}

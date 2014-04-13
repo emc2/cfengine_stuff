@@ -48,9 +48,12 @@ bundle agent nslcd
       "nslcd_group[nslcd][flags]" string => "";
 
     freebsd::
+      # Path to the nslcd config file
       "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
-
+      # rc vars to set
       "rc_conf[nslcd_enable]" string => "YES";
+      # service to start
+      "nslcd_service" string => "nslcd";
 
   files:
       # Set basic configuration variables in nslcd.conf
@@ -122,6 +125,12 @@ bundle agent nslcd
 
       # Create nslcd group
       "nslcd_group" usebundle => create_local_groups("nslcd.nslcd_group");
+
+  services:
+      # Start the nslcd service
+      "$(nslcd_service)"
+      service_policy => "start"
+      service_method => nonstandard_service;
 
   reports:
     nss_key::
