@@ -68,9 +68,6 @@ bundle common host_config
                       @(global_auth_clients)
                     };
 
-      # Set up kerberos-based saslauthd.
-      "sasl" or => { @(global_auth_clients) };
-
       # Set up kerberos-based PAM authentication.
       "pam" or => { @(global_auth_clients) };
 
@@ -142,7 +139,7 @@ bundle common master_config
       "ldap_client_bundles" slist => {};
 
     ldap_server::
-      "ldap_server_bundles" slist => { "ldap_server" };
+      "ldap_server_bundles" slist => { "ldap_server", "saslauthd" };
 
     !ldap_server::
       "ldap_server_bundles" slist => {};
@@ -153,10 +150,10 @@ bundle common master_config
     !pam::
       "pam_bundles" slist => {};
 
-    nslcd::
+    nslcd&!(darwin)::
       "nslcd_bundles" slist => { "nslcd" };
 
-    !nslcd::
+    !nslcd|(darwin)::
       "nslcd_bundles" slist => {};
 
     # Nothing to do for postgresql clients for now...
@@ -222,6 +219,7 @@ bundle common master_config
                           "promises/nslcd.cf",
                           "promises/pam.cf",
                           "promises/kerberos.cf",
+                          "promises/saslauthd.cf",
                           "promises/ldap.cf",
                           "promises/postgresql.cf",
                           "promises/mail.cf",
