@@ -57,11 +57,17 @@ bundle agent ldap_client
       # Copy this host's LDAP certificate file from the policy host
       "$(ldap_cert_path)"
       create => "true",
-      perms => m("644"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(ldap_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP certificate file",
       classes => if_repaired("ldap_cert");
+
+      # Set permissions on LDAP certificate file
+      "$(ldap_cert_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set LDAP certificate file permissions",
+      classes => if_repaired("ldap_cert_perms");
 
       # Copy this host's LDAP key file from the policy host
       "$(ldap_key_path)"
@@ -71,6 +77,13 @@ bundle agent ldap_client
                              "$(sys.policy_hub)"),
       comment => "Copy host LDAP key file",
       classes => if_repaired("ldap_key");
+
+      # Copy this host's LDAP key file from the policy host
+      "$(ldap_key_path)"
+      create => "false",
+      perms => m("600"),
+      comment => "Set LDAP key file permissions",
+      classes => if_repaired("ldap_key_perms");
 
   reports:
     create_ldap_conf_dir::
@@ -82,32 +95,63 @@ bundle agent ldap_client
     ldap_cert::
       "Copied LDAP SSL certificate file into place";
 
+    ldap_cert_perms::
+      "Set permissions of $(ldap_cert_path) to 644";
+
     ldap_key::
       "Copied LDAP SSL key file into place";
+
+    ldap_key_perms::
+      "Set permissions of $(ldap_key_path) to 644";
 }
 
-
+# Set up a slapd server, which permits GSSAPI logins, as well as PLAIN
+# logins that are checked against the kerberos service (using
+# saslauthd).
 bundle agent ldap_server
 {
   vars:
     freebsd::
+      # Directory where slapd modules are contained
       "ldap_module_dir" string => "/usr/local/libexec/openldap";
+      # Directory where slapd
       "ldap_run_dir" string => "/var/run/openldap";
+      # Directory where slapd database data is contained
       "ldap_db_dir" string => "/var/db/openldap-data";
+      # User under which slapd runs
       "slapd_user" string => "ldap";
+      # Group under which slapd runs
       "slapd_group" string => "ldap";
+      # Path to slapd sasl configuration file
       "sasl_config_path" string => "/usr/local/lib/sasl2/slapd.conf";
+      # Path to directory holding mux for ldapi:// connections
       "sasl_auth_mux_dir" string => "/var/run/saslauthd";
+      # Path to mux for ldapi:// connections
       "sasl_auth_mux_path" string => "$(sasl_auth_mux_dir)/mux";
+      # SASL configuration variables to set
       "sasl_config_vars" slist => { "pwcheck_method: saslauthd",
                                     "saslauthd_path: $(sasl_auth_mux_path)" };
 
+      # rc variables for enabling saslauthd and slapd
       "rc_conf[saslauthd_enable]" string => "YES";
       "rc_conf[saslauthd_flags]" string => "\"-a kerberos5\"";
       "rc_conf[slapd_enable]" string => "YES";
       "rc_conf[slapd_flags]" string => "\"-h 'ldapi:/// ldap:/// ldaps:///'\"";
       "rc_conf[slapd_sockets]" string => "/var/run/openldap/ldapi";
       "rc_conf[slapd_krb5_ktname]" string => "/etc/keytabs/ldap.keytab";
+
+      # The ldap user info
+      "ldap_user[ldap][uid]" string => "389";
+      "ldap_user[ldap][gid]" string => "ldap";
+      "ldap_user[ldap][fullname]" string => "OpenLDAP server";
+      "ldap_user[ldap][home]" string => "$(base_config.nonexistent_dir)";
+      "ldap_user[ldap][shell]" string => "$(base_config.nologin_shell)";
+      "ldap_user[ldap][flags]" string => "";
+
+      # The ldap group info
+      "ldap_group[ldap][gid]" string => "389";
+      "ldap_group[ldap][flags]" string => "";
+
 
     any::
       # Directory for ldap schemas
@@ -152,20 +196,32 @@ bundle agent ldap_server
       # Copy slapd certificate file from the policy host
       "$(slapd_cert_path)"
       create => "true",
-      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(slapd_cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy slapd certificate file",
       classes => if_repaired("slapd_cert");
 
+      # Set permissions on slapd certificate file
+      "$(slapd_cert_path)"
+      create => "false",
+      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
+      comment => "Set slapd certificate file permissions",
+      classes => if_repaired("slapd_cert_perms");
+
       # Copy slapd key file from the policy host
       "$(slapd_key_path)"
       create => "true",
-      perms => mog("600", "$(slapd_user)", "$(slapd_group)"),
       copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(slapd_key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy slapd key file",
       classes => if_repaired("slapd_key");
+
+      # Copy slapd key file from the policy host
+      "$(slapd_key_path)"
+      create => "false",
+      perms => mog("600", "$(slapd_user)", "$(slapd_group)"),
+      comment => "Set slapd key file permissions",
+      classes => if_repaired("slapd_key_perms");
 
       # Make sure the keytab has the right permissions
       "$(slapd_keytab_path)"
@@ -174,40 +230,64 @@ bundle agent ldap_server
       comment => "Set permission of slapd keytab",
       classes => if_repaired("slapd_keytab_wrong_perms");
 
-      # Create and/or edit the ldap.conf file
+      # Create and/or edit the slapd.conf file
       "$(slapd_conf_path)"
       create => "true",
-      perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/slapd.conf.template",
       comment => "Create slapd.conf file",
       classes => if_repaired("set_slapd_conf");
 
-      # Create and/or edit the ldap.conf file
+      # Create and/or edit the slapd.conf file
+      "$(slapd_conf_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set slapd.conf file permissions",
+      classes => if_repaired("slapd_conf_perms");
+
+      # Create and/or edit the slapd.access file
       "$(slapd_access_path)"
       create => "true",
-      perms => m("644"),
       edit_template => "$(sys.workdir)/inputs/promises/slapd.access.template",
       comment => "Create slapd.access file",
       classes => if_repaired("set_slapd_access");
 
+      # Set slapd.access permissions
+      "$(slapd_access_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set slapd.access file permissions",
+      classes => if_repaired("slapd_access_perms");
+
       # Create DB_CONFIG file
       "$(db_config_path)"
       create => "true",
-      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
       edit_line => append_if_no_line("set_cachesize 0 67108864 0"),
       comment => "Create DB_CONFIG file in database directory",
-      classes => if_repaired("create_db_config");
+      classes => if_repaired("edit_db_config");
+
+      # Set DB_CONFIG permissions
+      "$(db_config_path)"
+      create => "false",
+      perms => mog("644", "$(slapd_user)", "$(slapd_group)"),
+      comment => "Set DB_CONFIG file permissions",
+      classes => if_repaired("db_config_perms");
 
       # Setup sasl configuration file
       "$(sasl_config_path)"
       create => "true",
-      perms => m("644"),
       edit_line => append_if_no_lines(@(sasl_config_vars)),
-      comment => "Create sasl configuration file",
-      classes => if_repaired("create_sasl_conf");
+      comment => "Edit sasl configuration file",
+      classes => if_repaired("edit_sasl_conf");
+
+      # Set sasl configuration file permissions
+      "$(sasl_config_path)"
+      create => "false",
+      perms => m("644"),
+      comment => "Set sasl configuration file permissions",
+      classes => if_repaired("sasl_conf_perms");
 
     freebsd::
-      # Make sure the nslcd daemon is turned on
+      # Make sure the slapd daemon is turned on
       "/etc/rc.conf"
       create => "true",
       perms => mog("644", "root", "wheel"),
@@ -215,12 +295,54 @@ bundle agent ldap_server
       comment => "Enable saslauthd and slapd in rc.conf",
       classes => if_repaired("enable_slapd_rc_conf");
 
+  methods:
+      # Create ldap user
+      "ldap_user" usebundle => create_local_users("ldap_server.ldap_user");
+
+      # Create ldap group
+      "ldap_group" usebundle => create_local_groups("ldap_server.ldap_group");
+
+  services:
+      # Start the kerberos service
+      "sasl"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Start the kerberos service
+      "ldap"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the kdc config files if they were updated
+    edit_sasl_conf::
+      "sasl"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Reload the ldap config files if they were updated
+    set_slapd_conf|set_slapd_access|edit_db_config::
+      "ldap"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the ldap server if the keys change
+    slapd_key|slapd_cert::
+      "ldap"
+      service_policy => "restart",
+      service_method => nonstandard_service;
+
   reports:
-    create_sasl_conf::
+    edit_sasl_conf::
       "Edit sasl configuration in $(sasl_config_path)";
 
-    create_db_config::
+    sasl_conf_perms::
+      "Set $(sasl_config_path) permissions to 644";
+
+    edit_db_config::
       "Edited $(db_config_path) file";
+
+    db_config_perms::
+      "Set $(db_config_path) permissions";
 
     create_ldap_conf_dir::
       "Created LDAP configuration directory";
@@ -231,8 +353,14 @@ bundle agent ldap_server
     slapd_key::
       "Copied slapd SSL key";
 
+    slapd_key_perms::
+      "Set $(slapd_key_path) permissions to 600";
+
     slapd_cert::
       "Copied slapd SSL certificate";
+
+    slapd_cert_perms::
+      "Set $(slapd_cert_path) permissions to 644";
 
     slapd_keytab_wrong_perms::
       "Set permissions on $(slapd_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
@@ -240,8 +368,14 @@ bundle agent ldap_server
     set_slapd_conf::
       "Set LDAP server configuration variables";
 
+    slapd_conf_perms::
+      "Set LDAP server configuration variables";
+
     set_slapd_access::
       "Set LDAP server access policy";
+
+    slapd_access_perms::
+      "Set $(slapd_access_path) permissions to 644";
 
     enable_slapd_rc_conf::
       "Enabled slapd and saslauthd in rc.conf";
