@@ -1,0 +1,46 @@
+bundle agent saslauthd {
+  vars:
+    freebsd::
+      # rc variables
+      "rc_conf[saslauthd_enable]" string => "YES";
+      "rc_conf[saslauthd_flags]" string => "\"-a kerberos5\"";
+
+      # The sasl user info
+      "users[cyrus][uid]" string => "389";
+      "users[cyrus][gid]" string => "ldap";
+      "users[cyrus][fullname]" string => "OpenLDAP server";
+      "users[cyrus][home]" string => "$(base_config.nonexistent_dir)";
+      "users[cyrus][shell]" string => "$(base_config.nologin_shell)";
+      "users[cyrus][flags]" string => "";
+
+      # The sasl group info
+      "groups[cyrus][gid]" string => "389";
+      "groups[cyrus][flags]" string => "";
+
+  files:
+    freebsd::
+      # Make sure the saslauthd daemon is turned on
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("saslauthd.rc_conf"),
+      comment => "Enable saslauthd in rc.conf",
+      classes => if_repaired("enable_saslauthd_rc_conf");
+
+  methods:
+      # Create ldap user
+      "sasl_user" usebundle => create_local_users("saslauthd.users");
+
+      # Create ldap group
+      "sasl_group" usebundle => create_local_groups("saslauthd.groups");
+
+  services:
+      # Start the sasl service
+      "sasl"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+  reports:
+    enable_saslauthd_rc_conf::
+      "Enabled saslauthd in rc.conf";
+}
