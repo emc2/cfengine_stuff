@@ -47,6 +47,20 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[kadmin]" string => "/usr/sbin/service kadmind stop";
       "statuscommand[kadmin]" string => "/usr/sbin/service kadmind status";
 
+      # saslauthd
+      "startcommand[sasl]" string => "/usr/sbin/service saslauthd start";
+      "restartcommand[sasl]" string => "/usr/sbin/service saslauthd restart";
+      "reloadcommand[sasl]" string => "/usr/sbin/service saslauthd restart";
+      "stopcommand[sasl]" string => "/usr/sbin/service saslauthd stop";
+      "statuscommand[sasl]" string => "/usr/sbin/service saslauthd status";
+
+      # slapd
+      "startcommand[ldap]" string => "/usr/sbin/service slapd start";
+      "restartcommand[ldap]" string => "/usr/sbin/service slapd restart";
+      "reloadcommand[ldap]" string => "/usr/sbin/service slapd restart";
+      "stopcommand[ldap]" string => "/usr/sbin/service slapd stop";
+      "statuscommand[ldap]" string => "/usr/sbin/service slapd status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
