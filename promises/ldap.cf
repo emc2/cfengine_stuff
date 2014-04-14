@@ -12,7 +12,7 @@ bundle agent ldap_config
     freebsd::
       "ldap_conf_dir" string => "/usr/local/etc/openldap";
 
-    freebsd::
+    darwin::
       "ldap_conf_dir" string => "/etc/openldap";
 }
 
