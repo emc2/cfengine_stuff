@@ -11,6 +11,9 @@ bundle agent ldap_config
 
     freebsd::
       "ldap_conf_dir" string => "/usr/local/etc/openldap";
+
+    freebsd::
+      "ldap_conf_dir" string => "/etc/openldap";
 }
 
 # Set up an LDAP client with GSSAPI authentication.  This only sets up
@@ -133,8 +136,6 @@ bundle agent ldap_server
                                     "saslauthd_path: $(sasl_auth_mux_path)" };
 
       # rc variables for enabling saslauthd and slapd
-      "rc_conf[saslauthd_enable]" string => "YES";
-      "rc_conf[saslauthd_flags]" string => "\"-a kerberos5\"";
       "rc_conf[slapd_enable]" string => "YES";
       "rc_conf[slapd_flags]" string => "\"-h 'ldapi:/// ldap:/// ldaps:///'\"";
       "rc_conf[slapd_sockets]" string => "/var/run/openldap/ldapi";
@@ -292,7 +293,7 @@ bundle agent ldap_server
       create => "true",
       perms => mog("644", "root", "wheel"),
       edit_line => set_variable_values("ldap_server.rc_conf"),
-      comment => "Enable saslauthd and slapd in rc.conf",
+      comment => "Enable slapd in rc.conf",
       classes => if_repaired("enable_slapd_rc_conf");
 
   methods:
@@ -378,5 +379,5 @@ bundle agent ldap_server
       "Set $(slapd_access_path) permissions to 644";
 
     enable_slapd_rc_conf::
-      "Enabled slapd and saslauthd in rc.conf";
+      "Enabled slapd in rc.conf";
 }
