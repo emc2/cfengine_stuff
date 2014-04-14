@@ -9,6 +9,9 @@ bundle agent ssh_config
 
     freebsd::
       "ssh_config_dir" string => "/etc/ssh";
+
+    darwin::
+      "ssh_config_dir" string => "/etc/ssh";
 }
 
 # Bundle to manage the SSH configuration.  This sets configuration
