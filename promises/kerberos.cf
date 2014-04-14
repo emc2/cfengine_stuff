@@ -23,6 +23,7 @@ bundle agent kerberos_config
 
     darwin::
       "keytabs_dir" string => "/etc/keytabs";
+      "system_keytab" string => "/etc/krb5.keytab";
 }
 
 # Set up the basic kerberos realm configuration.  This assumes we're
