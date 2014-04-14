@@ -303,17 +303,17 @@ bundle agent ldap_server
       "ldap_group" usebundle => create_local_groups("ldap_server.ldap_group");
 
   services:
-      # Start the kerberos service
+      # Start the sasl service
       "sasl"
       service_policy => "start",
       service_method => nonstandard_service;
 
-      # Start the kerberos service
+      # Start the ldap service
       "ldap"
       service_policy => "start",
       service_method => nonstandard_service;
 
-      # Reload the kdc config files if they were updated
+      # Reload the sasl files if they were updated
     edit_sasl_conf::
       "sasl"
       service_policy => "reload",
