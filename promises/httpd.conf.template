@@ -136,6 +136,41 @@ Include etc/apache22/Includes/*.conf
         Require valid-user
     </Location>
 
+    <Location /jenkins/buildStatus/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/cli/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/ghprbhook/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/git/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/github-webhook/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/jnlpJars/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
+    <Location /jenkins/whoAmI/>
+      Satisfy Any
+      Allow from all
+    </Location>
+
     <FilesMatch "\.(cgi|shtml|phtml|php)$">
         SSLOptions +StdEnvVars
     </FilesMatch>
