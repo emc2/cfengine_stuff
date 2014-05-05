@@ -125,6 +125,10 @@ bundle agent ldap_server
       "slapd_user" string => "ldap";
       # Group under which slapd runs
       "slapd_group" string => "ldap";
+      # UID for slapd daemon
+      "slapd_uid" string => "389";
+      # GID for slapd daemon
+      "slapd_gid" string => "389";
       # Path to slapd sasl configuration file
       "sasl_config_path" string => "/usr/local/lib/sasl2/slapd.conf";
       # Path to directory holding mux for ldapi:// connections
@@ -141,20 +145,20 @@ bundle agent ldap_server
       "rc_conf[slapd_sockets]" string => "/var/run/openldap/ldapi";
       "rc_conf[slapd_krb5_ktname]" string => "/etc/keytabs/ldap.keytab";
 
+    any::
+
       # The ldap user info
-      "ldap_user[ldap][uid]" string => "389";
-      "ldap_user[ldap][gid]" string => "ldap";
-      "ldap_user[ldap][fullname]" string => "OpenLDAP server";
-      "ldap_user[ldap][home]" string => "$(base_config.nonexistent_dir)";
-      "ldap_user[ldap][shell]" string => "$(base_config.nologin_shell)";
-      "ldap_user[ldap][flags]" string => "";
+      "ldap_user[$(slapd_user)][uid]" string => "$(slapd_uid)";
+      "ldap_user[$(slapd_user)][gid]" string => "$(slapd_group)";
+      "ldap_user[$(slapd_user)][fullname]" string => "OpenLDAP server";
+      "ldap_user[$(slapd_user)][home]" string => "$(base_config.nonexistent_dir)";
+      "ldap_user[$(slapd_user)][shell]" string => "$(base_config.nologin_shell)";
+      "ldap_user[$(slapd_user)][flags]" string => "";
 
       # The ldap group info
-      "ldap_group[ldap][gid]" string => "389";
-      "ldap_group[ldap][flags]" string => "";
+      "ldap_group[$(slapd_group)][gid]" string => "$(slapd_gid)";
+      "ldap_group[$(slapd_group)][flags]" string => "";
 
-
-    any::
       # Directory for ldap schemas
       "slapd_schema_dir" string => "$(ldap_config.ldap_conf_dir)/schema";
 
