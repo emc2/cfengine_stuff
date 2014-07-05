@@ -61,6 +61,13 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[ldap]" string => "/usr/sbin/service slapd stop";
       "statuscommand[ldap]" string => "/usr/sbin/service slapd status";
 
+      # postgresql
+      "startcommand[postgresql]" string => "/usr/sbin/service postgresql start";
+      "restartcommand[postgresql]" string => "/usr/sbin/service postgresql restart";
+      "reloadcommand[postgresql]" string => "/usr/sbin/service postgresql restart";
+      "stopcommand[postgresql]" string => "/usr/sbin/service postgresql stop";
+      "statuscommand[postgresql]" string => "/usr/sbin/service postgresql status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
