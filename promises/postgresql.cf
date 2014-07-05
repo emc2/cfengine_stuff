@@ -12,6 +12,10 @@ bundle agent postgresql_config
     freebsd::
       # The master database directory
       "postgresql_db_dir" string => "/var/db/pgsql";
+      # The postgresql user directory
+      "postgresql_user_dir" string => "/usr/local/pgsql";
+      # The postgresql user directory
+      "postgresql_user" string => "pgsql";
 }
 
 bundle agent postgresql_server
@@ -59,10 +63,32 @@ bundle agent postgresql_server
       "postgresql_key_file" string => "server.key";
       "postgresql_key_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_key_file)";
 
+      # The postgresql user info
+      "nslcd_user[postgres][uid]" string => "70";
+      "nslcd_user[postgres][gid]" string => "$(postgresql_user)";
+      "nslcd_user[postgres][fullname]" string => "PostgreSQL pseudo-user";
+      "nslcd_user[postgres][home]" string => "$(postgresql_user_dir)";
+      "nslcd_user[postgres][shell]" string => "/bin/sh";
+      "nslcd_user[postgres][flags]" string => "";
+
     freebsd::
       # The user and group for the PostgreSQL database server.
       "postgresql_user" string => "pgsql";
       "postgresql_group" string => "pgsql";
+      "postgresql_uid" string => "70";
+      "postgresql_gid" string => "70";
+
+      # The postgresql user info
+      "postgresql_user[$(postgresql_user)][uid]" string => "$(postgresql_uid)";
+      "postgresql_user[$(postgresql_user)][gid]" string => "$(postgresql_group)";
+      "postgresql_user[$(postgresql_user)][fullname]" string => "PostgreSQL pseudo-user";
+      "postgresql_user[$(postgresql_user)][home]" string => "/usr/local/pgsql";
+      "postgresql_user[$(postgresql_user)][shell]" string => "/bin/sh";
+      "postgresql_user[$(postgresql_user)][flags]" string => "";
+
+      # The postgresql group info
+      "postgresql_group[$(postgresql_group)][gid]" string => "$(postgresql_gid)";
+      "postgresql_group[$(postgresql_group)][flags]" string => "";
 
   files:
       # Copy the CA cert into place
@@ -121,6 +147,13 @@ bundle agent postgresql_server
       perms => mog("600", "$(postgresql_user)", "$(postgresql_group)"),
       comment => "Set permission of postgresql keytab",
       classes => if_repaired("postgres_keytab_wrong_perms");
+
+  methods:
+      # Create postgresql user
+      "postgresql_user" usebundle => create_local_users("postgresql_server.postgresql_user");
+
+      # Create postgresql group
+      "postgresql_group" usebundle => create_local_groups("postgresql_server.postgresql_group");
 
   reports:
     postgres_ca_cert_copy::
