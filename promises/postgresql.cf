@@ -12,10 +12,6 @@ bundle agent postgresql_config
     freebsd::
       # The master database directory
       "postgresql_db_dir" string => "/var/db/pgsql";
-      # The postgresql user directory
-      "postgresql_user_dir" string => "/usr/local/pgsql";
-      # The postgresql user directory
-      "postgresql_user" string => "pgsql";
 }
 
 bundle agent postgresql_server
@@ -62,14 +58,6 @@ bundle agent postgresql_server
       # database directory.
       "postgresql_key_file" string => "server.key";
       "postgresql_key_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_key_file)";
-
-      # The postgresql user info
-      "nslcd_user[postgres][uid]" string => "70";
-      "nslcd_user[postgres][gid]" string => "$(postgresql_user)";
-      "nslcd_user[postgres][fullname]" string => "PostgreSQL pseudo-user";
-      "nslcd_user[postgres][home]" string => "$(postgresql_user_dir)";
-      "nslcd_user[postgres][shell]" string => "/bin/sh";
-      "nslcd_user[postgres][flags]" string => "";
 
     freebsd::
       # The user and group for the PostgreSQL database server.
