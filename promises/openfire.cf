@@ -191,6 +191,24 @@ bundle agent openfire
       # Create openfire group
       "openfire_group" usebundle => create_local_groups("openfire.groups");
 
+  services:
+      # Start the nslcd service
+      "openfire"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    set_login_conf_vars|set_base_config_vars::
+      "openfire"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the service if the keys were updated
+    keystore|truststore|client_truststore|internal_cert|internal_key|external_cert|external_key::
+      "openfire"
+      service_policy => "restart",
+      service_method => nonstandard_service;
+
   reports:
     keytab_wrong_perms::
       "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
