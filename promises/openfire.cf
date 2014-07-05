@@ -23,7 +23,7 @@ bundle agent openfire
       "group" string => "openfire";
 
     any::
-      # The nslcd user info
+      # The openfire user info
       "users[openfire][uid]" string => "342";
       "users[openfire][gid]" string => "openfire";
       "users[openfire][fullname]" string => "Openfire IM Daemon";
@@ -31,7 +31,7 @@ bundle agent openfire
       "users[openfire][shell]" string => "$(base_config.nologin_shell)";
       "users[openfire][flags]" string => "";
 
-      # The nslcd group info
+      # The openfire group info
       "groups[openfire][gid]" string => "342";
       "groups[openfire][flags]" string => "";
 
