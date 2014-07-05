@@ -59,13 +59,6 @@ bundle agent postgresql_server
       "postgresql_key_file" string => "server.key";
       "postgresql_key_path" string => "$(postgresql_config.postgresql_db_dir)/$(postgresql_key_file)";
 
-    freebsd::
-      # The user and group for the PostgreSQL database server.
-      "postgresql_user" string => "pgsql";
-      "postgresql_group" string => "pgsql";
-      "postgresql_uid" string => "70";
-      "postgresql_gid" string => "70";
-
       # The postgresql user info
       "postgresql_user[$(postgresql_user)][uid]" string => "$(postgresql_uid)";
       "postgresql_user[$(postgresql_user)][gid]" string => "$(postgresql_group)";
@@ -77,6 +70,13 @@ bundle agent postgresql_server
       # The postgresql group info
       "postgresql_group[$(postgresql_group)][gid]" string => "$(postgresql_gid)";
       "postgresql_group[$(postgresql_group)][flags]" string => "";
+
+    freebsd::
+      # The user and group for the PostgreSQL database server.
+      "postgresql_user" string => "pgsql";
+      "postgresql_group" string => "pgsql";
+      "postgresql_uid" string => "70";
+      "postgresql_gid" string => "70";
 
   files:
       # Copy the CA cert into place
