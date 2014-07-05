@@ -1,3 +1,4 @@
+# Set up the openfire XMPP server
 bundle agent openfire
 {
   vars:
@@ -22,6 +23,18 @@ bundle agent openfire
       "group" string => "openfire";
 
     any::
+      # The nslcd user info
+      "nslcd_user[openfire][uid]" string => "342";
+      "nslcd_user[openfire][gid]" string => "openfire";
+      "nslcd_user[openfire][fullname]" string => "Openfire IM Daemon";
+      "nslcd_user[openfire][home]" string => "$(base_config.nonexistent_dir)";
+      "nslcd_user[openfire][shell]" string => "$(base_config.nologin_shell)";
+      "nslcd_user[openfire][flags]" string => "";
+
+      # The nslcd group info
+      "nslcd_group[openfire][gid]" string => "342";
+      "nslcd_group[openfire][flags]" string => "";
+
       # The keystore file
       "keystore_file" string => "keystore";
       "keystore_path" string => "$(conf_dir)/$(keystore_file)";
@@ -170,6 +183,13 @@ bundle agent openfire
       copy_from => local_cp("$(port_postgres_jar)"),
       comment => "Install PostgreSQL JDBC driver",
       classes => if_repaired("postgresql_jdbc_driver");
+
+  methods:
+      # Create openfire user
+      "openfire_user" usebundle => create_local_users("openfire.user");
+
+      # Create openfire group
+      "openfire_group" usebundle => create_local_groups("openfire.group");
 
   reports:
     keytab_wrong_perms::
