@@ -68,6 +68,13 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[postgresql]" string => "/usr/sbin/service postgresql stop";
       "statuscommand[postgresql]" string => "/usr/sbin/service postgresql status";
 
+      # openfire
+      "startcommand[openfire]" string => "/usr/sbin/service openfire start";
+      "restartcommand[openfire]" string => "/usr/sbin/service openfire restart";
+      "reloadcommand[openfire]" string => "/usr/sbin/service openfire restart";
+      "stopcommand[openfire]" string => "/usr/sbin/service openfire stop";
+      "statuscommand[openfire]" string => "/usr/sbin/service openfire status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
