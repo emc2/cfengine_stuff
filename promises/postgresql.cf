@@ -143,6 +143,24 @@ bundle agent postgresql_server
       # Create postgresql group
       "postgresql_group" usebundle => create_local_groups("postgresql_server.postgresql_group");
 
+  services:
+      # Start the nslcd service
+      "postgresql"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    edit_postgreql_conf|postgres_hba_copy::
+      "postgresql"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the service if the keys were updated
+    postgres_ca_cert_copy|postgres_ca_crl_copy|postgres_cert_copy|postgres_key_copy::
+      "postgresql"
+      service_policy => "restart",
+      service_method => nonstandard_service;
+
   reports:
     postgres_ca_cert_copy::
       "Copied CA cert into $(postgresql_config.postgresql_db_dir)";
