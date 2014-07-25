@@ -75,6 +75,20 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[openfire]" string => "/usr/sbin/service openfire stop";
       "statuscommand[openfire]" string => "/usr/sbin/service openfire status";
 
+      # postfix
+      "startcommand[postfix]" string => "/usr/sbin/service postfix start";
+      "restartcommand[postfix]" string => "/usr/sbin/service postfix restart";
+      "reloadcommand[postfix]" string => "/usr/sbin/service postfix restart";
+      "stopcommand[postfix]" string => "/usr/sbin/service postfix stop";
+      "statuscommand[postfix]" string => "/usr/sbin/service postfix status";
+
+      # dovecot
+      "startcommand[dovecot]" string => "/usr/sbin/service dovecot start";
+      "restartcommand[dovecot]" string => "/usr/sbin/service dovecot restart";
+      "reloadcommand[dovecot]" string => "/usr/sbin/service dovecot restart";
+      "stopcommand[dovecot]" string => "/usr/sbin/service dovecot stop";
+      "statuscommand[dovecot]" string => "/usr/sbin/service dovecot status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
