@@ -16,8 +16,10 @@ bundle agent base_config
       "key_files_path" string => "/etc/ssl/private";
       # System-wide crontab file
       "system_crontab" string => "/etc/crontab";
-      # Name of a nonexistent directroy to give to system accounts
+      # Name of a nonexistent directory to give to system accounts
       "nonexistent_dir" string => "/nonexistent";
+      # Name of an empty directory to give to system accounts
+      "empty_dir" string => "/var/empty";
       # Name of the shell program for users without shell access
       "nologin_shell" string => "/usr/sbin/nologin";
 
@@ -27,6 +29,7 @@ bundle agent base_config
       "key_files_path" string => "/etc/ssl/private";
       "system_crontab" string => "/etc/crontab";
       "nonexistent_dir" string => "/nonexistent";
+      "empty_dir" string => "/var/empty";
       "nologin_shell" string => "/usr/sbin/nologin";
       
 }
