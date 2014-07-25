@@ -12,6 +12,10 @@ bundle agent postfix
       "command_dir" string => "/usr/local/sbin";
       "daemon_dir" string => "/usr/local/libexec/postfix";
       "data_dir" string => "/var/db/postfix";
+      "postfix_user" string => "postfix";
+      "postfix_group" string => "postfix";
+      "postfix_uid" string => "125";
+      "postfix_gid" string => "125";
 
       "rc_conf[sendmail_enable]" string => "NO";
       "rc_conf[sendmail_submit_enable]" string => "NO";
@@ -26,6 +30,18 @@ bundle agent postfix
       "mailq_path" string => "/usr/local/bin/mailq";
 
     any::
+      # The postfix user info
+      "user[$(postfix_user)][uid]" string => "$(postfix_uid)";
+      "user[$(postfix_user)][gid]" string => "$(postfix_group)";
+      "user[$(postfix_user)][fullname]" string => "OpenLDAP server";
+      "user[$(postfix_user)][home]" string => "$(queue_dir)";
+      "user[$(postfix_user)][shell]" string => "$(base_config.nologin_shell)";
+      "user[$(postfix_user)][flags]" string => "";
+
+      # The postfix group info
+      "group[$(postfix_group)][gid]" string => "$(postfix_gid)";
+      "group[$(postfix_group)][flags]" string => "";
+
       # Filename for ldap configuration file
       "postfix_master_cf_file" string => "master.cf";
       # Path to ldap configuration file
@@ -166,6 +182,31 @@ bundle agent postfix
       edit_line => set_variable_values("postfix.rc_conf"),
       comment => "Enable postfix in rc.conf",
       classes => if_repaired("enable_postfix_rc_conf");
+
+  methods:
+      # Create postfix user
+      "postfix_user" usebundle => create_local_users("postfix.user");
+
+      # Create postfix group
+      "postfix_group" usebundle => create_local_groups("postfix.group");
+
+  services:
+      # Start the postfix service
+      "postfix"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the postfix config files if they were updated
+    set_postfix_ldap_vars|set_postfix_main_vars|set_postfix_master_cf::
+      "postfix"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the postfix server if the keys change
+    postfix_internal_key|postfix_internal_cert|postfix_external_key|postfix_external_cert::
+      "postfix"
+      service_policy => "restart",
+      service_method => nonstandard_service;
 
   reports:
     postfix_internal_key::
