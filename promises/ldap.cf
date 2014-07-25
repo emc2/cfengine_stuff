@@ -129,7 +129,7 @@ bundle agent ldap_server
       "slapd_uid" string => "389";
       # GID for slapd daemon
       "slapd_gid" string => "389";
-      # Add the user to the mail group
+      # Add the user to the mail group, to allow access to saslauthd mux
       "slapd_user_flags" string => "-G mail";
       # Path to slapd sasl configuration file
       "sasl_config_path" string => "/usr/local/lib/sasl2/slapd.conf";
