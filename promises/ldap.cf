@@ -129,6 +129,8 @@ bundle agent ldap_server
       "slapd_uid" string => "389";
       # GID for slapd daemon
       "slapd_gid" string => "389";
+      # Add the user to the mail group
+      "slapd_user_flags" string => "-G mail";
       # Path to slapd sasl configuration file
       "sasl_config_path" string => "/usr/local/lib/sasl2/slapd.conf";
       # Path to directory holding mux for ldapi:// connections
@@ -153,7 +155,7 @@ bundle agent ldap_server
       "ldap_user[$(slapd_user)][fullname]" string => "OpenLDAP server";
       "ldap_user[$(slapd_user)][home]" string => "$(base_config.nonexistent_dir)";
       "ldap_user[$(slapd_user)][shell]" string => "$(base_config.nologin_shell)";
-      "ldap_user[$(slapd_user)][flags]" string => "";
+      "ldap_user[$(slapd_user)][flags]" string => "$(slapd_user_flags)";
 
       # The ldap group info
       "ldap_group[$(slapd_group)][gid]" string => "$(slapd_gid)";
