@@ -198,7 +198,7 @@ bundle agent openfire
       service_method => nonstandard_service;
 
       # Reload the config files if they were updated
-    set_login_conf_vars|set_base_config_vars::
+    set_login_conf_vars::
       "openfire"
       service_policy => "reload",
       service_method => nonstandard_service;
