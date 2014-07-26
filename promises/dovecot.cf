@@ -7,11 +7,48 @@ bundle agent dovecot
 {
   vars:
     freebsd::
+      # Dovecot config dir
       "dovecot_conf_dir" string => "/usr/local/etc/dovecot";
-
+      # Set rc.conf variable to enable dovecot
       "rc_conf[dovecot_enable]" string => "YES";
+      # Dovecot user name
+      "dovecot_user_name" string => "dovecot";
+      # Dovecot user groupname
+      "dovecot_user_group" string => "dovecot";
+      # Dovecot user uid
+      "dovecot_user_uid" string => "143";
+      # Dovecot user gid
+      "dovecot_user_gid" string => "143";
+      # Dovecot login user name
+      "dovecot_login_name" string => "dovenull";
+      # Dovecot login group name
+      "dovecot_login_group" string => "dovenull";
+      # Dovecot login user uid
+      "dovecot_login_uid" string => "144";
+      # Dovecot login user gid
+      "dovecot_login_gid" string => "144";
 
     any::
+      # The dovecot user info
+      "user[$(dovecot_user_name)][uid]" string => "$(dovecot_user_uid)";
+      "user[$(dovecot_user_name)][gid]" string => "$(dovecot_user_group)";
+      "user[$(dovecot_user_name)][fullname]" string => "Dovecot user";
+      "user[$(dovecot_user_name)][home]" string => "$(base_config.empty_dir)";
+      "user[$(dovecot_user_name)][shell]" string => "$(base_config.nologin_shell)";
+      "user[$(dovecot_user_name)][flags]" string => "-G mail";
+      "user[$(dovecot_login_name)][uid]" string => "$(dovecot_login_uid)";
+      "user[$(dovecot_login_name)][gid]" string => "$(dovecot_login_group)";
+      "user[$(dovecot_login_name)][fullname]" string => "Dovecot login";
+      "user[$(dovecot_login_name)][home]" string => "$(base_config.empty_dir)";
+      "user[$(dovecot_login_name)][shell]" string => "$(base_config.nologin_shell)";
+      "user[$(dovecot_login_name)][flags]" string => "";
+
+      # The govecot group info
+      "group[$(postfix_user_group)][gid]" string => "$(postfix_user_gid)";
+      "group[$(postfix_user_group)][flags]" string => "";
+      "group[$(postfix_login_group)][gid]" string => "$(postfix_login_gid)";
+      "group[$(postfix_login_group)][flags]" string => "";
+
       # Filename for dovecot configuration file
       "dovecot_conf_file" string => "dovecot.conf";
       # Path to dovecot configuration file
@@ -134,6 +171,31 @@ bundle agent dovecot
       edit_line => set_variable_values("dovecot.rc_conf"),
       comment => "Enable dovecot in rc.conf",
       classes => if_repaired("enable_dovecot_rc_conf");
+
+  methods:
+      # Create dovecot user
+      "dovecot_user" usebundle => create_local_users("dovecot.user");
+
+      # Create dovecot group
+      "dovecot_group" usebundle => create_local_groups("dovecot.group");
+
+  services:
+      # Start the dovecot service
+      "dovecot"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the dovecot config files if they were updated
+    set_dovecot_ldap_vars|set_dovecot_vars::
+      "dovecot"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+      # Restart the dovecot server if the keys change
+    dovecot_internal_key|dovecot_internal_cert|dovecot_external_key|dovecot_external_cert::
+      "dovecot"
+      service_policy => "restart",
+      service_method => nonstandard_service;
 
   reports:
     dovecot_internal_key::
