@@ -183,12 +183,6 @@ bundle agent no_ssh_server
       comment => "Disable nslcd in rc.conf",
       classes => if_repaired("disable_sshd_rc_conf");
 
-  services:
-      # Ensure the ssh service is not running
-      "ssh"
-      service_policy => "start",
-      service_method => nonstandard_service;
-
   reports:
     disable_sshd_rc_conf::
       "Disabled sshd in rc.conf";
