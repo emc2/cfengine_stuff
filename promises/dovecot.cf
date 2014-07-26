@@ -173,11 +173,11 @@ bundle agent dovecot
       classes => if_repaired("enable_dovecot_rc_conf");
 
   methods:
-      # Create dovecot user
-      "dovecot_user" usebundle => create_local_users("dovecot.user");
-
       # Create dovecot group
       "dovecot_group" usebundle => create_local_groups("dovecot.group");
+
+      # Create dovecot user
+      "dovecot_user" usebundle => create_local_users("dovecot.user");
 
   services:
       # Start the dovecot service
