@@ -137,11 +137,11 @@ bundle agent postgresql_server
       classes => if_repaired("postgres_keytab_wrong_perms");
 
   methods:
-      # Create postgresql user
-      "postgresql_user" usebundle => create_local_users("postgresql_server.postgresql_user");
-
       # Create postgresql group
       "postgresql_group" usebundle => create_local_groups("postgresql_server.postgresql_group");
+
+      # Create postgresql user
+      "postgresql_user" usebundle => create_local_users("postgresql_server.postgresql_user");
 
   services:
       # Start the nslcd service

@@ -185,11 +185,11 @@ bundle agent openfire
       classes => if_repaired("postgresql_jdbc_driver");
 
   methods:
-      # Create openfire user
-      "openfire_user" usebundle => create_local_users("openfire.users");
-
       # Create openfire group
       "openfire_group" usebundle => create_local_groups("openfire.groups");
+
+      # Create openfire user
+      "openfire_user" usebundle => create_local_users("openfire.users");
 
   services:
       # Start the nslcd service

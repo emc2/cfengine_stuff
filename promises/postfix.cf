@@ -36,7 +36,7 @@ bundle agent postfix
       "user[$(postfix_user)][fullname]" string => "postfix mail server";
       "user[$(postfix_user)][home]" string => "$(queue_dir)";
       "user[$(postfix_user)][shell]" string => "$(base_config.nologin_shell)";
-      "user[$(postfix_user)][flags]" string => "";
+      "user[$(postfix_user)][flags]" string => "-G mail";
 
       # The postfix group info
       "group[$(postfix_group)][gid]" string => "$(postfix_gid)";
@@ -184,11 +184,11 @@ bundle agent postfix
       classes => if_repaired("enable_postfix_rc_conf");
 
   methods:
-      # Create postfix user
-      "postfix_user" usebundle => create_local_users("postfix.user");
-
       # Create postfix group
       "postfix_group" usebundle => create_local_groups("postfix.group");
+
+      # Create postfix user
+      "postfix_user" usebundle => create_local_users("postfix.user");
 
   services:
       # Start the postfix service
