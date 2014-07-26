@@ -118,11 +118,11 @@ bundle agent nslcd
       classes => if_repaired("enable_nslcd_rc_conf");
 
   methods:
-      # Create nslcd user
-      "nslcd_user" usebundle => create_local_users("nslcd.nslcd_user");
-
       # Create nslcd group
       "nslcd_group" usebundle => create_local_groups("nslcd.nslcd_group");
+
+      # Create nslcd user
+      "nslcd_user" usebundle => create_local_users("nslcd.nslcd_user");
 
   services:
       # Start the nslcd service
