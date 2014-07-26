@@ -33,7 +33,7 @@ bundle agent postfix
       # The postfix user info
       "user[$(postfix_user)][uid]" string => "$(postfix_uid)";
       "user[$(postfix_user)][gid]" string => "$(postfix_group)";
-      "user[$(postfix_user)][fullname]" string => "OpenLDAP server";
+      "user[$(postfix_user)][fullname]" string => "postfix mail server";
       "user[$(postfix_user)][home]" string => "$(queue_dir)";
       "user[$(postfix_user)][shell]" string => "$(base_config.nologin_shell)";
       "user[$(postfix_user)][flags]" string => "";
