@@ -44,9 +44,9 @@ bundle agent dovecot
       "user[$(dovecot_login_name)][flags]" string => "";
 
       # The govecot group info
-      "group[$(dovecot_user_group)][gid]" string => "$(postfix_user_gid)";
+      "group[$(dovecot_user_group)][gid]" string => "$(dovecot_user_gid)";
       "group[$(dovecot_user_group)][flags]" string => "";
-      "group[$(dovecot_login_group)][gid]" string => "$(postfix_login_gid)";
+      "group[$(dovecot_login_group)][gid]" string => "$(dovecot_login_gid)";
       "group[$(dovecot_login_group)][flags]" string => "";
 
       # Filename for dovecot configuration file
