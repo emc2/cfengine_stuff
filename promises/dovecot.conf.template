@@ -43,6 +43,12 @@ service auth {
 [%CFEngine END %]
 
 [%CFEngine BEGIN %]
+service auth-worker {
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
 service imap-login {
   chroot = login
   user = dovecot
