@@ -20,20 +20,22 @@ bundle agent openfire
 
       # User and group
       "user" string => "openfire";
+      "uid" string => "342";
       "group" string => "openfire";
+      "gid" string => "342";
 
     any::
       # The openfire user info
-      "users[openfire][uid]" string => "342";
-      "users[openfire][gid]" string => "openfire";
-      "users[openfire][fullname]" string => "Openfire IM Daemon";
-      "users[openfire][home]" string => "$(base_config.nonexistent_dir)";
-      "users[openfire][shell]" string => "$(base_config.nologin_shell)";
-      "users[openfire][flags]" string => "";
+      "users[$(user)][uid]" string => "$(uid)";
+      "users[$(user)][gid]" string => "$(group)";
+      "users[$(user)][fullname]" string => "Openfire IM Daemon";
+      "users[$(user)][home]" string => "$(base_config.nonexistent_dir)";
+      "users[$(user)][shell]" string => "$(base_config.nologin_shell)";
+      "users[$(user)][flags]" string => "";
 
       # The openfire group info
-      "groups[openfire][gid]" string => "342";
-      "groups[openfire][flags]" string => "";
+      "groups[$(group)][gid]" string => "$(uid)";
+      "groups[$(group)][flags]" string => "";
 
       # The keystore file
       "keystore_file" string => "keystore";
