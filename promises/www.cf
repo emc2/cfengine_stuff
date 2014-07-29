@@ -1,0 +1,28 @@
+# A bundle that creates the www user and group.  This is separate from
+# the apache bundle, because tomcat and jenkins also require this.
+bundle agent www
+{
+  vars:
+      # User and group
+      "user" string => "www";
+      "group" string => "www";
+
+      # The nslcd user info
+      "users[$(user)][uid]" string => "80";
+      "users[$(user)][gid]" string => "$(group)";
+      "users[$(user)][fullname]" string => "World Wide Web Owner";
+      "users[$(user)][home]" string => "$(base_config.nonexistent_dir)";
+      "users[$(user)][shell]" string => "$(base_config.nologin_shell)";
+      "users[$(user)][flags]" string => "";
+
+      # The nslcd group info
+      "groups[$(group)][gid]" string => "80";
+      "groups[$(group)][flags]" string => "";
+
+  methods:
+      # Create nslcd group
+      "www_group" usebundle => create_local_groups("www.groups");
+
+      # Create nslcd user
+      "www_user" usebundle => create_local_users("www.users");
+}

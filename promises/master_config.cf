@@ -182,22 +182,22 @@ bundle common master_config
       "xmpp_server_bundles" slist => {};
 
     apache_server::
-      "apache_server_bundles" slist => { "apache" };
+      "apache_server_bundles" slist => { "www", "apache" };
 
     !apache_server::
       "apache_server_bundles" slist => {};
 
     tomcat_server::
-      "tomcat_server_bundles" slist => { "tomcat" };
+      "tomcat_server_bundles" slist => { "www", "tomcat" };
 
     !tomcat_server::
       "tomcat_server_bundles" slist => {};
 
     jenkins_master::
-      "jenkins_bundles" slist => {};
+      "jenkins_bundles" slist => { "www" };
 
     !jenkins_master&jenkins_slave::
-      "jenkins_bundles" slist => {};
+      "jenkins_bundles" slist => { "www" };
 
     !jenkins_master&!jenkins_slave::
       "jenkins_bundles" slist => {};
@@ -226,6 +226,7 @@ bundle common master_config
                           "promises/dovecot.cf",
                           "promises/postfix.cf",
                           "promises/openfire.cf",
+                          "promises/www.cf",
                           "promises/apache.cf",
                           "promises/tomcat.cf"
                         };
