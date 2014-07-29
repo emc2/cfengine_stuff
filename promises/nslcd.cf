@@ -17,45 +17,52 @@
 bundle agent nslcd
 {
   vars:
-      # NSS certificate file
-      "nslcd_cert_file" string => "$(sys.uqhost)-nss-cert.pem";
-      # NSS key file
-      "nslcd_key_file" string => "$(sys.uqhost)-nss-key.pem";
-      # Path to NSS certificate file
-      "nslcd_cert_path" string => "$(base_config.cert_files_path)/$(nslcd_cert_file)";
-      # Path to NSS key file
-      "nslcd_key_path" string => "$(base_config.key_files_path)/$(nslcd_key_file)";
-      # NSS kerberos credential
-      "nslcd_cred" string => "nss/$(sys.fqhost)";
-      # NSS keytab file
-      "nslcd_keytab_file" string => "nss.keytab";
-      # Path to NSS keytab
-      "nslcd_keytab_path" string => "$(kerberos_config.keytabs_dir)/$(nslcd_keytab_file)";
-
-      # A crontab entry to refresh the kerberos credentials every 8 hours
-      "nslcd_crontab_entry" string => "0       */8     *       *       *       nslcd   /usr/bin/kinit -t $(nslcd_keytab_path) $(nslcd_cred)";
-
-      # The nslcd user info
-      "nslcd_user[nslcd][uid]" string => "928";
-      "nslcd_user[nslcd][gid]" string => "nslcd";
-      "nslcd_user[nslcd][fullname]" string => "nslcd daemon";
-      "nslcd_user[nslcd][home]" string => "$(base_config.nonexistent_dir)";
-      "nslcd_user[nslcd][shell]" string => "$(base_config.nologin_shell)";
-      "nslcd_user[nslcd][flags]" string => "";
-
-      # The nslcd group info
-      "nslcd_group[nslcd][gid]" string => "928";
-      "nslcd_group[nslcd][flags]" string => "";
-
     freebsd::
+      # User and group info
+      "user" string => "nslcd";
+      "uid" string => "928"
+      "group" string => "nslcd";
+      "gid" string => "928"
+
       # Path to the nslcd config file
-      "nslcd_conf_path" string => "/usr/local/etc/nslcd.conf";
+      "conf_path" string => "/usr/local/etc/nslcd.conf";
       # rc vars to set
       "rc_conf[nslcd_enable]" string => "YES";
 
+    any::
+      # NSS certificate file
+      "cert_file" string => "$(sys.uqhost)-nss-cert.pem";
+      # NSS key file
+      "key_file" string => "$(sys.uqhost)-nss-key.pem";
+      # Path to NSS certificate file
+      "cert_path" string => "$(base_config.cert_files_path)/$(cert_file)";
+      # Path to NSS key file
+      "key_path" string => "$(base_config.key_files_path)/$(key_file)";
+      # NSS kerberos credential
+      "kerberos_cred" string => "nss/$(sys.fqhost)";
+      # NSS keytab file
+      "keytab_file" string => "nss.keytab";
+      # Path to NSS keytab
+      "keytab_path" string => "$(kerberos_config.keytabs_dir)/$(keytab_file)";
+
+      # A crontab entry to refresh the kerberos credentials every 8 hours
+      "nslcd_crontab_entry" string => "0       */8     *       *       *       $(user)   /usr/bin/kinit -t $(keytab_path) $(kerberos_cred)";
+
+      # The nslcd user info
+      "users[$(user)][uid]" string => "$(uid)";
+      "users[$(user)][gid]" string => "$(group)";
+      "users[$(user)][fullname]" string => "nslcd daemon";
+      "users[$(user)][home]" string => "$(base_config.nonexistent_dir)";
+      "users[$(user)][shell]" string => "$(base_config.nologin_shell)";
+      "users[$(user)][flags]" string => "";
+
+      # The nslcd group info
+      "groups[$(group)][gid]" string => "$(gid)";
+      "groups[$(group)][flags]" string => "";
+
   files:
       # Set basic configuration variables in nslcd.conf
-      "$(nslcd_conf_path)"
+      "$(conf_path)"
       create => "true",
       perms => m("600"),
       edit_template => "$(sys.workdir)/inputs/promises/nslcd.conf.template",
@@ -72,39 +79,39 @@ bundle agent nslcd
       classes => if_repaired("set_nslcd_crontab");
 
       # Copy this host's NSS certificate file from the policy host
-      "$(nslcd_cert_path)"
+      "$(cert_path)"
       create => "true",
-      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_cert_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(cert_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS certificate file",
       classes => if_repaired("nss_cert");
 
       # Set permissions of the NSS certificate file
-      "$(nslcd_cert_path)"
+      "$(cert_path)"
       create => "false",
-      perms => mog("644", "nslcd", "nslcd"),
+      perms => mog("644", "$(user)", "$(group)"),
       comment => "Set NSS certificate file permissions",
       classes => if_repaired("nss_cert_perms");
 
       # Make sure the keytab has the right permissions
-      "$(nslcd_keytab_path)"
+      "$(keytab_path)"
       create => "false",
-      perms => mog("600", "nslcd", "nslcd"),
+      perms => mog("600", "$(user)", "$(group)"),
       comment => "Set permission of NSS keytab",
       classes => if_repaired("nss_keytab_wrong_perms");
 
       # Copy this host's NSS key file from the policy host
-      "$(nslcd_key_path)"
+      "$(key_path)"
       create => "true",
-      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(nslcd_key_file)",
+      copy_from => secure_cp("$(base_config.file_store)/$(sys.uqhost)/$(key_file)",
                              "$(sys.policy_hub)"),
       comment => "Copy host NSS key file",
       classes => if_repaired("nss_key");
 
       # Set permissions of the NSS key file
-      "$(nslcd_key_path)"
+      "$(key_path)"
       create => "false",
-      perms => mog("600", "nslcd", "nslcd"),
+      perms => mog("600", "$(user)", "$(group)"),
       comment => "Set NSS key file permissions",
       classes => if_repaired("nss_key_perms");
 
@@ -119,10 +126,10 @@ bundle agent nslcd
 
   methods:
       # Create nslcd group
-      "nslcd_group" usebundle => create_local_groups("nslcd.nslcd_group");
+      "nslcd_group" usebundle => create_local_groups("nslcd.groups");
 
       # Create nslcd user
-      "nslcd_user" usebundle => create_local_users("nslcd.nslcd_user");
+      "nslcd_user" usebundle => create_local_users("nslcd.users");
 
   services:
       # Start the nslcd service
@@ -150,19 +157,19 @@ bundle agent nslcd
       "Copied NSS host SSL certificate";
 
     nss_key_perms::
-      "Set $(nslcd_key_path) permissions to 600";
+      "Set $(key_path) permissions to 600";
 
     nss_cert_perms::
-      "Set $(nslcd_cert_path) permissions to 644";
+      "Set $(cert_path) permissions to 644";
 
     edit_nslcd_conf::
-      "Set configuration variables in $(nslcd_conf_path)";
+      "Set configuration variables in $(conf_path)";
 
     set_nslcd_crontab::
       "Set crontab entry to refresh nslcd credentials periodically";
 
     nss_keytab_wrong_perms::
-      "Set permissions on $(nslcd_keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
+      "Set permissions on $(keytab_path).  WARNING: Keytab had wrong permissions; possible data breach!";
 
     enable_nslcd_rc_conf::
       "Enabled nslcd in rc.conf";
