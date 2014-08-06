@@ -20,9 +20,9 @@ bundle agent nslcd
     freebsd::
       # User and group info
       "user" string => "nslcd";
-      "uid" string => "928"
+      "uid" string => "928";
       "group" string => "nslcd";
-      "gid" string => "928"
+      "gid" string => "928";
 
       # Path to the nslcd config file
       "conf_path" string => "/usr/local/etc/nslcd.conf";
