@@ -9,8 +9,8 @@ bundle agent apache
       "log_dir" string => "/var/log";
 
       # User and group
-      "user" string => "www";
-      "group" string => "www";
+      "user" string => "$(www.user)";
+      "group" string => "$(www.group)";
 
       "rc_conf[apache22_enable]" string => "YES";
 
