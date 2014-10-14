@@ -303,11 +303,11 @@ bundle agent ldap_server
       classes => if_repaired("enable_slapd_rc_conf");
 
   methods:
-      # Create ldap user
-      "ldap_user" usebundle => create_local_users("ldap_server.ldap_user");
-
       # Create ldap group
       "ldap_group" usebundle => create_local_groups("ldap_server.ldap_group");
+
+      # Create ldap user
+      "ldap_user" usebundle => create_local_users("ldap_server.ldap_user");
 
   services:
       # Start the sasl service
