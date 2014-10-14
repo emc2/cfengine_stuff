@@ -135,8 +135,8 @@ bundle agent kerberos_server
     freebsd::
       # Variables for rc.conf, to enable the kerberos and kadmin
       # server.
-      "rc_conf[kerberos5_server_enable]" string => "YES";
-      "rc_conf[kadmind5_server_enable]" string => "YES";
+      "rc_conf[kdc_enable]" string => "YES";
+      "rc_conf[kadmind_enable]" string => "YES";
 
       "startcommand[kerberos]" string => "/etc/rc.d/kerberos";
       "startcommand[kadmind]" string => "/etc/rc.d/kadmind";

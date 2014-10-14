@@ -34,11 +34,11 @@ bundle agent nonstandard_services(service, state) {
       "statuscommand[nslcd]" string => "/usr/sbin/service nslcd status";
 
       # kerberos
-      "startcommand[kerberos]" string => "/usr/sbin/service kerberos start";
-      "restartcommand[kerberos]" string => "/usr/sbin/service kerberos restart";
-      "reloadcommand[kerberos]" string => "/usr/sbin/service kerberos restart";
-      "stopcommand[kerberos]" string => "/usr/sbin/service kerberos stop";
-      "statuscommand[kerberos]" string => "/usr/sbin/service kerberos status";
+      "startcommand[kerberos]" string => "/usr/sbin/service kdc start";
+      "restartcommand[kerberos]" string => "/usr/sbin/service kdc restart";
+      "reloadcommand[kerberos]" string => "/usr/sbin/service kdc restart";
+      "stopcommand[kerberos]" string => "/usr/sbin/service kdc stop";
+      "statuscommand[kerberos]" string => "/usr/sbin/service kdc status";
 
       # kadmin
       "startcommand[kadmin]" string => "/usr/sbin/service kadmind start";
