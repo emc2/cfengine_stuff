@@ -7,7 +7,7 @@ bundle agent pam {
       # The directory containing pam files
       "pam_dir" string => "/etc/pam.d";
       # The files that need updating
-      "pam_files" slist => { "system" };
+      "pam_files" slist => { "system", "imap", "pop3" };
       "template_file" string => "pam.template.freebsd";
 
     darwin::
