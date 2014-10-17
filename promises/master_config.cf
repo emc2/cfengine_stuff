@@ -12,6 +12,9 @@ bundle common host_config
       # The PostgreSQL database server
       "postgresql_server" string => "higgs";
 
+      # Proxies
+      "proxies" string => "proxy";
+
       # Clients for globally-controlled LDAP+Kerberos authentication.
       # These clients get Kerberized/LDAPized NSS and PAM.  Note: a
       # lot of the rest of this configuration assumes these bundles
@@ -100,9 +103,12 @@ bundle common host_config
 
       # Set up a server running a jenkins master
       "jenkins_master" expression => "$(jenkins_master)";
+
+      # Set up a tor node
+      "tor_node" expression => "$(proxies)"
 }
 
-bundle common master_config 
+bundle common master_config
 {
   vars:
       # EVERYBODY gets their ssh client updated...
@@ -202,6 +208,24 @@ bundle common master_config
     !jenkins_master&!jenkins_slave::
       "jenkins_bundles" slist => {};
 
+    tor_node::
+      "tor_bundles" slist => { "tor" };
+
+    !tor_node::
+      "tor_bundles" slist => {};
+
+    privoxy_node::
+      "privoxy_bundles" slist => { "privoxy" };
+
+    !privoxy_node::
+      "privoxy_bundles" slist => {};
+
+    squid_node::
+      "squid_bundles" slist => { "squid" };
+
+    !squid_node::
+      "squid_bundles" slist => {};
+
     freebsd::
       "os_bundles" slist => { "src_conf_disable_junk" };
 
@@ -228,7 +252,8 @@ bundle common master_config
                           "promises/openfire.cf",
                           "promises/www.cf",
                           "promises/apache.cf",
-                          "promises/tomcat.cf"
+                          "promises/tomcat.cf",
+			  "promises/tor.cf"
                         };
 
       # This is the master list of bundles that will be run.  We
@@ -251,7 +276,10 @@ bundle common master_config
                            @(xmpp_server_bundles),
                            @(apache_server_bundles),
                            @(tomcat_server_bundles),
-                           @(jenkins_bundles)
+                           @(jenkins_bundles),
+			   @(tor_bundles),
+			   @(privoxy_bundles),
+			   @(squid_bundles)
                          };
 
   # Set classes that will be observed by the individual bundles.
