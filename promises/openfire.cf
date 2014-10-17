@@ -194,7 +194,7 @@ bundle agent openfire
       "openfire_user" usebundle => create_local_users("openfire.users");
 
   services:
-      # Start the nslcd service
+      # Start the openfire service
       "openfire"
       service_policy => "start",
       service_method => nonstandard_service;
