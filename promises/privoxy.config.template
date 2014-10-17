@@ -17,4 +17,4 @@ debug 8192
 listen-address     :8118
 listen-address [::]:8118
 
-forward-socks5  / localhost:8118 .
+forward-socks5  / localhost:9050 .
