@@ -22,4 +22,4 @@ ExcludeSingleHopRelays 1
 EnforceDistinctSubnets 1
 WarnUnsafeSocks 1
 ClientDNSRejectInternalAddresses 1
-ServerDetectHijacking 1
+ServerDNSDetectHijacking 1
