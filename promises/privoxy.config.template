@@ -1,3 +1,12 @@
+user-manual $(privoxy.user_manual)
+
+logdir $(privoxy.log_dir)
+logfile $(privoxy.log_file)
+
+confdir $(privoxy.conf_dir)
+actionsfile default.action
+filterfile default.filter
+
 enable-remote-toggle 1
 enable-edit-actions 1
 
@@ -8,4 +17,4 @@ debug 8192
 listen-address     :8118
 listen-address [::]:8118
 
-forward-socks5  / localhost:8118
+forward-socks5  / localhost:8118 .
