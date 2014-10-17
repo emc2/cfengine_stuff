@@ -1,4 +1,4 @@
-Nickname $(host_config.domain)
+Nickname $(host_config.network_name)
 
 SocksPort 9050
 SocksListenAddress 0.0.0.0
