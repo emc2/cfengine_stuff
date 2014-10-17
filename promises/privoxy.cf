@@ -1,0 +1,78 @@
+# Set up a privoxy instance
+bundle agent privoxy
+{
+  vars:
+    freebsd::
+      # Master config directory
+      "conf_dir" string => "/usr/local/etc/privoxy";
+
+      # User and group
+      "user" string => "privoxy";
+      "uid" string => "201";
+      "group" string => "privoxy";
+      "gid" string => "201";
+
+      # Variables to get set in rc.conf
+      "rc_conf[privoxy_enable]" string => "YES";
+
+    any::
+      # The privoxy user info
+      "users[$(user)][uid]" string => "$(uid)";
+      "users[$(user)][gid]" string => "$(group)";
+      "users[$(user)][fullname]" string => "Privoxy proxy user";
+      "users[$(user)][home]" string => "$(base_config.nonexistent_dir)";
+      "users[$(user)][shell]" string => "$(base_config.nologin_shell)";
+      "users[$(user)][flags]" string => "";
+
+      # The privoxy group info
+      "groups[$(group)][gid]" string => "$(uid)";
+      "groups[$(group)][flags]" string => "";
+
+      # The privoxy configuration file
+      "privoxy_config_file" string => "config";
+      "privoxy_config_path" string => "$(conf_dir)/$(privoxy_config_file)";
+
+  files:
+      # Set privoxy configuation variables
+      "$(privoxy_config_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/privoxy.config.template",
+      comment => "Set Privoxy configuration variables",
+      classes => if_repaired("set_base_config_vars");
+
+    freebsd::
+      # Make sure privoxy is enabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("privoxy.rc_conf"),
+      comment => "Enable privoxy in rc.conf",
+      classes => if_repaired("enable_privoxy_rc_conf");
+
+  methods:
+      # Create privoxy group
+      "privoxy_group" usebundle => create_local_groups("privoxy.groups");
+
+      # Create privoxy user
+      "privoxy_user" usebundle => create_local_users("privoxy.users");
+
+  services:
+      # Start the privoxy service
+      "privoxy"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    set_base_config_vars::
+      "privoxy"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+  reports:
+    set_base_config_vars::
+      "Set privoxy base configuration variables in $(privoxy_config_path)";
+
+    enable_privoxy_rc_conf::
+      "Enabled privoxy in rc.conf";
+}

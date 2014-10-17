@@ -1,0 +1,11 @@
+enable-remote-toggle 1
+enable-edit-actions 1
+
+debug 1024
+debug 4096
+debug 8192
+
+listen-address     :8118
+listen-address [::]:8118
+
+forward-socks5  / localhost:8118
