@@ -89,6 +89,13 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[dovecot]" string => "/usr/sbin/service dovecot stop";
       "statuscommand[dovecot]" string => "/usr/sbin/service dovecot status";
 
+      # tor
+      "startcommand[tor]" string => "/usr/sbin/service tor start";
+      "restartcommand[tor]" string => "/usr/sbin/service tor restart";
+      "reloadcommand[tor]" string => "/usr/sbin/service tor restart";
+      "stopcommand[tor]" string => "/usr/sbin/service tor stop";
+      "statuscommand[tor]" string => "/usr/sbin/service tor status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";
