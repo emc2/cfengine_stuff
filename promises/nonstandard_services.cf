@@ -96,6 +96,13 @@ bundle agent nonstandard_services(service, state) {
       "stopcommand[tor]" string => "/usr/sbin/service tor stop";
       "statuscommand[tor]" string => "/usr/sbin/service tor status";
 
+      # privoxy
+      "startcommand[privoxy]" string => "/usr/sbin/service privoxy start";
+      "restartcommand[privoxy]" string => "/usr/sbin/service privoxy restart";
+      "reloadcommand[privoxy]" string => "/usr/sbin/service privoxy restart";
+      "stopcommand[privoxy]" string => "/usr/sbin/service privoxy stop";
+      "statuscommand[privoxy]" string => "/usr/sbin/service privoxy status";
+
   classes:
       "start" expression => strcmp("start","$(state)"),
       comment => "Check if to start a service";

@@ -109,6 +109,9 @@ bundle common host_config
 
       # Set up a tor node
       "tor_node" expression => "$(proxies)";
+
+      # Set up privoxy
+      "privoxy_node" expression => "$(proxies)";
 }
 
 bundle common master_config
@@ -256,7 +259,8 @@ bundle common master_config
                           "promises/www.cf",
                           "promises/apache.cf",
                           "promises/tomcat.cf",
-			  "promises/tor.cf"
+			  "promises/tor.cf",
+			  "promises/privoxy.cf"
                         };
 
       # This is the master list of bundles that will be run.  We
