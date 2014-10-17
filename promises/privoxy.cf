@@ -15,6 +15,13 @@ bundle agent privoxy
       # Variables to get set in rc.conf
       "rc_conf[privoxy_enable]" string => "YES";
 
+      # Path to the user manual
+      "user_manual" string => "/usr/local/share/doc/privoxy/user-manual";
+
+      # Path to the log directory
+      "log_dir" string => "/var/log/privoxy";
+      "log_file" string => "logfile";
+
     any::
       # The privoxy user info
       "users[$(user)][uid]" string => "$(uid)";
