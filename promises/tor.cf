@@ -1,4 +1,9 @@
 # Set up a Tor node
+#
+# NOTE: This sets up a tor node with an externally-visible SOCKS port.
+# This is intended for a network server that sits behind a firewall,
+# so the general internet cannot (ab)use it as an open proxy.  Update
+# the configuration if this is not the case!!
 bundle agent tor
 {
   vars:
