@@ -73,7 +73,7 @@ bundle agent tor
       "tor_user" usebundle => create_local_users("tor.users");
 
   services:
-      # Start the nslcd service
+      # Start the tor service
       "tor"
       service_policy => "start",
       service_method => nonstandard_service;
