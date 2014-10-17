@@ -1,0 +1,25 @@
+Nickname $(host_config.domain)
+
+SocksPort 9050
+SocksListenAddress 0.0.0.0
+SocksListenAddress [::]
+
+OrPort 9001
+OrListenAddress 0.0.0.0
+OrListenAddress [::]
+
+DNSPort 9053
+
+Log notice syslog
+SafeLogging 1
+
+RelayBandwidthRate 128 Kbytes
+RelayBandwidthBurst 512 Kbytes
+
+ExitPolicy reject *:*
+
+ExcludeSingleHopRelays 1
+EnforceDistinctSubnets 1
+WarnUnsafeSocks 1
+ClientDNSRejectInternalAddresses 1
+ServerDetectHijacking 1

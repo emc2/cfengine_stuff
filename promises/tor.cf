@@ -1,0 +1,91 @@
+# Set up a Tor node
+bundle agent tor
+{
+  vars:
+    freebsd::
+      # Master config directory
+      "conf_dir" string => "/usr/local/etc/tor";
+
+      # User and group
+      "user" string => "_tor";
+      "uid" string => "256";
+      "group" string => "_tor";
+      "gid" string => "256";
+
+      # Variables to get set in rc.conf
+      "rc_conf[tor_enable]" string => "YES";
+
+      # Tor home directory
+      "tor_home_dir" string => "/var/db/tor";
+
+    any::
+      # The tor user info
+      "users[$(user)][uid]" string => "$(uid)";
+      "users[$(user)][gid]" string => "$(group)";
+      "users[$(user)][fullname]" string => "Tor anonymizing router";
+      "users[$(user)][home]" string => "$(tor_home_dir)";
+      "users[$(user)][shell]" string => "$(base_config.nologin_shell)";
+      "users[$(user)][flags]" string => "";
+
+      # The tor group info
+      "groups[$(group)][gid]" string => "$(uid)";
+      "groups[$(group)][flags]" string => "";
+
+      # The torrc configuration file
+      "tor_config_file" string => "torrc";
+      "tor_config_path" string => "$(conf_dir)/$(tor_config_file)";
+
+  files:
+      # Create tor configuration directory
+      "$(conf_dir)/."
+      create => "true",
+      perms => m("755"),
+      comment => "Create tor configuration directory",
+      classes => if_repaired("create_conf_dir");
+
+      # Set tor configuation variables
+      "$(tor_config_path)"
+      create => "true",
+      perms => mog("644", "$(user)", "$(group)"),
+      edit_template => "$(sys.workdir)/inputs/promises/torrc.template",
+      comment => "Set Tor configuration variables",
+      classes => if_repaired("set_base_config_vars");
+
+    freebsd::
+      # Make sure tor is enabled
+      "/etc/rc.conf"
+      create => "true",
+      perms => mog("644", "root", "wheel"),
+      edit_line => set_variable_values("tor.rc_conf"),
+      comment => "Enable tor in rc.conf",
+      classes => if_repaired("enable_tor_rc_conf");
+
+  methods:
+      # Create tor group
+      "tor_group" usebundle => create_local_groups("tor.groups");
+
+      # Create tor user
+      "tor_user" usebundle => create_local_users("tor.users");
+
+  services:
+      # Start the nslcd service
+      "tor"
+      service_policy => "start",
+      service_method => nonstandard_service;
+
+      # Reload the config files if they were updated
+    set_base_config_vars::
+      "tor"
+      service_policy => "reload",
+      service_method => nonstandard_service;
+
+  reports:
+    create_conf_dir::
+      "Created tor configuration directory";
+
+    set_base_config_vars::
+      "Set tor base configuration variables in $(tor_config_path)";
+
+    enable_tor_rc_conf::
+      "Enabled tor in rc.conf";
+}
