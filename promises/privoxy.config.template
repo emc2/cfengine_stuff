@@ -17,5 +17,5 @@ debug 8192
 listen-address     :8118
 listen-address [::]:8118
 
-forward         .i2p localhost:4444 .
+forward         .i2p localhost:4444
 forward-socks5  /    localhost:9050 .
