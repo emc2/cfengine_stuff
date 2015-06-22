@@ -27,7 +27,7 @@ passdb {
 [%CFEngine BEGIN %]
 plugin {
   sieve = ~/.sieve
-  sieve_storage = ~/sieve
+  sieve_dir = ~/sieve
 }
 [%CFEngine END %]
 
@@ -68,7 +68,16 @@ service pop3-login {
 [%CFEngine END %]
 
 [%CFEngine BEGIN %]
-service sieve {
+service managesieve-login {
+  inet_listener sieve {
+    port = 4190
+  }
+  user = dovecot
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+service managesieve {
   user = dovecot
 }
 [%CFEngine END %]
@@ -98,5 +107,16 @@ protocol lda {
   mail_plugins = sieve
   postmaster_address = postmaster@$(mail_config.mail_domain)
   sendmail_path = /usr/local/bin/sendmail
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+protocol lmtp {
+    mail_plugins = sieve
+}
+[%CFEngine END %]
+
+[%CFEngine BEGIN %]
+protocol sieve {
 }
 [%CFEngine END %]
