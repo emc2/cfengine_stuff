@@ -21,7 +21,7 @@ bundle agent pam {
   classes:
     freebsd::
       "ports_pam_krb5" expression =>
-      "fileexists(/usr/local/lib/security/pam_krb5.so)";
+      fileexists("/usr/local/lib/security/pam_krb5.so");
 
   files:
       # Edit specific pam configuration files
