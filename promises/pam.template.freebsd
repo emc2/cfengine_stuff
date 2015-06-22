@@ -1,11 +1,24 @@
-[%CFEngine BEGIN %]
+[%CFEngine ports_pam_krb5:: %]
+auth            sufficient      pam_opie.so             no_warn no_fake_prompts
+auth            requisite       pam_opieaccess.so       no_warn allow_local
+auth            sufficient      /usr/local/lib/security/pam_krb5.so         no_warn try_first_pass
+auth            required        pam_unix.so             no_warn try_first_pass nullok
+[%CFEngine END %]
+
+[%CFEngine !ports_pam_krb5:: %]
 auth            sufficient      pam_opie.so             no_warn no_fake_prompts
 auth            requisite       pam_opieaccess.so       no_warn allow_local
 auth            sufficient      pam_krb5.so             no_warn try_first_pass
 auth            required        pam_unix.so             no_warn try_first_pass nullok
 [%CFEngine END %]
 
-[%CFEngine BEGIN %]
+[%CFEngine ports_pam_krb5:: %]
+account         required        /usr/local/lib/security/pam_krb5.so
+account         required        pam_login_access.so
+account         required        pam_unix.so
+[%CFEngine END %]
+
+[%CFEngine !ports_pam_krb5:: %]
 account         required        pam_krb5.so
 account         required        pam_login_access.so
 account         required        pam_unix.so
@@ -13,7 +26,12 @@ account         required        pam_unix.so
 
 session         required        pam_lastlog.so          no_fail
 
-[%CFEngine BEGIN %]
+[%CFEngine ports_pam_krb5:: %]
+password        sufficient      /usr/local/lib/security/pam_krb5.so             no_warn try_first_pass
+password        required        pam_unix.so             no_warn try_first_pass
+[%CFEngine END %]
+
+[%CFEngine !ports_pam_krb5:: %]
 password        sufficient      pam_krb5.so             no_warn try_first_pass
 password        required        pam_unix.so             no_warn try_first_pass
 [%CFEngine END %]

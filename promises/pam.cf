@@ -18,6 +18,11 @@ bundle agent pam {
     any::
       "filepath_$(pam_files)" string => "$(pam_dir)/$(pam_files)";
 
+  classes:
+    freebsd::
+      "ports_pam_krb5" expression =>
+      "fileexists(/usr/local/lib/security/pam_krb5.so)";
+
   files:
       # Edit specific pam configuration files
       "$(filepath_$(pam_files))"
